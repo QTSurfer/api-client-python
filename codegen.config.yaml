@@ -1,0 +1,12 @@
+# openapi-python-client config
+# Docs: https://github.com/openapi-generators/openapi-python-client
+#
+# `package_name_override` controls the top-level directory the generator
+# writes; we move that directory into `src/qtsurfer/api/client/_generated/`
+# after generation (see scripts/regenerate.sh).
+project_name_override: qtsurfer-api-client
+package_name_override: qtsurfer_api_client
+use_path_prefixes_for_title_model_names: true
+post_hooks:
+  - "ruff check --fix --exit-zero ."
+  - "ruff format ."
