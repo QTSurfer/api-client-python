@@ -56,6 +56,9 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
 
+      - name: Fetch openapi.yaml
+        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer.github.io/main/openapi.yaml -o openapi.yaml
+
       - name: Verify pyproject.toml version matches openapi.yaml
         run: |
           PYPROJECT_VERSION=$(uv run python -c "import tomllib; print(tomllib.loads(open('pyproject.toml','rb').read().decode())['project']['version'])")
