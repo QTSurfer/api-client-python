@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -11,14 +11,18 @@ from dateutil.parser import isoparse
 from ..models.result_map_signals_upload import ResultMapSignalsUpload
 from ..types import UNSET, Unset
 
+if TYPE_CHECKING:
+    from ..models.equity_point import EquityPoint
+
+
 T = TypeVar("T", bound="ResultMap")
 
 
 @_attrs_define
 class ResultMap:
     """Execution result map. Always includes core fields (hostName, iops, strategyId, instrument). Yield metrics (pnlTotal,
-    totalTrades, winRate, etc.) are present when the strategy emitted at least one trade. When signal storage is
-    enabled, includes signal fields described below.
+    pnlTotalPercent, totalTrades, winRate, equityCurve, etc.) are present when the strategy emitted at least one trade.
+    When signal storage is enabled, includes signal fields described below.
 
         Attributes:
             strategy_id (str): Identifier of the compiled strategy that produced this result Example:
@@ -28,6 +32,8 @@ class ResultMap:
                 support can correlate with logs. Example: executor10.
             iops (float | Unset): Instrument operations per second throughput during execution Example: 123956.53.
             pnl_total (float | Unset): Total profit and loss in the output currency Example: 42.75.
+            pnl_total_percent (float | Unset): Total PnL as a percentage of the initial capital (`backtestFunding`). Zero
+                when `backtestFunding` is 0. Example: 42.75.
             total_trades (int | Unset): Total number of trades executed by the strategy Example: 156.
             win_rate (float | Unset): Percentage of profitable trades (0-100) Example: 58.33.
             sharpe_ratio (float | Unset): Risk-adjusted return ratio (mean return / standard deviation of returns) Example:
@@ -37,6 +43,11 @@ class ResultMap:
             cagr (float | Unset): Compound Annual Growth Rate Example: 0.1534.
             max_drawdown (float | Unset): Maximum absolute drawdown in the output currency Example: 12.5.
             max_drawdown_percent (float | Unset): Maximum percentage drawdown from peak equity Example: 8.75.
+            equity_curve (list[EquityPoint] | Unset): Equity curve over the backtest. Element 0 is an anchor at the backtest
+                `from` with `initialCapital`; the remaining points are one sample per emitted yield, in order. Use it to plot
+                the strategy's running equity without re-deriving it from the yield history. Example: [{'timestamp':
+                1700000000000, 'equity': 100.0}, {'timestamp': 1700000060000, 'equity': 110.5}, {'timestamp': 1700000120000,
+                'equity': 90.25}].
             signal_count (int | Unset): Number of signals emitted during strategy execution Example: 100000.
             signals_id (str | Unset): Storage key for the signals file. Treat as opaque; use signalsUrl to download.
                 Example: 00000000-0000-0000-0000-000000000000/exec/binance/3vsndwikcuaatjmb83fjtl.
@@ -56,6 +67,7 @@ class ResultMap:
     host_name: str | Unset = UNSET
     iops: float | Unset = UNSET
     pnl_total: float | Unset = UNSET
+    pnl_total_percent: float | Unset = UNSET
     total_trades: int | Unset = UNSET
     win_rate: float | Unset = UNSET
     sharpe_ratio: float | Unset = UNSET
@@ -63,6 +75,7 @@ class ResultMap:
     cagr: float | Unset = UNSET
     max_drawdown: float | Unset = UNSET
     max_drawdown_percent: float | Unset = UNSET
+    equity_curve: list[EquityPoint] | Unset = UNSET
     signal_count: int | Unset = UNSET
     signals_id: str | Unset = UNSET
     signals_url: str | Unset = UNSET
@@ -82,6 +95,8 @@ class ResultMap:
 
         pnl_total = self.pnl_total
 
+        pnl_total_percent = self.pnl_total_percent
+
         total_trades = self.total_trades
 
         win_rate = self.win_rate
@@ -95,6 +110,13 @@ class ResultMap:
         max_drawdown = self.max_drawdown
 
         max_drawdown_percent = self.max_drawdown_percent
+
+        equity_curve: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.equity_curve, Unset):
+            equity_curve = []
+            for equity_curve_item_data in self.equity_curve:
+                equity_curve_item = equity_curve_item_data.to_dict()
+                equity_curve.append(equity_curve_item)
 
         signal_count = self.signal_count
 
@@ -126,6 +148,8 @@ class ResultMap:
             field_dict["iops"] = iops
         if pnl_total is not UNSET:
             field_dict["pnlTotal"] = pnl_total
+        if pnl_total_percent is not UNSET:
+            field_dict["pnlTotalPercent"] = pnl_total_percent
         if total_trades is not UNSET:
             field_dict["totalTrades"] = total_trades
         if win_rate is not UNSET:
@@ -140,6 +164,8 @@ class ResultMap:
             field_dict["maxDrawdown"] = max_drawdown
         if max_drawdown_percent is not UNSET:
             field_dict["maxDrawdownPercent"] = max_drawdown_percent
+        if equity_curve is not UNSET:
+            field_dict["equityCurve"] = equity_curve
         if signal_count is not UNSET:
             field_dict["signalCount"] = signal_count
         if signals_id is not UNSET:
@@ -157,6 +183,8 @@ class ResultMap:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.equity_point import EquityPoint
+
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
 
@@ -167,6 +195,8 @@ class ResultMap:
         iops = d.pop("iops", UNSET)
 
         pnl_total = d.pop("pnlTotal", UNSET)
+
+        pnl_total_percent = d.pop("pnlTotalPercent", UNSET)
 
         total_trades = d.pop("totalTrades", UNSET)
 
@@ -181,6 +211,15 @@ class ResultMap:
         max_drawdown = d.pop("maxDrawdown", UNSET)
 
         max_drawdown_percent = d.pop("maxDrawdownPercent", UNSET)
+
+        _equity_curve = d.pop("equityCurve", UNSET)
+        equity_curve: list[EquityPoint] | Unset = UNSET
+        if _equity_curve is not UNSET:
+            equity_curve = []
+            for equity_curve_item_data in _equity_curve:
+                equity_curve_item = EquityPoint.from_dict(equity_curve_item_data)
+
+                equity_curve.append(equity_curve_item)
 
         signal_count = d.pop("signalCount", UNSET)
 
@@ -210,6 +249,7 @@ class ResultMap:
             host_name=host_name,
             iops=iops,
             pnl_total=pnl_total,
+            pnl_total_percent=pnl_total_percent,
             total_trades=total_trades,
             win_rate=win_rate,
             sharpe_ratio=sharpe_ratio,
@@ -217,6 +257,7 @@ class ResultMap:
             cagr=cagr,
             max_drawdown=max_drawdown,
             max_drawdown_percent=max_drawdown_percent,
+            equity_curve=equity_curve,
             signal_count=signal_count,
             signals_id=signals_id,
             signals_url=signals_url,

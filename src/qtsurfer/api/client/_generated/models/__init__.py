@@ -5,6 +5,7 @@ from .backtest_job_result import BacktestJobResult
 from .cancel_execution_response_200 import CancelExecutionResponse200
 from .cancel_execution_response_200_status import CancelExecutionResponse200Status
 from .data_source_type import DataSourceType
+from .equity_point import EquityPoint
 from .exchange import Exchange
 from .execute_backtesting_body import ExecuteBacktestingBody
 from .get_exchange_klines_hour_format import GetExchangeKlinesHourFormat
@@ -27,6 +28,7 @@ __all__ = (
     "CancelExecutionResponse200",
     "CancelExecutionResponse200Status",
     "DataSourceType",
+    "EquityPoint",
     "Exchange",
     "ExecuteBacktestingBody",
     "GetExchangeKlinesHourFormat",
