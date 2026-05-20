@@ -33,3 +33,6 @@ coverage.xml
 
 # Codegen scratch
 /tmp/qtsurfer-client-gen/
+
+# OpenAPI spec is fetched by scripts/regenerate.sh, not committed
+openapi.yaml
