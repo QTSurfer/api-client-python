@@ -36,6 +36,7 @@ def test_known_endpoints_are_present() -> None:
 
     Update this list deliberately whenever the spec changes.
     """
+    from qtsurfer.api.client.api.auth import auth
     from qtsurfer.api.client.api.backtesting import (
         cancel_execution,
         execute_backtesting,
@@ -52,6 +53,7 @@ def test_known_endpoints_are_present() -> None:
     from qtsurfer.api.client.api.strategy import get_strategy_status
 
     endpoints = [
+        auth,
         get_exchanges,
         get_instruments,
         get_exchange_tickers_hour,
@@ -73,6 +75,8 @@ def test_known_endpoints_are_present() -> None:
 
 def test_models_re_export() -> None:
     from qtsurfer.api.client.models import (
+        AuthTokenError,
+        AuthTokenResponse,
         BacktestJobResult,
         Exchange,
         InstrumentDetail,
@@ -87,3 +91,5 @@ def test_models_re_export() -> None:
     assert BacktestJobResult is not None
     assert ResultMap is not None
     assert ResponseError is not None
+    assert AuthTokenResponse is not None
+    assert AuthTokenError is not None
