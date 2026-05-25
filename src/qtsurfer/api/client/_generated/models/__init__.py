@@ -1,8 +1,8 @@
 """Contains all the data models used in inputs/outputs"""
 
 from .accepted_job import AcceptedJob
-from .auth_error import AuthError
-from .auth_error_code import AuthErrorCode
+from .auth_token_error import AuthTokenError
+from .auth_token_error_code import AuthTokenErrorCode
 from .auth_token_response import AuthTokenResponse
 from .auth_token_response_tier import AuthTokenResponseTier
 from .auth_token_response_token_type import AuthTokenResponseTokenType
@@ -29,8 +29,8 @@ from .result_map_signals_upload import ResultMapSignalsUpload
 
 __all__ = (
     "AcceptedJob",
-    "AuthError",
-    "AuthErrorCode",
+    "AuthTokenError",
+    "AuthTokenErrorCode",
     "AuthTokenResponse",
     "AuthTokenResponseTier",
     "AuthTokenResponseTokenType",

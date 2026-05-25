@@ -6,21 +6,21 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.auth_error_code import AuthErrorCode
+from ..models.auth_token_error_code import AuthTokenErrorCode
 
-T = TypeVar("T", bound="AuthError")
+T = TypeVar("T", bound="AuthTokenError")
 
 
 @_attrs_define
-class AuthError:
+class AuthTokenError:
     """Error envelope returned by `POST /auth/token` when the API key is rejected.
 
     Attributes:
-        code (AuthErrorCode): Machine-readable error reason.
+        code (AuthTokenErrorCode): Machine-readable error reason.
         message (str): Human-readable description of the failure.
     """
 
-    code: AuthErrorCode
+    code: AuthTokenErrorCode
     message: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -43,17 +43,17 @@ class AuthError:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        code = AuthErrorCode(d.pop("code"))
+        code = AuthTokenErrorCode(d.pop("code"))
 
         message = d.pop("message")
 
-        auth_error = cls(
+        auth_token_error = cls(
             code=code,
             message=message,
         )
 
-        auth_error.additional_properties = d
-        return auth_error
+        auth_token_error.additional_properties = d
+        return auth_token_error
 
     @property
     def additional_keys(self) -> list[str]:

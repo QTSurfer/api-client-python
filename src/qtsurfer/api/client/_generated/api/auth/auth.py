@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.auth_error import AuthError
+from ...models.auth_token_error import AuthTokenError
 from ...models.auth_token_response import AuthTokenResponse
 from ...types import Response
 
@@ -22,14 +22,14 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Any | AuthError | AuthTokenResponse | None:
+) -> Any | AuthTokenError | AuthTokenResponse | None:
     if response.status_code == 200:
         response_200 = AuthTokenResponse.from_dict(response.json())
 
         return response_200
 
     if response.status_code == 401:
-        response_401 = AuthError.from_dict(response.json())
+        response_401 = AuthTokenError.from_dict(response.json())
 
         return response_401
 
@@ -45,7 +45,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | AuthError | AuthTokenResponse]:
+) -> Response[Any | AuthTokenError | AuthTokenResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -57,7 +57,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[Any | AuthError | AuthTokenResponse]:
+) -> Response[Any | AuthTokenError | AuthTokenResponse]:
     """Exchange API key for a short-lived JWT
 
      Exchanges a long-lived API key for a short-lived JWT used by every other
@@ -74,7 +74,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | AuthError | AuthTokenResponse]
+        Response[Any | AuthTokenError | AuthTokenResponse]
     """
 
     kwargs = _get_kwargs()
@@ -89,7 +89,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-) -> Any | AuthError | AuthTokenResponse | None:
+) -> Any | AuthTokenError | AuthTokenResponse | None:
     """Exchange API key for a short-lived JWT
 
      Exchanges a long-lived API key for a short-lived JWT used by every other
@@ -106,7 +106,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | AuthError | AuthTokenResponse
+        Any | AuthTokenError | AuthTokenResponse
     """
 
     return sync_detailed(
@@ -117,7 +117,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[Any | AuthError | AuthTokenResponse]:
+) -> Response[Any | AuthTokenError | AuthTokenResponse]:
     """Exchange API key for a short-lived JWT
 
      Exchanges a long-lived API key for a short-lived JWT used by every other
@@ -134,7 +134,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | AuthError | AuthTokenResponse]
+        Response[Any | AuthTokenError | AuthTokenResponse]
     """
 
     kwargs = _get_kwargs()
@@ -147,7 +147,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-) -> Any | AuthError | AuthTokenResponse | None:
+) -> Any | AuthTokenError | AuthTokenResponse | None:
     """Exchange API key for a short-lived JWT
 
      Exchanges a long-lived API key for a short-lived JWT used by every other
@@ -164,7 +164,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | AuthError | AuthTokenResponse
+        Any | AuthTokenError | AuthTokenResponse
     """
 
     return (

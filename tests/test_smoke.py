@@ -75,7 +75,7 @@ def test_known_endpoints_are_present() -> None:
 
 def test_models_re_export() -> None:
     from qtsurfer.api.client.models import (
-        AuthError,
+        AuthTokenError,
         AuthTokenResponse,
         BacktestJobResult,
         Exchange,
@@ -92,4 +92,4 @@ def test_models_re_export() -> None:
     assert ResultMap is not None
     assert ResponseError is not None
     assert AuthTokenResponse is not None
-    assert AuthError is not None
+    assert AuthTokenError is not None
