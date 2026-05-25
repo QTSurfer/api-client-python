@@ -57,6 +57,35 @@ instruments = get_instruments.sync(client=client, exchange_id="binance")
 print(f"{len(instruments or [])} instruments on binance")
 ```
 
+### API key → JWT
+
+Every endpoint above expects a short-lived JWT in the `Authorization: Bearer …`
+header. Exchange a long-lived API key for one via `auth`:
+
+```python
+import os
+
+from qtsurfer.api.client import AuthenticatedClient
+from qtsurfer.api.client.api.auth import auth
+
+# AuthenticatedClient also drives the apikey header — set prefix="" so it
+# sends `X-API-Key: <key>` instead of `Authorization: Bearer <key>`.
+apikey_client = AuthenticatedClient(
+    base_url="https://api.qtsurfer.com/v1",
+    token=os.environ["QTSURFER_APIKEY"],
+    prefix="",
+    auth_header_name="X-API-Key",
+)
+
+token_response = auth.sync(client=apikey_client)
+jwt = token_response.access_token  # use this in subsequent calls
+```
+
+For production use, prefer the [`qtsurfer-sdk`](https://github.com/QTSurfer/sdk-python)
+`auth(apikey)` helper — it handles token refresh, env-var pickup
+(`QTSURFER_APIKEY`), and pluggable token storage so callers don't reinvent any
+of it on top of the raw client.
+
 Each generated endpoint module exposes four entrypoints:
 
 | Function | Returns |
