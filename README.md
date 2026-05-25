@@ -70,6 +70,7 @@ Each generated endpoint module exposes four entrypoints:
 
 | Module | Operation | Method · Path |
 | --- | --- | --- |
+| `api.auth` | `auth` | `POST /auth/token` — exchange API key for a short-lived JWT |
 | `api.exchange` | `get_exchanges` | `GET /exchanges` |
 | `api.exchange` | `get_instruments` | `GET /exchange/{exchangeId}/instruments` |
 | `api.exchange` | `get_exchange_tickers_hour` | `GET /exchange/{exchangeId}/tickers/{base}/{quote}` |

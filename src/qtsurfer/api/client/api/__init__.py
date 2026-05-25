@@ -6,6 +6,6 @@ endpoint module exposes ``sync``, ``sync_detailed``, ``asyncio``,
 ``asyncio_detailed``.
 """
 
-from qtsurfer.api.client.api import backtesting, exchange, strategy
+from qtsurfer.api.client.api import auth, backtesting, exchange, strategy
 
-__all__ = ["backtesting", "exchange", "strategy"]
+__all__ = ["auth", "backtesting", "exchange", "strategy"]
