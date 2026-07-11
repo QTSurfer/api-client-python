@@ -7,7 +7,9 @@ from __future__ import annotations
 import datetime as _dt
 
 from qtsurfer.api.client.models import (
+    CoverageWindow,
     Exchange,
+    InstrumentCoverage,
     InstrumentDetail,
     JobState,
     JobStateStatus,
@@ -43,26 +45,27 @@ def test_instrument_detail_roundtrip_with_datetime() -> None:
         id="BTC/USDT",
         base="BTC",
         quote="USDT",
-        data_from=data_from,
-        data_to=data_to,
+        coverage=InstrumentCoverage(tickers=CoverageWindow(from_=data_from, to=data_to)),
         last_price=84250.5,
         volume24h=1234567.89,
     )
     payload = original.to_dict()
-    # datetimes serialise to ISO-8601 strings.
-    assert isinstance(payload["dataFrom"], str)
-    assert payload["dataFrom"].startswith("2026-01-15T10:00:00")
+    # datetimes serialise to ISO-8601 strings; the wire key for `from_` is `from`.
+    assert isinstance(payload["coverage"]["tickers"]["from"], str)
+    assert payload["coverage"]["tickers"]["from"].startswith("2026-01-15T10:00:00")
     parsed = InstrumentDetail.from_dict(payload)
     assert parsed.base == "BTC"
     assert parsed.quote == "USDT"
-    assert parsed.data_from == data_from
-    assert parsed.data_to == data_to
+    assert isinstance(parsed.coverage, InstrumentCoverage)
+    assert isinstance(parsed.coverage.tickers, CoverageWindow)
+    assert parsed.coverage.tickers.from_ == data_from
+    assert parsed.coverage.tickers.to == data_to
     assert parsed.last_price == 84250.5
 
 
 def test_job_state_roundtrip_with_enum() -> None:
     # Pick whatever the first enum member is — names vary by spec
-    # (Pending/Running/Completed/Aborted/Failed/Partial).
+    # (New/Started/Completed/Aborted/Failed).
     a_status = next(iter(JobStateStatus))
     original = JobState(
         context_id="ctx_abc_123",

@@ -4,13 +4,21 @@ the response into typed models."""
 
 from __future__ import annotations
 
+from datetime import datetime
+
 import httpx
 import pytest
 import respx
 
 from qtsurfer.api.client import AuthenticatedClient
 from qtsurfer.api.client.api.exchange import get_exchanges, get_instruments
-from qtsurfer.api.client.models import Exchange, InstrumentDetail
+from qtsurfer.api.client.models import (
+    CoverageWindow,
+    Exchange,
+    InstrumentCoverage,
+    InstrumentDetail,
+    InstrumentListResponse,
+)
 
 BASE_URL = "https://api.qtsurfer.test/v1"
 
@@ -51,28 +59,47 @@ def test_get_exchanges_request_and_response(client: AuthenticatedClient) -> None
 
 @respx.mock
 def test_get_instruments_path_param_interpolated(client: AuthenticatedClient) -> None:
-    payload = [
-        {
-            "id": "BTC/USDT",
-            "base": "BTC",
-            "quote": "USDT",
-            "dataFrom": "2026-01-15T00:00:00Z",
-            "dataTo": "2026-01-15T18:00:00Z",
-            "lastPrice": 84250.5,
-            "volume24h": 1234567.89,
-        }
-    ]
+    payload = {
+        "data": [
+            {
+                "id": "BTC/USDT",
+                "base": "BTC",
+                "quote": "USDT",
+                "coverage": {
+                    "tickers": {
+                        "from": "2026-01-15T00:00:00Z",
+                        "to": "2026-01-15T18:00:00Z",
+                    }
+                },
+                "lastPrice": 84250.5,
+                "volume24h": 1234567.89,
+            }
+        ],
+        "meta": {
+            "updatedAt": "2026-01-15T18:00:00Z",
+            "exchange": "binance",
+            "segment": "spot",
+        },
+        "_links": {"self": {"href": "/v1/exchange/binance/instruments"}},
+    }
     route = respx.get(f"{BASE_URL}/exchange/binance/instruments").mock(return_value=httpx.Response(200, json=payload))
 
-    instruments = get_instruments.sync(client=client, exchange_id="binance")
+    response = get_instruments.sync(client=client, exchange_id="binance")
 
     assert route.called
-    assert isinstance(instruments, list)
-    assert len(instruments) == 1
-    first = instruments[0]
+    assert isinstance(response, InstrumentListResponse)
+    assert len(response.data) == 1
+    first = response.data[0]
     assert isinstance(first, InstrumentDetail)
     assert first.base == "BTC"
     assert first.quote == "USDT"
+    coverage = first.coverage
+    assert isinstance(coverage, InstrumentCoverage)
+    assert isinstance(coverage.tickers, CoverageWindow)
+    assert isinstance(coverage.tickers.from_, datetime)
+    assert isinstance(coverage.tickers.to, datetime)
+    assert coverage.tickers.from_.isoformat().startswith("2026-01-15T00:00:00")
+    assert coverage.tickers.to.isoformat().startswith("2026-01-15T18:00:00")
 
 
 @respx.mock

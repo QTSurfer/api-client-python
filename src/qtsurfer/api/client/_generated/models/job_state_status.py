@@ -6,7 +6,6 @@ class JobStateStatus(str, Enum):
     COMPLETED = "Completed"
     FAILED = "Failed"
     NEW = "New"
-    PARTIAL = "Partial"
     STARTED = "Started"
 
     def __str__(self) -> str:

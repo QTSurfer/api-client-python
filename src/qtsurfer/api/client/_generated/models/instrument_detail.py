@@ -1,30 +1,29 @@
 from __future__ import annotations
 
-import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
-from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.instrument_coverage import InstrumentCoverage
+
 
 T = TypeVar("T", bound="InstrumentDetail")
 
 
 @_attrs_define
 class InstrumentDetail:
-    """Exchange instrument with data availability and market info
+    """Exchange instrument with per-data-type coverage and market info
 
     Attributes:
         id (str): Instrument identifier (e.g. currency pair) Example: BTC/USDT.
         base (str): Base currency Example: BTC.
         quote (str): Quote currency Example: USDT.
-        data_from (datetime.datetime | Unset): Earliest timestamp with quality-verified data available for backtesting
-            Example: 2026-03-17T00:00:00Z.
-        data_to (datetime.datetime | Unset): Latest timestamp with quality-verified data available for backtesting
-            Example: 2026-03-31T18:00:00Z.
+        coverage (InstrumentCoverage | Unset): Time coverage of available data for this instrument, per data type
         last_price (float | Unset): Last traded price Example: 84250.5.
         volume24h (float | Unset): Trading volume in the last 24 hours (in quote currency) Example: 1234567.89.
     """
@@ -32,8 +31,7 @@ class InstrumentDetail:
     id: str
     base: str
     quote: str
-    data_from: datetime.datetime | Unset = UNSET
-    data_to: datetime.datetime | Unset = UNSET
+    coverage: InstrumentCoverage | Unset = UNSET
     last_price: float | Unset = UNSET
     volume24h: float | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -45,13 +43,9 @@ class InstrumentDetail:
 
         quote = self.quote
 
-        data_from: str | Unset = UNSET
-        if not isinstance(self.data_from, Unset):
-            data_from = self.data_from.isoformat()
-
-        data_to: str | Unset = UNSET
-        if not isinstance(self.data_to, Unset):
-            data_to = self.data_to.isoformat()
+        coverage: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.coverage, Unset):
+            coverage = self.coverage.to_dict()
 
         last_price = self.last_price
 
@@ -66,10 +60,8 @@ class InstrumentDetail:
                 "quote": quote,
             }
         )
-        if data_from is not UNSET:
-            field_dict["dataFrom"] = data_from
-        if data_to is not UNSET:
-            field_dict["dataTo"] = data_to
+        if coverage is not UNSET:
+            field_dict["coverage"] = coverage
         if last_price is not UNSET:
             field_dict["lastPrice"] = last_price
         if volume24h is not UNSET:
@@ -79,6 +71,8 @@ class InstrumentDetail:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.instrument_coverage import InstrumentCoverage
+
         d = dict(src_dict)
         id = d.pop("id")
 
@@ -86,19 +80,12 @@ class InstrumentDetail:
 
         quote = d.pop("quote")
 
-        _data_from = d.pop("dataFrom", UNSET)
-        data_from: datetime.datetime | Unset
-        if isinstance(_data_from, Unset):
-            data_from = UNSET
+        _coverage = d.pop("coverage", UNSET)
+        coverage: InstrumentCoverage | Unset
+        if isinstance(_coverage, Unset):
+            coverage = UNSET
         else:
-            data_from = isoparse(_data_from)
-
-        _data_to = d.pop("dataTo", UNSET)
-        data_to: datetime.datetime | Unset
-        if isinstance(_data_to, Unset):
-            data_to = UNSET
-        else:
-            data_to = isoparse(_data_to)
+            coverage = InstrumentCoverage.from_dict(_coverage)
 
         last_price = d.pop("lastPrice", UNSET)
 
@@ -108,8 +95,7 @@ class InstrumentDetail:
             id=id,
             base=base,
             quote=quote,
-            data_from=data_from,
-            data_to=data_to,
+            coverage=coverage,
             last_price=last_price,
             volume24h=volume24h,
         )

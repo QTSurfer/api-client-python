@@ -54,7 +54,7 @@ for ex in exchanges or []:
     print(ex.id, ex.name)
 
 instruments = get_instruments.sync(client=client, exchange_id="binance")
-print(f"{len(instruments or [])} instruments on binance")
+print(f"{len(instruments.data)} instruments on binance ({instruments.meta.segment.value})")
 ```
 
 ### API key → JWT
@@ -101,7 +101,8 @@ Each generated endpoint module exposes four entrypoints:
 | --- | --- | --- |
 | `api.auth` | `auth` | `POST /auth/token` — exchange API key for a short-lived JWT |
 | `api.exchange` | `get_exchanges` | `GET /exchanges` |
-| `api.exchange` | `get_instruments` | `GET /exchange/{exchangeId}/instruments` |
+| `api.exchange` | `get_instruments` | `GET /exchange/{exchangeId}/instruments` (default `spot` segment) |
+| `api.exchange` | `get_segment_instruments` | `GET /exchange/{exchangeId}/{segment}/instruments` |
 | `api.exchange` | `get_exchange_tickers_hour` | `GET /exchange/{exchangeId}/tickers/{base}/{quote}` |
 | `api.exchange` | `get_exchange_klines_hour` | `GET /exchange/{exchangeId}/klines/{base}/{quote}` |
 | `api.strategy` | `get_strategy_status` | `GET /strategy/{strategyId}` |
@@ -113,7 +114,7 @@ Each generated endpoint module exposes four entrypoints:
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
-All generated model types (`Exchange`, `InstrumentDetail`, `JobState`, `BacktestJobResult`, `ResultMap`, `ResponseError`, …) live under `qtsurfer.api.client.models`.
+All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `BacktestJobResult`, `ResultMap`, `ResponseError`, …) live under `qtsurfer.api.client.models`. `get_instruments`/`get_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_preparation_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling.
 
 > **`POST /strategy` (`postStrategy`)** is currently omitted by the generator because the spec declares its request body as `text/plain` and `openapi-python-client` only emits JSON / form / multipart bodies. Call it directly via the underlying `httpx` client (`client.get_httpx_client().post("/strategy", content=src, headers={"Content-Type": "text/plain"})`) until the spec is restructured.
 

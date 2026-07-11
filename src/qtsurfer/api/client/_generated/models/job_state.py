@@ -20,10 +20,10 @@ class JobState:
 
     Attributes:
         context_id (str): Opaque context identifier for the job Example: ctx_2o8heaioicr0edvx5ybcap.
-        status (JobStateStatus): Current status of the job. `Partial` (prepare only) means some
-            hours are still being produced asynchronously — keep polling.
-            Treat `Completed | Aborted | Failed` as terminal; anything else
-            means keep polling.
+        status (JobStateStatus): Current status of the job. Treat `Completed | Aborted | Failed` as
+            terminal; `New | Started` mean keep polling. A single-instrument prepare
+            is always terminal (`Completed`) — decide from
+            `PrepareJobState.coverageRatio`, not by polling.
              Example: Completed.
         size (int): Total size of the data being prepared Example: 100.
         completed (int): The amount of data processed so far Example: 50.
