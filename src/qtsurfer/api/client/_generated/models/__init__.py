@@ -7,18 +7,28 @@ from .auth_token_response import AuthTokenResponse
 from .auth_token_response_tier import AuthTokenResponseTier
 from .auth_token_response_token_type import AuthTokenResponseTokenType
 from .backtest_job_result import BacktestJobResult
-from .cancel_execution_response_200 import CancelExecutionResponse200
-from .cancel_execution_response_200_status import CancelExecutionResponse200Status
+from .cancel_backtest_response_200 import CancelBacktestResponse200
+from .cancel_backtest_response_200_status import CancelBacktestResponse200Status
+from .cancel_sweep_response_200 import CancelSweepResponse200
+from .cancel_sweep_response_200_status import CancelSweepResponse200Status
+from .compile_strategy_response_200 import CompileStrategyResponse200
 from .coverage_window import CoverageWindow
 from .data_source_type import DataSourceType
+from .download_klines_format import DownloadKlinesFormat
+from .download_tickers_format import DownloadTickersFormat
 from .equity_point import EquityPoint
 from .exchange import Exchange
-from .execute_backtesting_body import ExecuteBacktestingBody
-from .get_exchange_klines_hour_format import GetExchangeKlinesHourFormat
-from .get_exchange_tickers_hour_format import GetExchangeTickersHourFormat
-from .get_segment_instruments_segment import GetSegmentInstrumentsSegment
-from .get_strategy_status_response_200 import GetStrategyStatusResponse200
-from .get_strategy_status_response_200_status import GetStrategyStatusResponse200Status
+from .execute_backtest_body import ExecuteBacktestBody
+from .execute_sweep_accepted import ExecuteSweepAccepted
+from .execute_sweep_request import ExecuteSweepRequest
+from .execute_sweep_result import ExecuteSweepResult
+from .execute_sweep_result_objective import ExecuteSweepResultObjective
+from .execute_sweep_result_order import ExecuteSweepResultOrder
+from .execute_sweep_result_status import ExecuteSweepResultStatus
+from .get_strategy_response_200 import GetStrategyResponse200
+from .get_strategy_response_200_status import GetStrategyResponse200Status
+from .get_sweep_result_objective import GetSweepResultObjective
+from .get_sweep_result_order import GetSweepResultOrder
 from .hal_link import HalLink
 from .instrument_coverage import InstrumentCoverage
 from .instrument_detail import InstrumentDetail
@@ -28,15 +38,26 @@ from .instrument_list_meta_segment import InstrumentListMetaSegment
 from .instrument_list_response import InstrumentListResponse
 from .job_state import JobState
 from .job_state_status import JobStateStatus
-from .post_strategy_response_200 import PostStrategyResponse200
-from .prepare_backtesting_body import PrepareBacktestingBody
-from .prepare_backtesting_body_cadence import PrepareBacktestingBodyCadence
+from .list_segment_instruments_segment import ListSegmentInstrumentsSegment
 from .prepare_job_state import PrepareJobState
 from .prepare_job_state_hours_without_data_item import PrepareJobStateHoursWithoutDataItem
 from .prepare_job_state_hours_without_data_item_rationale import PrepareJobStateHoursWithoutDataItemRationale
+from .prepare_request import PrepareRequest
+from .prepare_request_cadence import PrepareRequestCadence
 from .response_error import ResponseError
 from .result_map import ResultMap
 from .result_map_signals_upload import ResultMapSignalsUpload
+from .sweep_axis_type_0 import SweepAxisType0
+from .sweep_axis_type_1 import SweepAxisType1
+from .sweep_base_config import SweepBaseConfig
+from .sweep_base_config_fee_leg import SweepBaseConfigFeeLeg
+from .sweep_progress import SweepProgress
+from .sweep_run_row import SweepRunRow
+from .sweep_run_row_params import SweepRunRowParams
+from .sweep_spec_request import SweepSpecRequest
+from .sweep_spec_request_objective import SweepSpecRequestObjective
+from .sweep_spec_request_params import SweepSpecRequestParams
+from .sweep_spec_request_sampler import SweepSpecRequestSampler
 
 __all__ = (
     "AcceptedJob",
@@ -46,18 +67,28 @@ __all__ = (
     "AuthTokenResponseTier",
     "AuthTokenResponseTokenType",
     "BacktestJobResult",
-    "CancelExecutionResponse200",
-    "CancelExecutionResponse200Status",
+    "CancelBacktestResponse200",
+    "CancelBacktestResponse200Status",
+    "CancelSweepResponse200",
+    "CancelSweepResponse200Status",
+    "CompileStrategyResponse200",
     "CoverageWindow",
     "DataSourceType",
+    "DownloadKlinesFormat",
+    "DownloadTickersFormat",
     "EquityPoint",
     "Exchange",
-    "ExecuteBacktestingBody",
-    "GetExchangeKlinesHourFormat",
-    "GetExchangeTickersHourFormat",
-    "GetSegmentInstrumentsSegment",
-    "GetStrategyStatusResponse200",
-    "GetStrategyStatusResponse200Status",
+    "ExecuteBacktestBody",
+    "ExecuteSweepAccepted",
+    "ExecuteSweepRequest",
+    "ExecuteSweepResult",
+    "ExecuteSweepResultObjective",
+    "ExecuteSweepResultOrder",
+    "ExecuteSweepResultStatus",
+    "GetStrategyResponse200",
+    "GetStrategyResponse200Status",
+    "GetSweepResultObjective",
+    "GetSweepResultOrder",
     "HalLink",
     "InstrumentCoverage",
     "InstrumentDetail",
@@ -67,13 +98,24 @@ __all__ = (
     "InstrumentListResponse",
     "JobState",
     "JobStateStatus",
-    "PostStrategyResponse200",
-    "PrepareBacktestingBody",
-    "PrepareBacktestingBodyCadence",
+    "ListSegmentInstrumentsSegment",
     "PrepareJobState",
     "PrepareJobStateHoursWithoutDataItem",
     "PrepareJobStateHoursWithoutDataItemRationale",
+    "PrepareRequest",
+    "PrepareRequestCadence",
     "ResponseError",
     "ResultMap",
     "ResultMapSignalsUpload",
+    "SweepAxisType0",
+    "SweepAxisType1",
+    "SweepBaseConfig",
+    "SweepBaseConfigFeeLeg",
+    "SweepProgress",
+    "SweepRunRow",
+    "SweepRunRowParams",
+    "SweepSpecRequest",
+    "SweepSpecRequestObjective",
+    "SweepSpecRequestParams",
+    "SweepSpecRequestSampler",
 )

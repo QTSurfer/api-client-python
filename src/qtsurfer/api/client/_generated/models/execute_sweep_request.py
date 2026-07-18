@@ -1,0 +1,123 @@
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.sweep_base_config import SweepBaseConfig
+    from ..models.sweep_spec_request import SweepSpecRequest
+
+
+T = TypeVar("T", bound="ExecuteSweepRequest")
+
+
+@_attrs_define
+class ExecuteSweepRequest:
+    """
+    Attributes:
+        strategy_id (str): Unique identifier for a compiled strategy Example: 6bsh31ikwkuivhtgcoa6s4.
+        sweep (SweepSpecRequest):  Example: {'sampler': 'lhs', 'seed': 487221, 'samples': 100, 'objective': 'sharpe',
+            'params': {'rsiPeriod': {'from': 7, 'to': 28, 'step': 1}, 'useTrendFilter': {'values': [True, False]}}}.
+        base_config (SweepBaseConfig | Unset):
+        store_signals (bool | Unset): Store signals for every trial. Keep false for normal sweeps. Default: False.
+        shards (int | Unset): Requested horizontal shard count; 0 or omitted selects automatically. Default: 0.
+        min_trade_floor (int | Unset): Trials below this trade count are flagged but remain in the results. Default: 30.
+    """
+
+    strategy_id: str
+    sweep: SweepSpecRequest
+    base_config: SweepBaseConfig | Unset = UNSET
+    store_signals: bool | Unset = False
+    shards: int | Unset = 0
+    min_trade_floor: int | Unset = 30
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        strategy_id = self.strategy_id
+
+        sweep = self.sweep.to_dict()
+
+        base_config: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.base_config, Unset):
+            base_config = self.base_config.to_dict()
+
+        store_signals = self.store_signals
+
+        shards = self.shards
+
+        min_trade_floor = self.min_trade_floor
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "strategyId": strategy_id,
+                "sweep": sweep,
+            }
+        )
+        if base_config is not UNSET:
+            field_dict["baseConfig"] = base_config
+        if store_signals is not UNSET:
+            field_dict["storeSignals"] = store_signals
+        if shards is not UNSET:
+            field_dict["shards"] = shards
+        if min_trade_floor is not UNSET:
+            field_dict["minTradeFloor"] = min_trade_floor
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.sweep_base_config import SweepBaseConfig
+        from ..models.sweep_spec_request import SweepSpecRequest
+
+        d = dict(src_dict)
+        strategy_id = d.pop("strategyId")
+
+        sweep = SweepSpecRequest.from_dict(d.pop("sweep"))
+
+        _base_config = d.pop("baseConfig", UNSET)
+        base_config: SweepBaseConfig | Unset
+        if isinstance(_base_config, Unset):
+            base_config = UNSET
+        else:
+            base_config = SweepBaseConfig.from_dict(_base_config)
+
+        store_signals = d.pop("storeSignals", UNSET)
+
+        shards = d.pop("shards", UNSET)
+
+        min_trade_floor = d.pop("minTradeFloor", UNSET)
+
+        execute_sweep_request = cls(
+            strategy_id=strategy_id,
+            sweep=sweep,
+            base_config=base_config,
+            store_signals=store_signals,
+            shards=shards,
+            min_trade_floor=min_trade_floor,
+        )
+
+        execute_sweep_request.additional_properties = d
+        return execute_sweep_request
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

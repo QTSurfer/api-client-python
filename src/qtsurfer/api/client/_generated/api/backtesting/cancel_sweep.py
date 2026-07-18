@@ -6,22 +6,26 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_segment_instruments_segment import GetSegmentInstrumentsSegment
-from ...models.instrument_list_response import InstrumentListResponse
+from ...models.cancel_sweep_response_200 import CancelSweepResponse200
+from ...models.data_source_type import DataSourceType
 from ...models.response_error import ResponseError
 from ...types import Response
 
 
 def _get_kwargs(
     exchange_id: str,
-    segment: GetSegmentInstrumentsSegment,
+    type_: DataSourceType,
+    request_id: str,
+    sweep_id: str,
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
-        "method": "get",
-        "url": "/exchange/{exchange_id}/{segment}/instruments".format(
+        "method": "delete",
+        "url": "/backtest/{exchange_id}/{type_}/executeSweep/{request_id}/{sweep_id}".format(
             exchange_id=quote(str(exchange_id), safe=""),
-            segment=quote(str(segment), safe=""),
+            type_=quote(str(type_), safe=""),
+            request_id=quote(str(request_id), safe=""),
+            sweep_id=quote(str(sweep_id), safe=""),
         ),
     }
 
@@ -30,9 +34,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> InstrumentListResponse | ResponseError | None:
+) -> CancelSweepResponse200 | ResponseError | None:
     if response.status_code == 200:
-        response_200 = InstrumentListResponse.from_dict(response.json())
+        response_200 = CancelSweepResponse200.from_dict(response.json())
 
         return response_200
 
@@ -49,7 +53,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[InstrumentListResponse | ResponseError]:
+) -> Response[CancelSweepResponse200 | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -60,32 +64,36 @@ def _build_response(
 
 def sync_detailed(
     exchange_id: str,
-    segment: GetSegmentInstrumentsSegment,
+    type_: DataSourceType,
+    request_id: str,
+    sweep_id: str,
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | ResponseError]:
-    """Get the instruments for a specific exchange segment
+    client: AuthenticatedClient,
+) -> Response[CancelSweepResponse200 | ResponseError]:
+    """Cancel a running parameter sweep
 
-     Returns the instruments for one market segment of the exchange, each with
-    per-data-type coverage and market info. HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links; the default-segment shortcut is
-    `GET /exchange/{exchangeId}/instruments` (spot).
+     Requests cancellation between parameter vectors. Completed rows remain readable.
 
     Args:
         exchange_id (str):  Example: binance.
-        segment (GetSegmentInstrumentsSegment):  Example: spot.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
+            ticker.
+        request_id (str):
+        sweep_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | ResponseError]
+        Response[CancelSweepResponse200 | ResponseError]
     """
 
     kwargs = _get_kwargs(
         exchange_id=exchange_id,
-        segment=segment,
+        type_=type_,
+        request_id=request_id,
+        sweep_id=sweep_id,
     )
 
     response = client.get_httpx_client().request(
@@ -97,64 +105,72 @@ def sync_detailed(
 
 def sync(
     exchange_id: str,
-    segment: GetSegmentInstrumentsSegment,
+    type_: DataSourceType,
+    request_id: str,
+    sweep_id: str,
     *,
-    client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | ResponseError | None:
-    """Get the instruments for a specific exchange segment
+    client: AuthenticatedClient,
+) -> CancelSweepResponse200 | ResponseError | None:
+    """Cancel a running parameter sweep
 
-     Returns the instruments for one market segment of the exchange, each with
-    per-data-type coverage and market info. HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links; the default-segment shortcut is
-    `GET /exchange/{exchangeId}/instruments` (spot).
+     Requests cancellation between parameter vectors. Completed rows remain readable.
 
     Args:
         exchange_id (str):  Example: binance.
-        segment (GetSegmentInstrumentsSegment):  Example: spot.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
+            ticker.
+        request_id (str):
+        sweep_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | ResponseError
+        CancelSweepResponse200 | ResponseError
     """
 
     return sync_detailed(
         exchange_id=exchange_id,
-        segment=segment,
+        type_=type_,
+        request_id=request_id,
+        sweep_id=sweep_id,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
     exchange_id: str,
-    segment: GetSegmentInstrumentsSegment,
+    type_: DataSourceType,
+    request_id: str,
+    sweep_id: str,
     *,
-    client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | ResponseError]:
-    """Get the instruments for a specific exchange segment
+    client: AuthenticatedClient,
+) -> Response[CancelSweepResponse200 | ResponseError]:
+    """Cancel a running parameter sweep
 
-     Returns the instruments for one market segment of the exchange, each with
-    per-data-type coverage and market info. HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links; the default-segment shortcut is
-    `GET /exchange/{exchangeId}/instruments` (spot).
+     Requests cancellation between parameter vectors. Completed rows remain readable.
 
     Args:
         exchange_id (str):  Example: binance.
-        segment (GetSegmentInstrumentsSegment):  Example: spot.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
+            ticker.
+        request_id (str):
+        sweep_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | ResponseError]
+        Response[CancelSweepResponse200 | ResponseError]
     """
 
     kwargs = _get_kwargs(
         exchange_id=exchange_id,
-        segment=segment,
+        type_=type_,
+        request_id=request_id,
+        sweep_id=sweep_id,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -164,33 +180,37 @@ async def asyncio_detailed(
 
 async def asyncio(
     exchange_id: str,
-    segment: GetSegmentInstrumentsSegment,
+    type_: DataSourceType,
+    request_id: str,
+    sweep_id: str,
     *,
-    client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | ResponseError | None:
-    """Get the instruments for a specific exchange segment
+    client: AuthenticatedClient,
+) -> CancelSweepResponse200 | ResponseError | None:
+    """Cancel a running parameter sweep
 
-     Returns the instruments for one market segment of the exchange, each with
-    per-data-type coverage and market info. HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links; the default-segment shortcut is
-    `GET /exchange/{exchangeId}/instruments` (spot).
+     Requests cancellation between parameter vectors. Completed rows remain readable.
 
     Args:
         exchange_id (str):  Example: binance.
-        segment (GetSegmentInstrumentsSegment):  Example: spot.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
+            ticker.
+        request_id (str):
+        sweep_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | ResponseError
+        CancelSweepResponse200 | ResponseError
     """
 
     return (
         await asyncio_detailed(
             exchange_id=exchange_id,
-            segment=segment,
+            type_=type_,
+            request_id=request_id,
+            sweep_id=sweep_id,
             client=client,
         )
     ).parsed

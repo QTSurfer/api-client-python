@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_exchange_tickers_hour_format import GetExchangeTickersHourFormat
+from ...models.download_tickers_format import DownloadTickersFormat
 from ...models.response_error import ResponseError
 from ...types import UNSET, Response, Unset
 
@@ -16,7 +16,7 @@ def _get_kwargs(
     quote: str,
     *,
     hour: str,
-    format_: GetExchangeTickersHourFormat | Unset = GetExchangeTickersHourFormat.LASTRA,
+    format_: DownloadTickersFormat | Unset = DownloadTickersFormat.LASTRA,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -82,7 +82,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeTickersHourFormat | Unset = GetExchangeTickersHourFormat.LASTRA,
+    format_: DownloadTickersFormat | Unset = DownloadTickersFormat.LASTRA,
 ) -> Response[ResponseError]:
     """Download one hour of tickers for an instrument as a Lastra segment
 
@@ -120,8 +120,8 @@ def sync_detailed(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeTickersHourFormat | Unset):  Default:
-            GetExchangeTickersHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadTickersFormat | Unset):  Default: DownloadTickersFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -153,7 +153,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeTickersHourFormat | Unset = GetExchangeTickersHourFormat.LASTRA,
+    format_: DownloadTickersFormat | Unset = DownloadTickersFormat.LASTRA,
 ) -> ResponseError | None:
     """Download one hour of tickers for an instrument as a Lastra segment
 
@@ -191,8 +191,8 @@ def sync(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeTickersHourFormat | Unset):  Default:
-            GetExchangeTickersHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadTickersFormat | Unset):  Default: DownloadTickersFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -219,7 +219,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeTickersHourFormat | Unset = GetExchangeTickersHourFormat.LASTRA,
+    format_: DownloadTickersFormat | Unset = DownloadTickersFormat.LASTRA,
 ) -> Response[ResponseError]:
     """Download one hour of tickers for an instrument as a Lastra segment
 
@@ -257,8 +257,8 @@ async def asyncio_detailed(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeTickersHourFormat | Unset):  Default:
-            GetExchangeTickersHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadTickersFormat | Unset):  Default: DownloadTickersFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -288,7 +288,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeTickersHourFormat | Unset = GetExchangeTickersHourFormat.LASTRA,
+    format_: DownloadTickersFormat | Unset = DownloadTickersFormat.LASTRA,
 ) -> ResponseError | None:
     """Download one hour of tickers for an instrument as a Lastra segment
 
@@ -326,8 +326,8 @@ async def asyncio(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeTickersHourFormat | Unset):  Default:
-            GetExchangeTickersHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadTickersFormat | Unset):  Default: DownloadTickersFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

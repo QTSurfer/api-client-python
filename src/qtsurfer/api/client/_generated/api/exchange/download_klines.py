@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_exchange_klines_hour_format import GetExchangeKlinesHourFormat
+from ...models.download_klines_format import DownloadKlinesFormat
 from ...models.response_error import ResponseError
 from ...types import UNSET, Response, Unset
 
@@ -16,7 +16,7 @@ def _get_kwargs(
     quote: str,
     *,
     hour: str,
-    format_: GetExchangeKlinesHourFormat | Unset = GetExchangeKlinesHourFormat.LASTRA,
+    format_: DownloadKlinesFormat | Unset = DownloadKlinesFormat.LASTRA,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -82,7 +82,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeKlinesHourFormat | Unset = GetExchangeKlinesHourFormat.LASTRA,
+    format_: DownloadKlinesFormat | Unset = DownloadKlinesFormat.LASTRA,
 ) -> Response[ResponseError]:
     """Download one hour of klines for an instrument as a Lastra segment
 
@@ -100,8 +100,8 @@ def sync_detailed(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeKlinesHourFormat | Unset):  Default:
-            GetExchangeKlinesHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -133,7 +133,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeKlinesHourFormat | Unset = GetExchangeKlinesHourFormat.LASTRA,
+    format_: DownloadKlinesFormat | Unset = DownloadKlinesFormat.LASTRA,
 ) -> ResponseError | None:
     """Download one hour of klines for an instrument as a Lastra segment
 
@@ -151,8 +151,8 @@ def sync(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeKlinesHourFormat | Unset):  Default:
-            GetExchangeKlinesHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -179,7 +179,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeKlinesHourFormat | Unset = GetExchangeKlinesHourFormat.LASTRA,
+    format_: DownloadKlinesFormat | Unset = DownloadKlinesFormat.LASTRA,
 ) -> Response[ResponseError]:
     """Download one hour of klines for an instrument as a Lastra segment
 
@@ -197,8 +197,8 @@ async def asyncio_detailed(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeKlinesHourFormat | Unset):  Default:
-            GetExchangeKlinesHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -228,7 +228,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     hour: str,
-    format_: GetExchangeKlinesHourFormat | Unset = GetExchangeKlinesHourFormat.LASTRA,
+    format_: DownloadKlinesFormat | Unset = DownloadKlinesFormat.LASTRA,
 ) -> ResponseError | None:
     """Download one hour of klines for an instrument as a Lastra segment
 
@@ -246,8 +246,8 @@ async def asyncio(
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
         hour (str):  Example: 2026-01-15T10.
-        format_ (GetExchangeKlinesHourFormat | Unset):  Default:
-            GetExchangeKlinesHourFormat.LASTRA. Example: lastra.
+        format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
+            lastra.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

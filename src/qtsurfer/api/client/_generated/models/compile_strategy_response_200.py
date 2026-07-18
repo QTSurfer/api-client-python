@@ -6,11 +6,11 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="PostStrategyResponse200")
+T = TypeVar("T", bound="CompileStrategyResponse200")
 
 
 @_attrs_define
-class PostStrategyResponse200:
+class CompileStrategyResponse200:
     """
     Attributes:
         strategy_id (str): Unique identifier for a compiled strategy Example: 6bsh31ikwkuivhtgcoa6s4.
@@ -37,12 +37,12 @@ class PostStrategyResponse200:
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
 
-        post_strategy_response_200 = cls(
+        compile_strategy_response_200 = cls(
             strategy_id=strategy_id,
         )
 
-        post_strategy_response_200.additional_properties = d
-        return post_strategy_response_200
+        compile_strategy_response_200.additional_properties = d
+        return compile_strategy_response_200
 
     @property
     def additional_keys(self) -> list[str]:

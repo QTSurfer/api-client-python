@@ -6,21 +6,21 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.cancel_execution_response_200_status import CancelExecutionResponse200Status
+from ..models.cancel_backtest_response_200_status import CancelBacktestResponse200Status
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="CancelExecutionResponse200")
+T = TypeVar("T", bound="CancelBacktestResponse200")
 
 
 @_attrs_define
-class CancelExecutionResponse200:
+class CancelBacktestResponse200:
     """
     Attributes:
-        status (CancelExecutionResponse200Status | Unset):  Example: cancelling.
+        status (CancelBacktestResponse200Status | Unset):  Example: cancelling.
         job_id (str | Unset):  Example: 13RBLGQlPnfDjO6wyKSX8i.
     """
 
-    status: CancelExecutionResponse200Status | Unset = UNSET
+    status: CancelBacktestResponse200Status | Unset = UNSET
     job_id: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -45,21 +45,21 @@ class CancelExecutionResponse200:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         _status = d.pop("status", UNSET)
-        status: CancelExecutionResponse200Status | Unset
+        status: CancelBacktestResponse200Status | Unset
         if isinstance(_status, Unset):
             status = UNSET
         else:
-            status = CancelExecutionResponse200Status(_status)
+            status = CancelBacktestResponse200Status(_status)
 
         job_id = d.pop("jobId", UNSET)
 
-        cancel_execution_response_200 = cls(
+        cancel_backtest_response_200 = cls(
             status=status,
             job_id=job_id,
         )
 
-        cancel_execution_response_200.additional_properties = d
-        return cancel_execution_response_200
+        cancel_backtest_response_200.additional_properties = d
+        return cancel_backtest_response_200
 
     @property
     def additional_keys(self) -> list[str]:

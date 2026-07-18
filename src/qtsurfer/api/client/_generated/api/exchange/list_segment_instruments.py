@@ -7,18 +7,21 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.instrument_list_response import InstrumentListResponse
+from ...models.list_segment_instruments_segment import ListSegmentInstrumentsSegment
 from ...models.response_error import ResponseError
 from ...types import Response
 
 
 def _get_kwargs(
     exchange_id: str,
+    segment: ListSegmentInstrumentsSegment,
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/exchange/{exchange_id}/instruments".format(
+        "url": "/exchange/{exchange_id}/{segment}/instruments".format(
             exchange_id=quote(str(exchange_id), safe=""),
+            segment=quote(str(segment), safe=""),
         ),
     }
 
@@ -57,18 +60,20 @@ def _build_response(
 
 def sync_detailed(
     exchange_id: str,
+    segment: ListSegmentInstrumentsSegment,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[InstrumentListResponse | ResponseError]:
-    r"""Get an exchange's instruments (default spot segment)
+    """List an exchange segment's instruments
 
-     \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
-    in `data`, each instrument with per-data-type coverage and market info. `meta`
-    confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links.
+     Returns the instruments for one market segment of the exchange, each with
+    per-data-type coverage and market info. HAL `_links` carry `self` plus the
+    `spot` / `futures` segment-discovery links; the default-segment shortcut is
+    `GET /exchange/{exchangeId}/instruments` (spot).
 
     Args:
         exchange_id (str):  Example: binance.
+        segment (ListSegmentInstrumentsSegment):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -80,6 +85,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         exchange_id=exchange_id,
+        segment=segment,
     )
 
     response = client.get_httpx_client().request(
@@ -91,18 +97,20 @@ def sync_detailed(
 
 def sync(
     exchange_id: str,
+    segment: ListSegmentInstrumentsSegment,
     *,
     client: AuthenticatedClient | Client,
 ) -> InstrumentListResponse | ResponseError | None:
-    r"""Get an exchange's instruments (default spot segment)
+    """List an exchange segment's instruments
 
-     \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
-    in `data`, each instrument with per-data-type coverage and market info. `meta`
-    confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links.
+     Returns the instruments for one market segment of the exchange, each with
+    per-data-type coverage and market info. HAL `_links` carry `self` plus the
+    `spot` / `futures` segment-discovery links; the default-segment shortcut is
+    `GET /exchange/{exchangeId}/instruments` (spot).
 
     Args:
         exchange_id (str):  Example: binance.
+        segment (ListSegmentInstrumentsSegment):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -114,24 +122,27 @@ def sync(
 
     return sync_detailed(
         exchange_id=exchange_id,
+        segment=segment,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
     exchange_id: str,
+    segment: ListSegmentInstrumentsSegment,
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[InstrumentListResponse | ResponseError]:
-    r"""Get an exchange's instruments (default spot segment)
+    """List an exchange segment's instruments
 
-     \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
-    in `data`, each instrument with per-data-type coverage and market info. `meta`
-    confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links.
+     Returns the instruments for one market segment of the exchange, each with
+    per-data-type coverage and market info. HAL `_links` carry `self` plus the
+    `spot` / `futures` segment-discovery links; the default-segment shortcut is
+    `GET /exchange/{exchangeId}/instruments` (spot).
 
     Args:
         exchange_id (str):  Example: binance.
+        segment (ListSegmentInstrumentsSegment):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -143,6 +154,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         exchange_id=exchange_id,
+        segment=segment,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -152,18 +164,20 @@ async def asyncio_detailed(
 
 async def asyncio(
     exchange_id: str,
+    segment: ListSegmentInstrumentsSegment,
     *,
     client: AuthenticatedClient | Client,
 ) -> InstrumentListResponse | ResponseError | None:
-    r"""Get an exchange's instruments (default spot segment)
+    """List an exchange segment's instruments
 
-     \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
-    in `data`, each instrument with per-data-type coverage and market info. `meta`
-    confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
-    `spot` / `futures` segment-discovery links.
+     Returns the instruments for one market segment of the exchange, each with
+    per-data-type coverage and market info. HAL `_links` carry `self` plus the
+    `spot` / `futures` segment-discovery links; the default-segment shortcut is
+    `GET /exchange/{exchangeId}/instruments` (spot).
 
     Args:
         exchange_id (str):  Example: binance.
+        segment (ListSegmentInstrumentsSegment):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -176,6 +190,7 @@ async def asyncio(
     return (
         await asyncio_detailed(
             exchange_id=exchange_id,
+            segment=segment,
             client=client,
         )
     ).parsed

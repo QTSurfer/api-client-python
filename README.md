@@ -42,31 +42,31 @@ uv add qtsurfer-api-client
 import os
 
 from qtsurfer.api.client import AuthenticatedClient
-from qtsurfer.api.client.api.exchange import get_exchanges, get_instruments
+from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 
 client = AuthenticatedClient(
     base_url="https://api.qtsurfer.com/v1",
     token=os.environ["QTSURFER_TOKEN"],
 )
 
-exchanges = get_exchanges.sync(client=client)
+exchanges = list_exchanges.sync(client=client)
 for ex in exchanges or []:
     print(ex.id, ex.name)
 
-instruments = get_instruments.sync(client=client, exchange_id="binance")
+instruments = list_instruments.sync(client=client, exchange_id="binance")
 print(f"{len(instruments.data)} instruments on binance ({instruments.meta.segment.value})")
 ```
 
 ### API key → JWT
 
 Every endpoint above expects a short-lived JWT in the `Authorization: Bearer …`
-header. Exchange a long-lived API key for one via `auth`:
+header. Exchange a long-lived API key for one via `authenticate`:
 
 ```python
 import os
 
 from qtsurfer.api.client import AuthenticatedClient
-from qtsurfer.api.client.api.auth import auth
+from qtsurfer.api.client.api.auth import authenticate
 
 # AuthenticatedClient also drives the apikey header — set prefix="" so it
 # sends `X-API-Key: <key>` instead of `Authorization: Bearer <key>`.
@@ -77,7 +77,7 @@ apikey_client = AuthenticatedClient(
     auth_header_name="X-API-Key",
 )
 
-token_response = auth.sync(client=apikey_client)
+token_response = authenticate.sync(client=apikey_client)
 jwt = token_response.access_token  # use this in subsequent calls
 ```
 
@@ -99,24 +99,24 @@ Each generated endpoint module exposes four entrypoints:
 
 | Module | Operation | Method · Path |
 | --- | --- | --- |
-| `api.auth` | `auth` | `POST /auth/token` — exchange API key for a short-lived JWT |
-| `api.exchange` | `get_exchanges` | `GET /exchanges` |
-| `api.exchange` | `get_instruments` | `GET /exchange/{exchangeId}/instruments` (default `spot` segment) |
-| `api.exchange` | `get_segment_instruments` | `GET /exchange/{exchangeId}/{segment}/instruments` |
-| `api.exchange` | `get_exchange_tickers_hour` | `GET /exchange/{exchangeId}/tickers/{base}/{quote}` |
-| `api.exchange` | `get_exchange_klines_hour` | `GET /exchange/{exchangeId}/klines/{base}/{quote}` |
-| `api.strategy` | `get_strategy_status` | `GET /strategy/{strategyId}` |
-| `api.backtesting` | `prepare_backtesting` | `POST /backtesting/prepare` |
-| `api.backtesting` | `get_preparation_status` | `GET /backtesting/prepare/{jobId}` |
-| `api.backtesting` | `execute_backtesting` | `POST /backtesting/execute` |
-| `api.backtesting` | `cancel_execution` | `POST /backtesting/execute/{jobId}/cancel` |
-| `api.backtesting` | `get_execution_result` | `GET /backtesting/execute/{jobId}` |
+| `api.auth` | `authenticate` | `POST /auth/token` — exchange API key for a short-lived JWT |
+| `api.exchange` | `list_exchanges` | `GET /exchanges` |
+| `api.exchange` | `list_instruments` | `GET /exchange/{exchangeId}/instruments` (default `spot` segment) |
+| `api.exchange` | `list_segment_instruments` | `GET /exchange/{exchangeId}/{segment}/instruments` |
+| `api.exchange` | `download_tickers` | `GET /exchange/{exchangeId}/tickers/{base}/{quote}` |
+| `api.exchange` | `download_klines` | `GET /exchange/{exchangeId}/klines/{base}/{quote}` |
+| `api.strategy` | `get_strategy` | `GET /strategy/{strategyId}` |
+| `api.backtesting` | `prepare_backtest` | `POST /backtesting/prepare` |
+| `api.backtesting` | `get_prepare_status` | `GET /backtesting/prepare/{jobId}` |
+| `api.backtesting` | `execute_backtest` | `POST /backtesting/execute` |
+| `api.backtesting` | `cancel_backtest` | `POST /backtesting/execute/{jobId}/cancel` |
+| `api.backtesting` | `get_backtest_result` | `GET /backtesting/execute/{jobId}` |
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
-All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `BacktestJobResult`, `ResultMap`, `ResponseError`, …) live under `qtsurfer.api.client.models`. `get_instruments`/`get_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_preparation_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling.
+All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `BacktestJobResult`, `ResultMap`, `ResponseError`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling.
 
-> **`POST /strategy` (`postStrategy`)** is currently omitted by the generator because the spec declares its request body as `text/plain` and `openapi-python-client` only emits JSON / form / multipart bodies. Call it directly via the underlying `httpx` client (`client.get_httpx_client().post("/strategy", content=src, headers={"Content-Type": "text/plain"})`) until the spec is restructured.
+> **`POST /strategy` (`compileStrategy`)** is currently omitted by the generator because the spec declares its request body as `text/plain` and `openapi-python-client` only emits JSON / form / multipart bodies. Call it directly via the underlying `httpx` client (`client.get_httpx_client().post("/strategy", content=src, headers={"Content-Type": "text/plain"})`) until the spec is restructured.
 
 ### Binary downloads (`/exchange/{ex}/tickers|klines/{base}/{quote}`)
 
@@ -124,11 +124,11 @@ These endpoints return raw [Lastra](https://github.com/QTSurfer/lastra-java) byt
 
 ```python
 from qtsurfer.api.client import AuthenticatedClient
-from qtsurfer.api.client.api.exchange import get_exchange_tickers_hour
+from qtsurfer.api.client.api.exchange import download_tickers
 
 client = AuthenticatedClient(base_url="https://api.qtsurfer.com/v1", token=token)
 
-response = get_exchange_tickers_hour.sync_detailed(
+response = download_tickers.sync_detailed(
     client=client,
     exchange_id="binance",
     base="BTC",

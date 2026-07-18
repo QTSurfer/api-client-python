@@ -8,11 +8,11 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ExecuteBacktestingBody")
+T = TypeVar("T", bound="ExecuteBacktestBody")
 
 
 @_attrs_define
-class ExecuteBacktestingBody:
+class ExecuteBacktestBody:
     """
     Attributes:
         prepare_job_id (str): Job ID returned by `POST /prepare` (must be in `Completed` state) Example:
@@ -57,14 +57,14 @@ class ExecuteBacktestingBody:
 
         store_signals = d.pop("storeSignals", UNSET)
 
-        execute_backtesting_body = cls(
+        execute_backtest_body = cls(
             prepare_job_id=prepare_job_id,
             strategy_id=strategy_id,
             store_signals=store_signals,
         )
 
-        execute_backtesting_body.additional_properties = d
-        return execute_backtesting_body
+        execute_backtest_body.additional_properties = d
+        return execute_backtest_body
 
     @property
     def additional_keys(self) -> list[str]:

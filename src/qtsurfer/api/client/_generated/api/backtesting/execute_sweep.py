@@ -6,9 +6,9 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.accepted_job import AcceptedJob
 from ...models.data_source_type import DataSourceType
-from ...models.prepare_backtesting_body import PrepareBacktestingBody
+from ...models.execute_sweep_accepted import ExecuteSweepAccepted
+from ...models.execute_sweep_request import ExecuteSweepRequest
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -16,16 +16,18 @@ from ...types import Response
 def _get_kwargs(
     exchange_id: str,
     type_: DataSourceType,
+    request_id: str,
     *,
-    body: PrepareBacktestingBody,
+    body: ExecuteSweepRequest,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/backtest/{exchange_id}/{type_}/prepare".format(
+        "url": "/backtest/{exchange_id}/{type_}/executeSweep/{request_id}".format(
             exchange_id=quote(str(exchange_id), safe=""),
             type_=quote(str(type_), safe=""),
+            request_id=quote(str(request_id), safe=""),
         ),
     }
 
@@ -39,9 +41,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> AcceptedJob | ResponseError | None:
+) -> ExecuteSweepAccepted | ResponseError | None:
     if response.status_code == 202:
-        response_202 = AcceptedJob.from_dict(response.json())
+        response_202 = ExecuteSweepAccepted.from_dict(response.json())
 
         return response_202
 
@@ -68,7 +70,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[AcceptedJob | ResponseError]:
+) -> Response[ExecuteSweepAccepted | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -80,35 +82,36 @@ def _build_response(
 def sync_detailed(
     exchange_id: str,
     type_: DataSourceType,
+    request_id: str,
     *,
     client: AuthenticatedClient,
-    body: PrepareBacktestingBody,
-) -> Response[AcceptedJob | ResponseError]:
-    """Prepare backtesting data
+    body: ExecuteSweepRequest,
+) -> Response[ExecuteSweepAccepted | ResponseError]:
+    """Execute a parameter sweep over prepared data
 
-     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
-    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
-
-    The same params always return the same `jobId` (idempotent). Repeated calls with identical
-    params do not enqueue duplicate work — they reuse the existing job.
+     Runs a parameter matrix over the single immutable dataset identified by `requestId`.
+    The backend expands and executes the matrix internally; clients poll the returned
+    `sweepId` for incremental results.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareBacktestingBody):
+        request_id (str):
+        body (ExecuteSweepRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AcceptedJob | ResponseError]
+        Response[ExecuteSweepAccepted | ResponseError]
     """
 
     kwargs = _get_kwargs(
         exchange_id=exchange_id,
         type_=type_,
+        request_id=request_id,
         body=body,
     )
 
@@ -122,35 +125,36 @@ def sync_detailed(
 def sync(
     exchange_id: str,
     type_: DataSourceType,
+    request_id: str,
     *,
     client: AuthenticatedClient,
-    body: PrepareBacktestingBody,
-) -> AcceptedJob | ResponseError | None:
-    """Prepare backtesting data
+    body: ExecuteSweepRequest,
+) -> ExecuteSweepAccepted | ResponseError | None:
+    """Execute a parameter sweep over prepared data
 
-     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
-    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
-
-    The same params always return the same `jobId` (idempotent). Repeated calls with identical
-    params do not enqueue duplicate work — they reuse the existing job.
+     Runs a parameter matrix over the single immutable dataset identified by `requestId`.
+    The backend expands and executes the matrix internally; clients poll the returned
+    `sweepId` for incremental results.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareBacktestingBody):
+        request_id (str):
+        body (ExecuteSweepRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AcceptedJob | ResponseError
+        ExecuteSweepAccepted | ResponseError
     """
 
     return sync_detailed(
         exchange_id=exchange_id,
         type_=type_,
+        request_id=request_id,
         client=client,
         body=body,
     ).parsed
@@ -159,35 +163,36 @@ def sync(
 async def asyncio_detailed(
     exchange_id: str,
     type_: DataSourceType,
+    request_id: str,
     *,
     client: AuthenticatedClient,
-    body: PrepareBacktestingBody,
-) -> Response[AcceptedJob | ResponseError]:
-    """Prepare backtesting data
+    body: ExecuteSweepRequest,
+) -> Response[ExecuteSweepAccepted | ResponseError]:
+    """Execute a parameter sweep over prepared data
 
-     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
-    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
-
-    The same params always return the same `jobId` (idempotent). Repeated calls with identical
-    params do not enqueue duplicate work — they reuse the existing job.
+     Runs a parameter matrix over the single immutable dataset identified by `requestId`.
+    The backend expands and executes the matrix internally; clients poll the returned
+    `sweepId` for incremental results.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareBacktestingBody):
+        request_id (str):
+        body (ExecuteSweepRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AcceptedJob | ResponseError]
+        Response[ExecuteSweepAccepted | ResponseError]
     """
 
     kwargs = _get_kwargs(
         exchange_id=exchange_id,
         type_=type_,
+        request_id=request_id,
         body=body,
     )
 
@@ -199,36 +204,37 @@ async def asyncio_detailed(
 async def asyncio(
     exchange_id: str,
     type_: DataSourceType,
+    request_id: str,
     *,
     client: AuthenticatedClient,
-    body: PrepareBacktestingBody,
-) -> AcceptedJob | ResponseError | None:
-    """Prepare backtesting data
+    body: ExecuteSweepRequest,
+) -> ExecuteSweepAccepted | ResponseError | None:
+    """Execute a parameter sweep over prepared data
 
-     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
-    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
-
-    The same params always return the same `jobId` (idempotent). Repeated calls with identical
-    params do not enqueue duplicate work — they reuse the existing job.
+     Runs a parameter matrix over the single immutable dataset identified by `requestId`.
+    The backend expands and executes the matrix internally; clients poll the returned
+    `sweepId` for incremental results.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareBacktestingBody):
+        request_id (str):
+        body (ExecuteSweepRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AcceptedJob | ResponseError
+        ExecuteSweepAccepted | ResponseError
     """
 
     return (
         await asyncio_detailed(
             exchange_id=exchange_id,
             type_=type_,
+            request_id=request_id,
             client=client,
             body=body,
         )

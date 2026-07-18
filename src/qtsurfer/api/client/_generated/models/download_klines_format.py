@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class GetExchangeTickersHourFormat(str, Enum):
+class DownloadKlinesFormat(str, Enum):
     LASTRA = "lastra"
     PARQUET = "parquet"
 

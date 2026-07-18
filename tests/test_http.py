@@ -11,7 +11,7 @@ import pytest
 import respx
 
 from qtsurfer.api.client import AuthenticatedClient
-from qtsurfer.api.client.api.exchange import get_exchanges, get_instruments
+from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 from qtsurfer.api.client.models import (
     CoverageWindow,
     Exchange,
@@ -29,7 +29,7 @@ def client() -> AuthenticatedClient:
 
 
 @respx.mock
-def test_get_exchanges_request_and_response(client: AuthenticatedClient) -> None:
+def test_list_exchanges_request_and_response(client: AuthenticatedClient) -> None:
     route = respx.get(f"{BASE_URL}/exchanges").mock(
         return_value=httpx.Response(
             200,
@@ -40,7 +40,7 @@ def test_get_exchanges_request_and_response(client: AuthenticatedClient) -> None
         )
     )
 
-    exchanges = get_exchanges.sync(client=client)
+    exchanges = list_exchanges.sync(client=client)
 
     assert route.called
     # Verify request shape: bearer token + correct URL/method.
@@ -58,7 +58,7 @@ def test_get_exchanges_request_and_response(client: AuthenticatedClient) -> None
 
 
 @respx.mock
-def test_get_instruments_path_param_interpolated(client: AuthenticatedClient) -> None:
+def test_list_instruments_path_param_interpolated(client: AuthenticatedClient) -> None:
     payload = {
         "data": [
             {
@@ -84,7 +84,7 @@ def test_get_instruments_path_param_interpolated(client: AuthenticatedClient) ->
     }
     route = respx.get(f"{BASE_URL}/exchange/binance/instruments").mock(return_value=httpx.Response(200, json=payload))
 
-    response = get_instruments.sync(client=client, exchange_id="binance")
+    response = list_instruments.sync(client=client, exchange_id="binance")
 
     assert route.called
     assert isinstance(response, InstrumentListResponse)
@@ -103,7 +103,7 @@ def test_get_instruments_path_param_interpolated(client: AuthenticatedClient) ->
 
 
 @respx.mock
-def test_get_instruments_detailed_returns_status(client: AuthenticatedClient) -> None:
+def test_list_instruments_detailed_returns_status(client: AuthenticatedClient) -> None:
     respx.get(f"{BASE_URL}/exchange/unknown/instruments").mock(
         return_value=httpx.Response(
             404,
@@ -111,7 +111,7 @@ def test_get_instruments_detailed_returns_status(client: AuthenticatedClient) ->
         )
     )
 
-    response = get_instruments.sync_detailed(client=client, exchange_id="unknown")
+    response = list_instruments.sync_detailed(client=client, exchange_id="unknown")
 
     assert response.status_code == 404
     # parsed is the ResponseError model on the documented 404 branch.

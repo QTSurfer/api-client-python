@@ -36,34 +36,34 @@ def test_known_endpoints_are_present() -> None:
 
     Update this list deliberately whenever the spec changes.
     """
-    from qtsurfer.api.client.api.auth import auth
+    from qtsurfer.api.client.api.auth import authenticate
     from qtsurfer.api.client.api.backtesting import (
-        cancel_execution,
-        execute_backtesting,
-        get_execution_result,
-        get_preparation_status,
-        prepare_backtesting,
+        cancel_backtest,
+        execute_backtest,
+        get_backtest_result,
+        get_prepare_status,
+        prepare_backtest,
     )
     from qtsurfer.api.client.api.exchange import (
-        get_exchange_klines_hour,
-        get_exchange_tickers_hour,
-        get_exchanges,
-        get_instruments,
+        download_klines,
+        download_tickers,
+        list_exchanges,
+        list_instruments,
     )
-    from qtsurfer.api.client.api.strategy import get_strategy_status
+    from qtsurfer.api.client.api.strategy import get_strategy
 
     endpoints = [
-        auth,
-        get_exchanges,
-        get_instruments,
-        get_exchange_tickers_hour,
-        get_exchange_klines_hour,
-        get_strategy_status,
-        prepare_backtesting,
-        get_preparation_status,
-        execute_backtesting,
-        cancel_execution,
-        get_execution_result,
+        authenticate,
+        list_exchanges,
+        list_instruments,
+        download_tickers,
+        download_klines,
+        get_strategy,
+        prepare_backtest,
+        get_prepare_status,
+        execute_backtest,
+        cancel_backtest,
+        get_backtest_result,
     ]
     for ep in endpoints:
         # Each generated endpoint module exposes the four standard entry points.

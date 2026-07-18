@@ -8,7 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.accepted_job import AcceptedJob
 from ...models.data_source_type import DataSourceType
-from ...models.execute_backtesting_body import ExecuteBacktestingBody
+from ...models.prepare_request import PrepareRequest
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -17,13 +17,13 @@ def _get_kwargs(
     exchange_id: str,
     type_: DataSourceType,
     *,
-    body: ExecuteBacktestingBody,
+    body: PrepareRequest,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/backtest/{exchange_id}/{type_}/execute".format(
+        "url": "/backtest/{exchange_id}/{type_}/prepare".format(
             exchange_id=quote(str(exchange_id), safe=""),
             type_=quote(str(type_), safe=""),
         ),
@@ -82,25 +82,22 @@ def sync_detailed(
     type_: DataSourceType,
     *,
     client: AuthenticatedClient,
-    body: ExecuteBacktestingBody,
+    body: PrepareRequest,
 ) -> Response[AcceptedJob | ResponseError]:
-    """Execute a compiled strategy against a prepared dataset
+    """Prepare backtest data
 
-     Enqueues an execute task that runs the strategy identified by `strategyId` over the data
-    prepared by the prepare job identified by `prepareJobId`. The instrument and date range are
-    recovered from the prepare job — they do not need to be sent again.
+     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
+    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
 
-    Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
-    for the result.
-
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params always return the same `jobId` (idempotent). Repeated calls with identical
+    params do not enqueue duplicate work — they reuse the existing job.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (ExecuteBacktestingBody):
+        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
+            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -128,25 +125,22 @@ def sync(
     type_: DataSourceType,
     *,
     client: AuthenticatedClient,
-    body: ExecuteBacktestingBody,
+    body: PrepareRequest,
 ) -> AcceptedJob | ResponseError | None:
-    """Execute a compiled strategy against a prepared dataset
+    """Prepare backtest data
 
-     Enqueues an execute task that runs the strategy identified by `strategyId` over the data
-    prepared by the prepare job identified by `prepareJobId`. The instrument and date range are
-    recovered from the prepare job — they do not need to be sent again.
+     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
+    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
 
-    Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
-    for the result.
-
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params always return the same `jobId` (idempotent). Repeated calls with identical
+    params do not enqueue duplicate work — they reuse the existing job.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (ExecuteBacktestingBody):
+        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
+            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -169,25 +163,22 @@ async def asyncio_detailed(
     type_: DataSourceType,
     *,
     client: AuthenticatedClient,
-    body: ExecuteBacktestingBody,
+    body: PrepareRequest,
 ) -> Response[AcceptedJob | ResponseError]:
-    """Execute a compiled strategy against a prepared dataset
+    """Prepare backtest data
 
-     Enqueues an execute task that runs the strategy identified by `strategyId` over the data
-    prepared by the prepare job identified by `prepareJobId`. The instrument and date range are
-    recovered from the prepare job — they do not need to be sent again.
+     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
+    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
 
-    Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
-    for the result.
-
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params always return the same `jobId` (idempotent). Repeated calls with identical
+    params do not enqueue duplicate work — they reuse the existing job.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (ExecuteBacktestingBody):
+        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
+            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -213,25 +204,22 @@ async def asyncio(
     type_: DataSourceType,
     *,
     client: AuthenticatedClient,
-    body: ExecuteBacktestingBody,
+    body: PrepareRequest,
 ) -> AcceptedJob | ResponseError | None:
-    """Execute a compiled strategy against a prepared dataset
+    """Prepare backtest data
 
-     Enqueues an execute task that runs the strategy identified by `strategyId` over the data
-    prepared by the prepare job identified by `prepareJobId`. The instrument and date range are
-    recovered from the prepare job — they do not need to be sent again.
+     Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
+    poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
 
-    Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
-    for the result.
-
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params always return the same `jobId` (idempotent). Repeated calls with identical
+    params do not enqueue duplicate work — they reuse the existing job.
 
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (ExecuteBacktestingBody):
+        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
+            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

@@ -6,23 +6,23 @@ from typing import Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.get_strategy_status_response_200_status import GetStrategyStatusResponse200Status
+from ..models.get_strategy_response_200_status import GetStrategyResponse200Status
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="GetStrategyStatusResponse200")
+T = TypeVar("T", bound="GetStrategyResponse200")
 
 
 @_attrs_define
-class GetStrategyStatusResponse200:
+class GetStrategyResponse200:
     """
     Attributes:
-        status (GetStrategyStatusResponse200Status):  Example: Completed.
+        status (GetStrategyResponse200Status):  Example: Completed.
         job_id (str | Unset): Compile job id (only set in async mode) Example: 6bsh31ikwkuivhtgcoa6s4.
         strategy_id (str | Unset): Unique identifier for a compiled strategy Example: 6bsh31ikwkuivhtgcoa6s4.
         status_detail (None | str | Unset): Compilation error messages when `status` is `Failed`
     """
 
-    status: GetStrategyStatusResponse200Status
+    status: GetStrategyResponse200Status
     job_id: str | Unset = UNSET
     strategy_id: str | Unset = UNSET
     status_detail: None | str | Unset = UNSET
@@ -60,7 +60,7 @@ class GetStrategyStatusResponse200:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        status = GetStrategyStatusResponse200Status(d.pop("status"))
+        status = GetStrategyResponse200Status(d.pop("status"))
 
         job_id = d.pop("jobId", UNSET)
 
@@ -75,15 +75,15 @@ class GetStrategyStatusResponse200:
 
         status_detail = _parse_status_detail(d.pop("statusDetail", UNSET))
 
-        get_strategy_status_response_200 = cls(
+        get_strategy_response_200 = cls(
             status=status,
             job_id=job_id,
             strategy_id=strategy_id,
             status_detail=status_detail,
         )
 
-        get_strategy_status_response_200.additional_properties = d
-        return get_strategy_status_response_200
+        get_strategy_response_200.additional_properties = d
+        return get_strategy_response_200
 
     @property
     def additional_keys(self) -> list[str]:

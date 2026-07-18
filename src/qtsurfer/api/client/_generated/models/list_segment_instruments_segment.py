@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class GetSegmentInstrumentsSegment(str, Enum):
+class ListSegmentInstrumentsSegment(str, Enum):
     FUTURES = "futures"
     SPOT = "spot"
 

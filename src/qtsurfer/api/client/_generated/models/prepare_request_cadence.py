@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class PrepareBacktestingBodyCadence(str, Enum):
+class PrepareRequestCadence(str, Enum):
     VALUE_0 = "1s"
     VALUE_1 = "5s"
     VALUE_2 = "1m"

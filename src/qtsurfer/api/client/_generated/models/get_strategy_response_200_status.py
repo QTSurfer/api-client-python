@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class GetStrategyStatusResponse200Status(str, Enum):
+class GetStrategyResponse200Status(str, Enum):
     ABORTED = "Aborted"
     COMPLETED = "Completed"
     FAILED = "Failed"
