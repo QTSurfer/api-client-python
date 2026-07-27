@@ -25,6 +25,7 @@ from .execute_sweep_result import ExecuteSweepResult
 from .execute_sweep_result_objective import ExecuteSweepResultObjective
 from .execute_sweep_result_order import ExecuteSweepResultOrder
 from .execute_sweep_result_status import ExecuteSweepResultStatus
+from .get_backtest_result_response_202 import GetBacktestResultResponse202
 from .get_strategy_response_200 import GetStrategyResponse200
 from .get_strategy_response_200_status import GetStrategyResponse200Status
 from .get_sweep_result_objective import GetSweepResultObjective
@@ -85,6 +86,7 @@ __all__ = (
     "ExecuteSweepResultObjective",
     "ExecuteSweepResultOrder",
     "ExecuteSweepResultStatus",
+    "GetBacktestResultResponse202",
     "GetStrategyResponse200",
     "GetStrategyResponse200Status",
     "GetSweepResultObjective",
