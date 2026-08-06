@@ -21,7 +21,8 @@ class BacktestJobResult:
     Attributes:
         results (ResultMap): Execution result map. Always includes core fields (hostName, iops, strategyId, instrument).
             Yield metrics (pnlTotal, pnlTotalPercent, totalTrades, winRate, equityCurve, etc.) are present when the strategy
-            emitted at least one trade. When signal storage is enabled, includes signal fields described below.
+            emitted at least one trade. When signal storage is enabled, includes signal fields described below. `notices`
+            carries what the run had to say about itself, and is absent when it had nothing.
         state (JobState): Information about a single job
     """
 

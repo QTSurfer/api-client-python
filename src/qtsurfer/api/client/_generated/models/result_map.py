@@ -13,6 +13,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.equity_point import EquityPoint
+    from ..models.notice import Notice
 
 
 T = TypeVar("T", bound="ResultMap")
@@ -22,15 +23,33 @@ T = TypeVar("T", bound="ResultMap")
 class ResultMap:
     """Execution result map. Always includes core fields (hostName, iops, strategyId, instrument). Yield metrics (pnlTotal,
     pnlTotalPercent, totalTrades, winRate, equityCurve, etc.) are present when the strategy emitted at least one trade.
-    When signal storage is enabled, includes signal fields described below.
+    When signal storage is enabled, includes signal fields described below. `notices` carries what the run had to say
+    about itself, and is absent when it had nothing.
 
         Attributes:
-            strategy_id (str): Identifier of the compiled strategy that produced this result Example:
-                strategy:00000000-0000-0000-0000-000000000000:ticker:2iyvtenlzh9dabqtxn7nbv.
+            strategy_id (str): **Not the `strategyId` you compiled with** — this is the execution context id,
+                `strategy:<user>:<strategyId>`. The compiled strategy's id is the last `:`-separated
+                segment; that, not this whole string, is what `GET /strategy/{strategyId}` takes.
+
+                Take the segment after the last `:` rather than counting from the front: the shape has
+                changed once already and callers that indexed a fixed position broke on it.
+                 Example: strategy:00000000-0000-0000-0000-000000000000:2iyvtenlzh9dabqtxn7nbv.
             instrument (str): The instrument (currency pair) that was backtested Example: BTC/USDT.
             host_name (str | Unset): Identifier of the worker that executed the strategy. Useful when reporting issues so
                 support can correlate with logs. Example: executor10.
             iops (float | Unset): Instrument operations per second throughput during execution Example: 123956.53.
+            notices (list[Notice] | Unset): Diagnostics the engine raised over this run, each with `provenance: execute`.
+
+                **Absent means nothing was raised.** This is the one surface where silence is a real
+                answer: the run happened, over your data, start to finish, and the engine found nothing
+                worth saying. That is not true of the compile path, where an empty list only means a
+                short synthetic series reached nothing — see `GET /strategy/{strategyId}`.
+
+                Notices are raised on failed and aborted runs too, and those are the ones most worth
+                reading: a run that produced no trades often did so for a reason stated here.
+            notices_truncated (int | Unset): How many notices were dropped past the cap of 50. Absent when none were. A
+                large value usually means one fault repeating per instrument or per parameter vector rather than 50 distinct
+                problems. Example: 3.
             pnl_total (float | Unset): Total profit and loss in the output currency Example: 42.75.
             pnl_total_percent (float | Unset): Total PnL as a percentage of the initial capital (`backtestFunding`). Zero
                 when `backtestFunding` is 0. Example: 42.75.
@@ -66,6 +85,8 @@ class ResultMap:
     instrument: str
     host_name: str | Unset = UNSET
     iops: float | Unset = UNSET
+    notices: list[Notice] | Unset = UNSET
+    notices_truncated: int | Unset = UNSET
     pnl_total: float | Unset = UNSET
     pnl_total_percent: float | Unset = UNSET
     total_trades: int | Unset = UNSET
@@ -92,6 +113,15 @@ class ResultMap:
         host_name = self.host_name
 
         iops = self.iops
+
+        notices: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.notices, Unset):
+            notices = []
+            for notices_item_data in self.notices:
+                notices_item = notices_item_data.to_dict()
+                notices.append(notices_item)
+
+        notices_truncated = self.notices_truncated
 
         pnl_total = self.pnl_total
 
@@ -146,6 +176,10 @@ class ResultMap:
             field_dict["hostName"] = host_name
         if iops is not UNSET:
             field_dict["iops"] = iops
+        if notices is not UNSET:
+            field_dict["notices"] = notices
+        if notices_truncated is not UNSET:
+            field_dict["noticesTruncated"] = notices_truncated
         if pnl_total is not UNSET:
             field_dict["pnlTotal"] = pnl_total
         if pnl_total_percent is not UNSET:
@@ -184,6 +218,7 @@ class ResultMap:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.equity_point import EquityPoint
+        from ..models.notice import Notice
 
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
@@ -193,6 +228,17 @@ class ResultMap:
         host_name = d.pop("hostName", UNSET)
 
         iops = d.pop("iops", UNSET)
+
+        _notices = d.pop("notices", UNSET)
+        notices: list[Notice] | Unset = UNSET
+        if _notices is not UNSET:
+            notices = []
+            for notices_item_data in _notices:
+                notices_item = Notice.from_dict(notices_item_data)
+
+                notices.append(notices_item)
+
+        notices_truncated = d.pop("noticesTruncated", UNSET)
 
         pnl_total = d.pop("pnlTotal", UNSET)
 
@@ -248,6 +294,8 @@ class ResultMap:
             instrument=instrument,
             host_name=host_name,
             iops=iops,
+            notices=notices,
+            notices_truncated=notices_truncated,
             pnl_total=pnl_total,
             pnl_total_percent=pnl_total_percent,
             total_trades=total_trades,

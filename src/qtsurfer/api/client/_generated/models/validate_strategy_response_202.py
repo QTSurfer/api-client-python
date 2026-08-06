@@ -6,68 +6,56 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import UNSET, Unset
+from ..models.validate_strategy_response_202_validation import ValidateStrategyResponse202Validation
 
-T = TypeVar("T", bound="ExecuteBacktestBody")
+T = TypeVar("T", bound="ValidateStrategyResponse202")
 
 
 @_attrs_define
-class ExecuteBacktestBody:
+class ValidateStrategyResponse202:
     """
     Attributes:
-        prepare_job_id (str): Job ID returned by `POST /prepare` (must be in `Completed` state) Example:
-            13RBLGQlPnfDjO6wyKSX8i.
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
             always yields the same id, for every caller, whatever its formatting. See
             `POST /strategy` for exactly which rewrites preserve it and which do not.
              Example: 6bsh31ikwkuivhtgcoa6s4.
-        store_signals (bool | Unset): When true, the worker uploads emitted signals to object storage and the
-            response includes `signalsUrl` / `signalsId` fields. Defaults to false.
-             Default: False.
+        validation (ValidateStrategyResponse202Validation):
     """
 
-    prepare_job_id: str
     strategy_id: str
-    store_signals: bool | Unset = False
+    validation: ValidateStrategyResponse202Validation
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        prepare_job_id = self.prepare_job_id
-
         strategy_id = self.strategy_id
 
-        store_signals = self.store_signals
+        validation = self.validation.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "prepareJobId": prepare_job_id,
                 "strategyId": strategy_id,
+                "validation": validation,
             }
         )
-        if store_signals is not UNSET:
-            field_dict["storeSignals"] = store_signals
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        prepare_job_id = d.pop("prepareJobId")
-
         strategy_id = d.pop("strategyId")
 
-        store_signals = d.pop("storeSignals", UNSET)
+        validation = ValidateStrategyResponse202Validation(d.pop("validation"))
 
-        execute_backtest_body = cls(
-            prepare_job_id=prepare_job_id,
+        validate_strategy_response_202 = cls(
             strategy_id=strategy_id,
-            store_signals=store_signals,
+            validation=validation,
         )
 
-        execute_backtest_body.additional_properties = d
-        return execute_backtest_body
+        validate_strategy_response_202.additional_properties = d
+        return validate_strategy_response_202
 
     @property
     def additional_keys(self) -> list[str]:

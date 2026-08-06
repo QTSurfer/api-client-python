@@ -8,6 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.response_error import ResponseError
 from ...models.strategy_state import StrategyState
+from ...models.validate_strategy_response_202 import ValidateStrategyResponse202
 from ...types import Response
 
 
@@ -16,8 +17,8 @@ def _get_kwargs(
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
-        "method": "get",
-        "url": "/strategy/{strategy_id}".format(
+        "method": "post",
+        "url": "/strategy/{strategy_id}/validate".format(
             strategy_id=quote(str(strategy_id), safe=""),
         ),
     }
@@ -27,11 +28,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ResponseError | StrategyState | None:
+) -> ResponseError | StrategyState | ValidateStrategyResponse202 | None:
     if response.status_code == 200:
         response_200 = StrategyState.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 202:
+        response_202 = ValidateStrategyResponse202.from_dict(response.json())
+
+        return response_202
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -46,7 +52,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ResponseError | StrategyState]:
+) -> Response[ResponseError | StrategyState | ValidateStrategyResponse202]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -59,14 +65,19 @@ def sync_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[ResponseError | StrategyState]:
-    """Get a strategy by id, including its validation state
+) -> Response[ResponseError | StrategyState | ValidateStrategyResponse202]:
+    """Check that a registered strategy can actually run
 
-     Reports that the strategy is registered — implied by a `200` at all — and what validating it
-    found.
+     Instantiates the compiled class and drives it through a bounded synthetic series, so a wiring
+    fault surfaces here instead of at your first backtest. The verdict — pass or fail, plus any
+    engine notices — is recorded and served from `GET /strategy/{strategyId}`.
 
-    A `404` means one thing: no such registered strategy for this user. It is never a stale or
-    expired answer; registration and verdict are stored durably, not cached.
+    **Idempotent.** If a verdict already exists for the current compilation it comes straight
+    back with `200` and nothing is queued. Otherwise the check is queued and this returns `202`;
+    poll `GET /strategy/{strategyId}` until `validation` is `passed` or `failed`.
+
+    Recompiling supersedes a verdict, which makes this callable again — the old answer described
+    bytecode that is no longer what would run.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -80,7 +91,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ResponseError | StrategyState]
+        Response[ResponseError | StrategyState | ValidateStrategyResponse202]
     """
 
     kwargs = _get_kwargs(
@@ -98,14 +109,19 @@ def sync(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> ResponseError | StrategyState | None:
-    """Get a strategy by id, including its validation state
+) -> ResponseError | StrategyState | ValidateStrategyResponse202 | None:
+    """Check that a registered strategy can actually run
 
-     Reports that the strategy is registered — implied by a `200` at all — and what validating it
-    found.
+     Instantiates the compiled class and drives it through a bounded synthetic series, so a wiring
+    fault surfaces here instead of at your first backtest. The verdict — pass or fail, plus any
+    engine notices — is recorded and served from `GET /strategy/{strategyId}`.
 
-    A `404` means one thing: no such registered strategy for this user. It is never a stale or
-    expired answer; registration and verdict are stored durably, not cached.
+    **Idempotent.** If a verdict already exists for the current compilation it comes straight
+    back with `200` and nothing is queued. Otherwise the check is queued and this returns `202`;
+    poll `GET /strategy/{strategyId}` until `validation` is `passed` or `failed`.
+
+    Recompiling supersedes a verdict, which makes this callable again — the old answer described
+    bytecode that is no longer what would run.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -119,7 +135,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ResponseError | StrategyState
+        ResponseError | StrategyState | ValidateStrategyResponse202
     """
 
     return sync_detailed(
@@ -132,14 +148,19 @@ async def asyncio_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[ResponseError | StrategyState]:
-    """Get a strategy by id, including its validation state
+) -> Response[ResponseError | StrategyState | ValidateStrategyResponse202]:
+    """Check that a registered strategy can actually run
 
-     Reports that the strategy is registered — implied by a `200` at all — and what validating it
-    found.
+     Instantiates the compiled class and drives it through a bounded synthetic series, so a wiring
+    fault surfaces here instead of at your first backtest. The verdict — pass or fail, plus any
+    engine notices — is recorded and served from `GET /strategy/{strategyId}`.
 
-    A `404` means one thing: no such registered strategy for this user. It is never a stale or
-    expired answer; registration and verdict are stored durably, not cached.
+    **Idempotent.** If a verdict already exists for the current compilation it comes straight
+    back with `200` and nothing is queued. Otherwise the check is queued and this returns `202`;
+    poll `GET /strategy/{strategyId}` until `validation` is `passed` or `failed`.
+
+    Recompiling supersedes a verdict, which makes this callable again — the old answer described
+    bytecode that is no longer what would run.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -153,7 +174,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ResponseError | StrategyState]
+        Response[ResponseError | StrategyState | ValidateStrategyResponse202]
     """
 
     kwargs = _get_kwargs(
@@ -169,14 +190,19 @@ async def asyncio(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> ResponseError | StrategyState | None:
-    """Get a strategy by id, including its validation state
+) -> ResponseError | StrategyState | ValidateStrategyResponse202 | None:
+    """Check that a registered strategy can actually run
 
-     Reports that the strategy is registered — implied by a `200` at all — and what validating it
-    found.
+     Instantiates the compiled class and drives it through a bounded synthetic series, so a wiring
+    fault surfaces here instead of at your first backtest. The verdict — pass or fail, plus any
+    engine notices — is recorded and served from `GET /strategy/{strategyId}`.
 
-    A `404` means one thing: no such registered strategy for this user. It is never a stale or
-    expired answer; registration and verdict are stored durably, not cached.
+    **Idempotent.** If a verdict already exists for the current compilation it comes straight
+    back with `200` and nothing is queued. Otherwise the check is queued and this returns `202`;
+    poll `GET /strategy/{strategyId}` until `validation` is `passed` or `failed`.
+
+    Recompiling supersedes a verdict, which makes this callable again — the old answer described
+    bytecode that is no longer what would run.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -190,7 +216,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ResponseError | StrategyState
+        ResponseError | StrategyState | ValidateStrategyResponse202
     """
 
     return (

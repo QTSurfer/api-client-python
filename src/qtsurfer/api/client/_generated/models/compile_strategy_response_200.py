@@ -13,7 +13,10 @@ T = TypeVar("T", bound="CompileStrategyResponse200")
 class CompileStrategyResponse200:
     """
     Attributes:
-        strategy_id (str): Unique identifier for a compiled strategy Example: 6bsh31ikwkuivhtgcoa6s4.
+        strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
+            always yields the same id, for every caller, whatever its formatting. See
+            `POST /strategy` for exactly which rewrites preserve it and which do not.
+             Example: 6bsh31ikwkuivhtgcoa6s4.
     """
 
     strategy_id: str

@@ -36,3 +36,4 @@ coverage.xml
 
 # OpenAPI spec is fetched by scripts/regenerate.sh, not committed
 openapi.yaml
+docs/

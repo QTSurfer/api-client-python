@@ -50,7 +50,7 @@ def test_known_endpoints_are_present() -> None:
         list_exchanges,
         list_instruments,
     )
-    from qtsurfer.api.client.api.strategy import get_strategy
+    from qtsurfer.api.client.api.strategy import get_strategy, validate_strategy
 
     endpoints = [
         authenticate,
@@ -59,6 +59,7 @@ def test_known_endpoints_are_present() -> None:
         download_tickers,
         download_klines,
         get_strategy,
+        validate_strategy,
         prepare_backtest,
         get_prepare_status,
         execute_backtest,

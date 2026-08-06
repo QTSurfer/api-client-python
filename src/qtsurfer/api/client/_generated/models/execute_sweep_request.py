@@ -20,7 +20,10 @@ T = TypeVar("T", bound="ExecuteSweepRequest")
 class ExecuteSweepRequest:
     """
     Attributes:
-        strategy_id (str): Unique identifier for a compiled strategy Example: 6bsh31ikwkuivhtgcoa6s4.
+        strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
+            always yields the same id, for every caller, whatever its formatting. See
+            `POST /strategy` for exactly which rewrites preserve it and which do not.
+             Example: 6bsh31ikwkuivhtgcoa6s4.
         sweep (SweepSpecRequest):  Example: {'sampler': 'lhs', 'seed': 487221, 'samples': 100, 'objective': 'sharpe',
             'params': {'rsiPeriod': {'from': 7, 'to': 28, 'step': 1}, 'useTrendFilter': {'values': [True, False]}}}.
         base_config (SweepBaseConfig | Unset):

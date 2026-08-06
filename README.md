@@ -106,6 +106,7 @@ Each generated endpoint module exposes four entrypoints:
 | `api.exchange` | `download_tickers` | `GET /exchange/{exchangeId}/tickers/{base}/{quote}` |
 | `api.exchange` | `download_klines` | `GET /exchange/{exchangeId}/klines/{base}/{quote}` |
 | `api.strategy` | `get_strategy` | `GET /strategy/{strategyId}` |
+| `api.strategy` | `validate_strategy` | `POST /strategy/{strategyId}/validate` |
 | `api.backtesting` | `prepare_backtest` | `POST /backtesting/prepare` |
 | `api.backtesting` | `get_prepare_status` | `GET /backtesting/prepare/{jobId}` |
 | `api.backtesting` | `execute_backtest` | `POST /backtesting/execute` |
@@ -114,9 +115,9 @@ Each generated endpoint module exposes four entrypoints:
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
-All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `BacktestJobResult`, `ResultMap`, `ResponseError`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling.
+All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `BacktestJobResult`, `ResultMap`, `ResponseError`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
 
-> **`POST /strategy` (`compileStrategy`)** is currently omitted by the generator because the spec declares its request body as `text/plain` and `openapi-python-client` only emits JSON / form / multipart bodies. Call it directly via the underlying `httpx` client (`client.get_httpx_client().post("/strategy", content=src, headers={"Content-Type": "text/plain"})`) until the spec is restructured.
+> **`POST /strategy` (`compileStrategy`)** is currently omitted by the generator because the spec declares its request body as `text/plain` and `openapi-python-client` only emits JSON / form / multipart bodies. Call it directly via the underlying `httpx` client (`client.get_httpx_client().post("/strategy", content=src, headers={"Content-Type": "text/plain"})`) until the spec is restructured. `get_strategy` and `validate_strategy` have no such restriction and generate normally.
 
 ### Binary downloads (`/exchange/{ex}/tickers|klines/{base}/{quote}`)
 
