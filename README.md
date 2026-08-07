@@ -4,6 +4,7 @@
   <a href="https://github.com/QTSurfer/api-client-python/actions/workflows/ci.yml"><img src="https://github.com/QTSurfer/api-client-python/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://pypi.org/project/qtsurfer-api-client/"><img src="https://img.shields.io/pypi/v/qtsurfer-api-client.svg" alt="PyPI"></a>
   <a href="https://pypi.org/project/qtsurfer-api-client/"><img src="https://img.shields.io/pypi/pyversions/qtsurfer-api-client.svg" alt="Python versions"></a>
+  <a href="https://qtsurfer.github.io/api-client-python/"><img src="https://img.shields.io/badge/docs-pdoc-blue" alt="pdoc"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
 </p>
 
