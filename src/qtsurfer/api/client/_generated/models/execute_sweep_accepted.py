@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.walk_forward_accepted import WalkForwardAccepted
+
 
 T = TypeVar("T", bound="ExecuteSweepAccepted")
 
@@ -19,6 +25,8 @@ class ExecuteSweepAccepted:
         shards (int):
         seed (int): Effective seed used to expand the sweep.
         queued (bool): False when an identical sweep already exists and was not enqueued again.
+        walk_forward (WalkForwardAccepted | Unset): Echo of the accepted walk-forward configuration, present only when
+            the submit carried one. `inSamplePct` is the resolved value, so a request that omitted it can see what it got.
     """
 
     sweep_id: str
@@ -27,6 +35,7 @@ class ExecuteSweepAccepted:
     shards: int
     seed: int
     queued: bool
+    walk_forward: WalkForwardAccepted | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -42,6 +51,10 @@ class ExecuteSweepAccepted:
 
         queued = self.queued
 
+        walk_forward: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.walk_forward, Unset):
+            walk_forward = self.walk_forward.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -54,11 +67,15 @@ class ExecuteSweepAccepted:
                 "queued": queued,
             }
         )
+        if walk_forward is not UNSET:
+            field_dict["walkForward"] = walk_forward
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.walk_forward_accepted import WalkForwardAccepted
+
         d = dict(src_dict)
         sweep_id = d.pop("sweepId")
 
@@ -72,6 +89,13 @@ class ExecuteSweepAccepted:
 
         queued = d.pop("queued")
 
+        _walk_forward = d.pop("walkForward", UNSET)
+        walk_forward: WalkForwardAccepted | Unset
+        if isinstance(_walk_forward, Unset):
+            walk_forward = UNSET
+        else:
+            walk_forward = WalkForwardAccepted.from_dict(_walk_forward)
+
         execute_sweep_accepted = cls(
             sweep_id=sweep_id,
             request_id=request_id,
@@ -79,6 +103,7 @@ class ExecuteSweepAccepted:
             shards=shards,
             seed=seed,
             queued=queued,
+            walk_forward=walk_forward,
         )
 
         execute_sweep_accepted.additional_properties = d

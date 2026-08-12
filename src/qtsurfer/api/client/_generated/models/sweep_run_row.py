@@ -33,6 +33,16 @@ class SweepRunRow:
         aborted (bool):
         runtime_ms (int):
         rank (int | Unset): Present only in the `ranked` view.
+        plateau_score (float | Unset): The objective of the worst run in this point's immediate neighbourhood — how well
+            the region around it holds up, not how well it scored itself. Present only in the `ranked` view when plateau
+            ranking applied. Always read together with `neighbourCount`.
+        neighbour_count (int | Unset): How many neighbouring parameter points backed the `plateauScore`. Zero means the
+            point had no neighbours in the grid, so its score is unevidenced rather than confirmed — the value alone cannot
+            be distinguished from a genuinely robust one.
+        deflated_sharpe (float | Unset): Probability that this run's Sharpe reflects real edge rather than the best draw
+            from however many parameter vectors were tried. Above ~0.95 the result survives the multiple-testing correction;
+            near 0.5 or below it is indistinguishable from the best of a pile of coin flips. Absent on aborted runs, and on
+            sweeps with too few trials to establish any dispersion to deflate against.
     """
 
     run_ix: int
@@ -49,6 +59,9 @@ class SweepRunRow:
     aborted: bool
     runtime_ms: int
     rank: int | Unset = UNSET
+    plateau_score: float | Unset = UNSET
+    neighbour_count: int | Unset = UNSET
+    deflated_sharpe: float | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -80,6 +93,12 @@ class SweepRunRow:
 
         rank = self.rank
 
+        plateau_score = self.plateau_score
+
+        neighbour_count = self.neighbour_count
+
+        deflated_sharpe = self.deflated_sharpe
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -101,6 +120,12 @@ class SweepRunRow:
         )
         if rank is not UNSET:
             field_dict["rank"] = rank
+        if plateau_score is not UNSET:
+            field_dict["plateauScore"] = plateau_score
+        if neighbour_count is not UNSET:
+            field_dict["neighbourCount"] = neighbour_count
+        if deflated_sharpe is not UNSET:
+            field_dict["deflatedSharpe"] = deflated_sharpe
 
         return field_dict
 
@@ -137,6 +162,12 @@ class SweepRunRow:
 
         rank = d.pop("rank", UNSET)
 
+        plateau_score = d.pop("plateauScore", UNSET)
+
+        neighbour_count = d.pop("neighbourCount", UNSET)
+
+        deflated_sharpe = d.pop("deflatedSharpe", UNSET)
+
         sweep_run_row = cls(
             run_ix=run_ix,
             params=params,
@@ -152,6 +183,9 @@ class SweepRunRow:
             aborted=aborted,
             runtime_ms=runtime_ms,
             rank=rank,
+            plateau_score=plateau_score,
+            neighbour_count=neighbour_count,
+            deflated_sharpe=deflated_sharpe,
         )
 
         sweep_run_row.additional_properties = d

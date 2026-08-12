@@ -6,6 +6,66 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.106.0] — 2026-08-12
+
+This client's version tracks the OpenAPI spec version it was generated against. The previous
+release tracked spec `0.102.0`; this entry covers the combined delta through `0.106.0` — sweep
+walk-forward validation — landing all at once. No intermediate spec version was separately
+published for this client.
+
+### Added ✨
+
+- `get_sweep_sensitivity` — `GET
+  /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/sensitivity` — aggregates a
+  sweep's stored rows into per-axis **marginals** (`SweepMarginal`, best/mean/worst per value,
+  collapsing every other axis) and per-axis-pair **heatmaps** (`SweepHeatmap`), answering which
+  parameters actually moved the objective rather than just which point won. Returns
+  `SweepSensitivity` (200) or `ResponseError` (404). Works on a sweep still in flight — the
+  aggregates then describe only the runs finished so far. Generated under
+  `qtsurfer.api.client._generated.api.backtesting`, alongside its sibling sweep endpoints. Like
+  every sweep function, it is not wrapped by the hand-written `qtsurfer.api.client.api` shim (only
+  `auth`/`backtesting`/`exchange`/`strategy` are re-exported there, and none of the sweep functions
+  are among them); call it directly as
+  `qtsurfer.api.client._generated.api.backtesting.get_sweep_sensitivity`. Its `SweepSensitivity` /
+  `SweepMarginal` / `SweepHeatmap` model classes *are* available from `qtsurfer.api.client.models`,
+  same as every other model, via that package's wildcard re-export.
+- `executeSweep` accepts an optional `walkForward: WalkForwardRequest` (`folds`, `inSamplePct`) to
+  run the sweep as walk-forward validation instead of a flat grid search. `ExecuteSweepAccepted`
+  gains a matching optional `walkForward: WalkForwardAccepted` (`folds`, `inSamplePct`,
+  `totalRuns`), present as soon as the sweep is accepted — safe to branch on before polling for
+  results.
+- `getSweepResult`'s `ExecuteSweepResult` gains an optional `walkForward: WalkForwardResult`
+  (`folds`, `inSamplePct`, `completedFolds`, `paramDrift`, `results: WalkForwardFold[]`) once the
+  sweep was submitted with `walkForward`. Its leaderboard is one row per completed fold — that
+  fold's winner scored out-of-sample, with `runIx` carrying the fold index rather than a grid
+  position. `ranking` is always `raw` and no plateau/DSR/PBO figure is attached to a walk-forward
+  result, since layering a certification computed over the fold count on top of an already
+  out-of-sample score would overstate what was measured.
+- `ExecuteSweepResult` gains `ranking` (which ordering was actually applied — not always the one
+  requested; see "Changed" below), and optional `pbo` / `pboSplits` (probability of backtest
+  overfitting for the sweep as a whole, by combinatorially symmetric cross-validation, and the
+  number of train/test splits it was averaged over).
+- `SweepRunRow` gains optional `plateauScore`, `neighbourCount`, and `deflatedSharpe`, populated
+  when plateau ranking applied to that row.
+
+### Changed 🔄
+
+- `getSweepResult` gains an optional `ranking` query param (`plateau` | `raw`), generated as
+  `GetSweepResultRanking` and **defaulting client-side to `PLATEAU`** — calling `get_sweep_result`
+  without passing `ranking=` now requests the plateau-ranked view, not the sweep's previous implicit
+  raw-objective order. A plateau score is the objective of the worst run in a parameter point's
+  neighbourhood, so a point ranks well only if the region around it also does; the raw top score is
+  often a spike that does not survive nearby parameters. Pass `ranking=GetSweepResultRanking.RAW`
+  for the old unadjusted-objective order. Sweeps submitted before plateau ranking existed have no
+  stored parameter grid to rebuild a neighbourhood from and are always ranked raw regardless of the
+  request — the response's own `ranking` field says which ordering was actually used, and is the
+  only way to know for certain.
+- `SweepProgress` gains three new **required** fields — `failedShards` (units that failed and will
+  not be retried), `retrying` (units queued for another attempt after a transient failure — not
+  counted as failed), `notStarted` (units with nothing reported yet) — plus optional
+  `stalledSeconds` and `etaSeconds`. Any code constructing a `SweepProgress` by hand (rather than via
+  `from_dict`) needs to supply the three new required arguments.
+
 ## [0.102.0] — 2026-08-06
 
 ### Changed 🔄

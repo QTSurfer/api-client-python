@@ -87,11 +87,22 @@ def sync_detailed(
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
 ) -> Response[ExecuteSweepAccepted | ResponseError]:
-    """Execute a parameter sweep over prepared data
+    r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
     The backend expands and executes the matrix internally; clients poll the returned
     `sweepId` for incremental results.
+
+    Supplying `walkForward` runs the sweep in a different mode entirely. Instead of scoring
+    every parameter vector once over the whole range, the data is split into F sequential
+    folds; each fold optimizes the full grid on its own window and then scores only its winner
+    on the window immediately after — data that winner was not chosen on. It answers a harder
+    question than a leaderboard: not \"which parameters won\", but \"does re-optimizing this
+    periodically actually work\". Omit the block and nothing changes, including the response.
+
+    The cost is the reason it is opt-in rather than always on: F folds × N vectors, so a
+    4-fold run over a 500-point grid is 2004 backtests where the plain sweep is 500. The
+    request is rejected when `folds × totalRuns` exceeds the server's sweep budget.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -130,11 +141,22 @@ def sync(
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
 ) -> ExecuteSweepAccepted | ResponseError | None:
-    """Execute a parameter sweep over prepared data
+    r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
     The backend expands and executes the matrix internally; clients poll the returned
     `sweepId` for incremental results.
+
+    Supplying `walkForward` runs the sweep in a different mode entirely. Instead of scoring
+    every parameter vector once over the whole range, the data is split into F sequential
+    folds; each fold optimizes the full grid on its own window and then scores only its winner
+    on the window immediately after — data that winner was not chosen on. It answers a harder
+    question than a leaderboard: not \"which parameters won\", but \"does re-optimizing this
+    periodically actually work\". Omit the block and nothing changes, including the response.
+
+    The cost is the reason it is opt-in rather than always on: F folds × N vectors, so a
+    4-fold run over a 500-point grid is 2004 backtests where the plain sweep is 500. The
+    request is rejected when `folds × totalRuns` exceeds the server's sweep budget.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -168,11 +190,22 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
 ) -> Response[ExecuteSweepAccepted | ResponseError]:
-    """Execute a parameter sweep over prepared data
+    r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
     The backend expands and executes the matrix internally; clients poll the returned
     `sweepId` for incremental results.
+
+    Supplying `walkForward` runs the sweep in a different mode entirely. Instead of scoring
+    every parameter vector once over the whole range, the data is split into F sequential
+    folds; each fold optimizes the full grid on its own window and then scores only its winner
+    on the window immediately after — data that winner was not chosen on. It answers a harder
+    question than a leaderboard: not \"which parameters won\", but \"does re-optimizing this
+    periodically actually work\". Omit the block and nothing changes, including the response.
+
+    The cost is the reason it is opt-in rather than always on: F folds × N vectors, so a
+    4-fold run over a 500-point grid is 2004 backtests where the plain sweep is 500. The
+    request is rejected when `folds × totalRuns` exceeds the server's sweep budget.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -209,11 +242,22 @@ async def asyncio(
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
 ) -> ExecuteSweepAccepted | ResponseError | None:
-    """Execute a parameter sweep over prepared data
+    r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
     The backend expands and executes the matrix internally; clients poll the returned
     `sweepId` for incremental results.
+
+    Supplying `walkForward` runs the sweep in a different mode entirely. Instead of scoring
+    every parameter vector once over the whole range, the data is split into F sequential
+    folds; each fold optimizes the full grid on its own window and then scores only its winner
+    on the window immediately after — data that winner was not chosen on. It answers a harder
+    question than a leaderboard: not \"which parameters won\", but \"does re-optimizing this
+    periodically actually work\". Omit the block and nothing changes, including the response.
+
+    The cost is the reason it is opt-in rather than always on: F folds × N vectors, so a
+    4-fold run over a 500-point grid is 2004 backtests where the plain sweep is 500. The
+    request is rejected when `folds × totalRuns` exceeds the server's sweep budget.
 
     Args:
         exchange_id (str):  Example: binance.

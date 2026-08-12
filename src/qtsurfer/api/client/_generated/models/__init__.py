@@ -24,10 +24,13 @@ from .execute_sweep_request import ExecuteSweepRequest
 from .execute_sweep_result import ExecuteSweepResult
 from .execute_sweep_result_objective import ExecuteSweepResultObjective
 from .execute_sweep_result_order import ExecuteSweepResultOrder
+from .execute_sweep_result_ranking import ExecuteSweepResultRanking
 from .execute_sweep_result_status import ExecuteSweepResultStatus
 from .get_backtest_result_response_202 import GetBacktestResultResponse202
 from .get_sweep_result_objective import GetSweepResultObjective
 from .get_sweep_result_order import GetSweepResultOrder
+from .get_sweep_result_ranking import GetSweepResultRanking
+from .get_sweep_sensitivity_objective import GetSweepSensitivityObjective
 from .hal_link import HalLink
 from .instrument_coverage import InstrumentCoverage
 from .instrument_detail import InstrumentDetail
@@ -55,15 +58,27 @@ from .sweep_axis_type_0 import SweepAxisType0
 from .sweep_axis_type_1 import SweepAxisType1
 from .sweep_base_config import SweepBaseConfig
 from .sweep_base_config_fee_leg import SweepBaseConfigFeeLeg
+from .sweep_heatmap import SweepHeatmap
+from .sweep_heatmap_cell import SweepHeatmapCell
+from .sweep_marginal import SweepMarginal
+from .sweep_marginal_point import SweepMarginalPoint
 from .sweep_progress import SweepProgress
 from .sweep_run_row import SweepRunRow
 from .sweep_run_row_params import SweepRunRowParams
+from .sweep_sensitivity import SweepSensitivity
+from .sweep_sensitivity_objective import SweepSensitivityObjective
+from .sweep_sensitivity_status import SweepSensitivityStatus
 from .sweep_spec_request import SweepSpecRequest
 from .sweep_spec_request_objective import SweepSpecRequestObjective
 from .sweep_spec_request_params import SweepSpecRequestParams
 from .sweep_spec_request_sampler import SweepSpecRequestSampler
 from .validate_strategy_response_202 import ValidateStrategyResponse202
 from .validate_strategy_response_202_validation import ValidateStrategyResponse202Validation
+from .walk_forward_accepted import WalkForwardAccepted
+from .walk_forward_fold import WalkForwardFold
+from .walk_forward_fold_params import WalkForwardFoldParams
+from .walk_forward_request import WalkForwardRequest
+from .walk_forward_result import WalkForwardResult
 
 __all__ = (
     "AcceptedJob",
@@ -90,10 +105,13 @@ __all__ = (
     "ExecuteSweepResult",
     "ExecuteSweepResultObjective",
     "ExecuteSweepResultOrder",
+    "ExecuteSweepResultRanking",
     "ExecuteSweepResultStatus",
     "GetBacktestResultResponse202",
     "GetSweepResultObjective",
     "GetSweepResultOrder",
+    "GetSweepResultRanking",
+    "GetSweepSensitivityObjective",
     "HalLink",
     "InstrumentCoverage",
     "InstrumentDetail",
@@ -121,13 +139,25 @@ __all__ = (
     "SweepAxisType1",
     "SweepBaseConfig",
     "SweepBaseConfigFeeLeg",
+    "SweepHeatmap",
+    "SweepHeatmapCell",
+    "SweepMarginal",
+    "SweepMarginalPoint",
     "SweepProgress",
     "SweepRunRow",
     "SweepRunRowParams",
+    "SweepSensitivity",
+    "SweepSensitivityObjective",
+    "SweepSensitivityStatus",
     "SweepSpecRequest",
     "SweepSpecRequestObjective",
     "SweepSpecRequestParams",
     "SweepSpecRequestSampler",
     "ValidateStrategyResponse202",
     "ValidateStrategyResponse202Validation",
+    "WalkForwardAccepted",
+    "WalkForwardFold",
+    "WalkForwardFoldParams",
+    "WalkForwardRequest",
+    "WalkForwardResult",
 )

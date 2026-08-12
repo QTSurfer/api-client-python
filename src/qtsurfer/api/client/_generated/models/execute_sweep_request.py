@@ -11,6 +11,7 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.sweep_base_config import SweepBaseConfig
     from ..models.sweep_spec_request import SweepSpecRequest
+    from ..models.walk_forward_request import WalkForwardRequest
 
 
 T = TypeVar("T", bound="ExecuteSweepRequest")
@@ -30,6 +31,9 @@ class ExecuteSweepRequest:
         store_signals (bool | Unset): Store signals for every trial. Keep false for normal sweeps. Default: False.
         shards (int | Unset): Requested horizontal shard count; 0 or omitted selects automatically. Default: 0.
         min_trade_floor (int | Unset): Trials below this trade count are flagged but remain in the results. Default: 30.
+        walk_forward (WalkForwardRequest | Unset): Opt in to walk-forward validation. Present, the sweep runs as F
+            sequential folds and the result gains a `walkForward` section; absent, nothing about the sweep changes. Two
+            requests that differ only in this block are two different sweeps and do not deduplicate against each other.
     """
 
     strategy_id: str
@@ -38,6 +42,7 @@ class ExecuteSweepRequest:
     store_signals: bool | Unset = False
     shards: int | Unset = 0
     min_trade_floor: int | Unset = 30
+    walk_forward: WalkForwardRequest | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -55,6 +60,10 @@ class ExecuteSweepRequest:
 
         min_trade_floor = self.min_trade_floor
 
+        walk_forward: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.walk_forward, Unset):
+            walk_forward = self.walk_forward.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -71,6 +80,8 @@ class ExecuteSweepRequest:
             field_dict["shards"] = shards
         if min_trade_floor is not UNSET:
             field_dict["minTradeFloor"] = min_trade_floor
+        if walk_forward is not UNSET:
+            field_dict["walkForward"] = walk_forward
 
         return field_dict
 
@@ -78,6 +89,7 @@ class ExecuteSweepRequest:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.sweep_base_config import SweepBaseConfig
         from ..models.sweep_spec_request import SweepSpecRequest
+        from ..models.walk_forward_request import WalkForwardRequest
 
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
@@ -97,6 +109,13 @@ class ExecuteSweepRequest:
 
         min_trade_floor = d.pop("minTradeFloor", UNSET)
 
+        _walk_forward = d.pop("walkForward", UNSET)
+        walk_forward: WalkForwardRequest | Unset
+        if isinstance(_walk_forward, Unset):
+            walk_forward = UNSET
+        else:
+            walk_forward = WalkForwardRequest.from_dict(_walk_forward)
+
         execute_sweep_request = cls(
             strategy_id=strategy_id,
             sweep=sweep,
@@ -104,6 +123,7 @@ class ExecuteSweepRequest:
             store_signals=store_signals,
             shards=shards,
             min_trade_floor=min_trade_floor,
+            walk_forward=walk_forward,
         )
 
         execute_sweep_request.additional_properties = d

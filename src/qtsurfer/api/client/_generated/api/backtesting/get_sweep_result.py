@@ -10,6 +10,7 @@ from ...models.data_source_type import DataSourceType
 from ...models.execute_sweep_result import ExecuteSweepResult
 from ...models.get_sweep_result_objective import GetSweepResultObjective
 from ...models.get_sweep_result_order import GetSweepResultOrder
+from ...models.get_sweep_result_ranking import GetSweepResultRanking
 from ...models.response_error import ResponseError
 from ...types import UNSET, Response, Unset
 
@@ -22,6 +23,7 @@ def _get_kwargs(
     *,
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
+    ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -37,6 +39,12 @@ def _get_kwargs(
         json_order = order.value
 
     params["order"] = json_order
+
+    json_ranking: str | Unset = UNSET
+    if not isinstance(ranking, Unset):
+        json_ranking = ranking.value
+
+    params["ranking"] = json_ranking
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -93,12 +101,37 @@ def sync_detailed(
     client: AuthenticatedClient,
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
+    ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
 ) -> Response[ExecuteSweepResult | ResponseError]:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
     display leaderboard. `order=natural` returns every available row, untruncated, ordered by
     deterministic `runIx`; use that view when materialising durable trial rows.
+
+    The `ranked` view is ordered by **plateau score** by default, not by the raw objective. A
+    plateau score is the objective of the worst run in a parameter point's immediate
+    neighbourhood, so a point scores well only if the region around it also does — the highest
+    raw score is frequently a spike that does not survive the parameters moving slightly. Pass
+    `ranking=raw` for the unadjusted objective order.
+
+    Rows in the `ranked` view carry `plateauScore` and `neighbourCount` when plateau ranking
+    applied. Read them together: `neighbourCount: 0` means the point had no neighbours to
+    compare against, so its plateau score is unevidenced rather than confirmed. Sweeps
+    submitted before plateau ranking existed have no stored parameter grid to rebuild a
+    neighbourhood from and are always ranked raw; the response's `ranking` field says which
+    ordering was actually used.
+
+    A sweep submitted with `walkForward` answers in a different shape, and the `walkForward`
+    field on the response is what tells the two apart — it appears as soon as the sweep is
+    accepted, before any fold has finished, so it is safe to branch on while polling. There
+    the leaderboard is one row per completed fold: that fold's winner as it scored
+    **out-of-sample**, with `runIx` carrying the fold index rather than a grid position. The
+    in-sample runs behind those winners are not retained — they are an optimization's working
+    set, and only the winner survives its fold. `ranking` is always `raw` and no plateau, DSR
+    or PBO figure is reported: the out-of-sample scores are already the honest number, and
+    layering a certification computed over F observations on top of them would overstate what
+    was measured.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -108,6 +141,7 @@ def sync_detailed(
         sweep_id (str):
         objective (GetSweepResultObjective | Unset):
         order (GetSweepResultOrder | Unset):  Default: GetSweepResultOrder.RANKED.
+        ranking (GetSweepResultRanking | Unset):  Default: GetSweepResultRanking.PLATEAU.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -124,6 +158,7 @@ def sync_detailed(
         sweep_id=sweep_id,
         objective=objective,
         order=order,
+        ranking=ranking,
     )
 
     response = client.get_httpx_client().request(
@@ -142,12 +177,37 @@ def sync(
     client: AuthenticatedClient,
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
+    ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
 ) -> ExecuteSweepResult | ResponseError | None:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
     display leaderboard. `order=natural` returns every available row, untruncated, ordered by
     deterministic `runIx`; use that view when materialising durable trial rows.
+
+    The `ranked` view is ordered by **plateau score** by default, not by the raw objective. A
+    plateau score is the objective of the worst run in a parameter point's immediate
+    neighbourhood, so a point scores well only if the region around it also does — the highest
+    raw score is frequently a spike that does not survive the parameters moving slightly. Pass
+    `ranking=raw` for the unadjusted objective order.
+
+    Rows in the `ranked` view carry `plateauScore` and `neighbourCount` when plateau ranking
+    applied. Read them together: `neighbourCount: 0` means the point had no neighbours to
+    compare against, so its plateau score is unevidenced rather than confirmed. Sweeps
+    submitted before plateau ranking existed have no stored parameter grid to rebuild a
+    neighbourhood from and are always ranked raw; the response's `ranking` field says which
+    ordering was actually used.
+
+    A sweep submitted with `walkForward` answers in a different shape, and the `walkForward`
+    field on the response is what tells the two apart — it appears as soon as the sweep is
+    accepted, before any fold has finished, so it is safe to branch on while polling. There
+    the leaderboard is one row per completed fold: that fold's winner as it scored
+    **out-of-sample**, with `runIx` carrying the fold index rather than a grid position. The
+    in-sample runs behind those winners are not retained — they are an optimization's working
+    set, and only the winner survives its fold. `ranking` is always `raw` and no plateau, DSR
+    or PBO figure is reported: the out-of-sample scores are already the honest number, and
+    layering a certification computed over F observations on top of them would overstate what
+    was measured.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -157,6 +217,7 @@ def sync(
         sweep_id (str):
         objective (GetSweepResultObjective | Unset):
         order (GetSweepResultOrder | Unset):  Default: GetSweepResultOrder.RANKED.
+        ranking (GetSweepResultRanking | Unset):  Default: GetSweepResultRanking.PLATEAU.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -174,6 +235,7 @@ def sync(
         client=client,
         objective=objective,
         order=order,
+        ranking=ranking,
     ).parsed
 
 
@@ -186,12 +248,37 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
+    ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
 ) -> Response[ExecuteSweepResult | ResponseError]:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
     display leaderboard. `order=natural` returns every available row, untruncated, ordered by
     deterministic `runIx`; use that view when materialising durable trial rows.
+
+    The `ranked` view is ordered by **plateau score** by default, not by the raw objective. A
+    plateau score is the objective of the worst run in a parameter point's immediate
+    neighbourhood, so a point scores well only if the region around it also does — the highest
+    raw score is frequently a spike that does not survive the parameters moving slightly. Pass
+    `ranking=raw` for the unadjusted objective order.
+
+    Rows in the `ranked` view carry `plateauScore` and `neighbourCount` when plateau ranking
+    applied. Read them together: `neighbourCount: 0` means the point had no neighbours to
+    compare against, so its plateau score is unevidenced rather than confirmed. Sweeps
+    submitted before plateau ranking existed have no stored parameter grid to rebuild a
+    neighbourhood from and are always ranked raw; the response's `ranking` field says which
+    ordering was actually used.
+
+    A sweep submitted with `walkForward` answers in a different shape, and the `walkForward`
+    field on the response is what tells the two apart — it appears as soon as the sweep is
+    accepted, before any fold has finished, so it is safe to branch on while polling. There
+    the leaderboard is one row per completed fold: that fold's winner as it scored
+    **out-of-sample**, with `runIx` carrying the fold index rather than a grid position. The
+    in-sample runs behind those winners are not retained — they are an optimization's working
+    set, and only the winner survives its fold. `ranking` is always `raw` and no plateau, DSR
+    or PBO figure is reported: the out-of-sample scores are already the honest number, and
+    layering a certification computed over F observations on top of them would overstate what
+    was measured.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -201,6 +288,7 @@ async def asyncio_detailed(
         sweep_id (str):
         objective (GetSweepResultObjective | Unset):
         order (GetSweepResultOrder | Unset):  Default: GetSweepResultOrder.RANKED.
+        ranking (GetSweepResultRanking | Unset):  Default: GetSweepResultRanking.PLATEAU.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -217,6 +305,7 @@ async def asyncio_detailed(
         sweep_id=sweep_id,
         objective=objective,
         order=order,
+        ranking=ranking,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -233,12 +322,37 @@ async def asyncio(
     client: AuthenticatedClient,
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
+    ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
 ) -> ExecuteSweepResult | ResponseError | None:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
     display leaderboard. `order=natural` returns every available row, untruncated, ordered by
     deterministic `runIx`; use that view when materialising durable trial rows.
+
+    The `ranked` view is ordered by **plateau score** by default, not by the raw objective. A
+    plateau score is the objective of the worst run in a parameter point's immediate
+    neighbourhood, so a point scores well only if the region around it also does — the highest
+    raw score is frequently a spike that does not survive the parameters moving slightly. Pass
+    `ranking=raw` for the unadjusted objective order.
+
+    Rows in the `ranked` view carry `plateauScore` and `neighbourCount` when plateau ranking
+    applied. Read them together: `neighbourCount: 0` means the point had no neighbours to
+    compare against, so its plateau score is unevidenced rather than confirmed. Sweeps
+    submitted before plateau ranking existed have no stored parameter grid to rebuild a
+    neighbourhood from and are always ranked raw; the response's `ranking` field says which
+    ordering was actually used.
+
+    A sweep submitted with `walkForward` answers in a different shape, and the `walkForward`
+    field on the response is what tells the two apart — it appears as soon as the sweep is
+    accepted, before any fold has finished, so it is safe to branch on while polling. There
+    the leaderboard is one row per completed fold: that fold's winner as it scored
+    **out-of-sample**, with `runIx` carrying the fold index rather than a grid position. The
+    in-sample runs behind those winners are not retained — they are an optimization's working
+    set, and only the winner survives its fold. `ranking` is always `raw` and no plateau, DSR
+    or PBO figure is reported: the out-of-sample scores are already the honest number, and
+    layering a certification computed over F observations on top of them would overstate what
+    was measured.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -248,6 +362,7 @@ async def asyncio(
         sweep_id (str):
         objective (GetSweepResultObjective | Unset):
         order (GetSweepResultOrder | Unset):  Default: GetSweepResultOrder.RANKED.
+        ranking (GetSweepResultRanking | Unset):  Default: GetSweepResultRanking.PLATEAU.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -266,5 +381,6 @@ async def asyncio(
             client=client,
             objective=objective,
             order=order,
+            ranking=ranking,
         )
     ).parsed
