@@ -5,6 +5,7 @@ from qtsurfer.api.client._generated.api.exchange import (
     download_tickers,
     list_exchanges,
     list_instruments,
+    list_segment_instruments,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "download_tickers",
     "list_exchanges",
     "list_instruments",
+    "list_segment_instruments",
 ]

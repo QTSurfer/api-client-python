@@ -72,8 +72,6 @@ from .sweep_spec_request import SweepSpecRequest
 from .sweep_spec_request_objective import SweepSpecRequestObjective
 from .sweep_spec_request_params import SweepSpecRequestParams
 from .sweep_spec_request_sampler import SweepSpecRequestSampler
-from .validate_strategy_response_202 import ValidateStrategyResponse202
-from .validate_strategy_response_202_validation import ValidateStrategyResponse202Validation
 from .walk_forward_accepted import WalkForwardAccepted
 from .walk_forward_fold import WalkForwardFold
 from .walk_forward_fold_params import WalkForwardFoldParams
@@ -153,8 +151,6 @@ __all__ = (
     "SweepSpecRequestObjective",
     "SweepSpecRequestParams",
     "SweepSpecRequestSampler",
-    "ValidateStrategyResponse202",
-    "ValidateStrategyResponse202Validation",
     "WalkForwardAccepted",
     "WalkForwardFold",
     "WalkForwardFoldParams",

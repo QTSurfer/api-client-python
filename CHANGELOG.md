@@ -6,6 +6,64 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.107.0] — 2026-08-12
+
+Regenerated against OpenAPI spec `0.107.0`. This client's version tracks the spec version it was
+generated against. Both changes are additive at the wire level — no request shape changes, and no
+endpoint was added or removed.
+
+### Added ✨
+
+- `ExecuteSweepResult` gains an optional `fail_reason` (`failReason` on the wire) — the cause
+  reported by the **first** shard to fail. The backend already emitted it and the client dropped it
+  silently, because the field was never declared; it now survives into the model. This is what turns
+  a sweep that came back `status=ExecuteSweepResultStatus.PARTIAL` with `progress.done` at 0 into an
+  answer instead of a shrug: the usual reason nothing finished is that the strategy could not be
+  loaded at all, and that sentence was previously thrown away. First failure wins and later ones are
+  not recorded, so on a sweep where several shards failed for different reasons this names one of
+  them rather than all — read it alongside `progress.failed_shards`, not as a count. `UNSET` when no
+  shard reported a cause, the normal case for a healthy sweep. Reaches callers through
+  `get_sweep_result`, which returns `ExecuteSweepResult`.
+
+### Changed 🔄
+
+- `validate_strategy`'s `202` now deserializes into `StrategyState`, the same type as its `200`. The
+  spec previously declared that response as an anonymous inline schema, from which the generator
+  minted a `ValidateStrategyResponse202` model of its own; that model and its
+  `ValidateStrategyResponse202Validation` enum are gone, and the union returned by all four entry
+  points narrows from `ResponseError | StrategyState | ValidateStrategyResponse202` to
+  `ResponseError | StrategyState`.
+
+  **The consequence for callers: the status code, not the body, is now what tells the two responses
+  apart.** `sync`/`asyncio` hand back a `StrategyState` either way and the return type keeps no trace
+  of which arrived — a caller that needs to know must use `sync_detailed`/`asyncio_detailed` and read
+  `.status_code`. A `200` means a verdict already existed and came straight back; a `202` means this
+  call queued a check, so poll `get_strategy` until `validation` leaves `pending`. Note that
+  `validation: pending` on its own does not imply `202` — a `200` can carry it too, left by a check an
+  earlier call queued. The hand-written `qtsurfer.api.client.api.strategy` shim now documents this.
+
+### Removed 🗑️
+
+- `ValidateStrategyResponse202` and `ValidateStrategyResponse202Validation` are no longer exported
+  from `qtsurfer.api.client.models` (see "Changed" above). Code that imported either — realistically
+  only an `isinstance` check narrowing the old three-way union — should switch to `StrategyState`.
+
+### Fixed 🐛
+
+- **Five endpoints were unreachable through `qtsurfer.api.client.api`**, the package the module
+  docstring points at as the endpoint surface: `list_segment_instruments`, `execute_sweep`,
+  `get_sweep_result`, `cancel_sweep` and `get_sweep_sensitivity` existed in the generated tree but
+  were never re-exported, so importing them the documented way raised `ImportError` — and the README
+  listed `api.exchange.list_segment_instruments` as if it worked. All five are now re-exported.
+  Anything already reaching into `qtsurfer.api.client._generated` for them keeps working; the point
+  is that it should no longer be necessary.
+
+### Not changed
+
+- `compile_strategy` (`POST /strategy`) remains absent — its `text/plain` request body is still
+  unsupported by `openapi-python-client`. Unrelated to this spec bump; call it directly via the
+  underlying `httpx` client (see the README).
+
 ## [0.106.0] — 2026-08-12
 
 This client's version tracks the OpenAPI spec version it was generated against. The previous

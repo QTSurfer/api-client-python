@@ -43,6 +43,14 @@ class ExecuteSweepResult:
             the sweep is selecting noise, whatever its top row says. Computed once when the last shard finishes, so it is
             absent while the sweep is still running and on sweeps too small for the statistic to mean anything.
         pbo_splits (int | Unset): How many train/test splits the `pbo` figure was averaged over.
+        fail_reason (str | Unset): Why the sweep produced less than it should have — the cause reported by the **first**
+            shard to fail, not a list. It is what turns an inscrutable empty leaderboard into an answer: a sweep can come
+            back `PARTIAL` with `done: 0` because the strategy could not be loaded at all, and without this the response
+            says only that nothing finished.
+            First failure wins and later ones are not recorded, so on a sweep where several shards failed for different
+            reasons this names one of them rather than all. Absent when no shard reported a cause, which is the normal case
+            for a healthy sweep — read it together with `progress.failedShards` rather than as a count of anything. Example:
+            Failed to load/configure strategy.
         walk_forward (WalkForwardResult | Unset): Present only on a sweep submitted with `walkForward`, and present from
             acceptance onward — its presence, not its contents, is what identifies a walk-forward sweep. `completedFolds` is
             0 while the first fold is still running.
@@ -59,6 +67,7 @@ class ExecuteSweepResult:
     ranking: ExecuteSweepResultRanking | Unset = UNSET
     pbo: float | Unset = UNSET
     pbo_splits: int | Unset = UNSET
+    fail_reason: str | Unset = UNSET
     walk_forward: WalkForwardResult | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -90,6 +99,8 @@ class ExecuteSweepResult:
 
         pbo_splits = self.pbo_splits
 
+        fail_reason = self.fail_reason
+
         walk_forward: dict[str, Any] | Unset = UNSET
         if not isinstance(self.walk_forward, Unset):
             walk_forward = self.walk_forward.to_dict()
@@ -114,6 +125,8 @@ class ExecuteSweepResult:
             field_dict["pbo"] = pbo
         if pbo_splits is not UNSET:
             field_dict["pboSplits"] = pbo_splits
+        if fail_reason is not UNSET:
+            field_dict["failReason"] = fail_reason
         if walk_forward is not UNSET:
             field_dict["walkForward"] = walk_forward
 
@@ -158,6 +171,8 @@ class ExecuteSweepResult:
 
         pbo_splits = d.pop("pboSplits", UNSET)
 
+        fail_reason = d.pop("failReason", UNSET)
+
         _walk_forward = d.pop("walkForward", UNSET)
         walk_forward: WalkForwardResult | Unset
         if isinstance(_walk_forward, Unset):
@@ -177,6 +192,7 @@ class ExecuteSweepResult:
             ranking=ranking,
             pbo=pbo,
             pbo_splits=pbo_splits,
+            fail_reason=fail_reason,
             walk_forward=walk_forward,
         )
 

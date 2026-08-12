@@ -108,11 +108,20 @@ Each generated endpoint module exposes four entrypoints:
 | `api.exchange` | `download_klines` | `GET /exchange/{exchangeId}/klines/{base}/{quote}` |
 | `api.strategy` | `get_strategy` | `GET /strategy/{strategyId}` |
 | `api.strategy` | `validate_strategy` | `POST /strategy/{strategyId}/validate` |
-| `api.backtesting` | `prepare_backtest` | `POST /backtesting/prepare` |
-| `api.backtesting` | `get_prepare_status` | `GET /backtesting/prepare/{jobId}` |
-| `api.backtesting` | `execute_backtest` | `POST /backtesting/execute` |
-| `api.backtesting` | `cancel_backtest` | `POST /backtesting/execute/{jobId}/cancel` |
-| `api.backtesting` | `get_backtest_result` | `GET /backtesting/execute/{jobId}` |
+| `api.backtesting` | `prepare_backtest` | `POST /backtest/{exchangeId}/{type}/prepare` |
+| `api.backtesting` | `get_prepare_status` | `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` |
+| `api.backtesting` | `execute_backtest` | `POST /backtest/{exchangeId}/{type}/execute` |
+| `api.backtesting` | `cancel_backtest` | `DELETE /backtest/{exchangeId}/{type}/execute/{jobId}` |
+| `api.backtesting` | `get_backtest_result` | `GET /backtest/{exchangeId}/{type}/execute/{jobId}` |
+| `api.backtesting` | `execute_sweep` | `POST /backtest/{exchangeId}/{type}/executeSweep/{requestId}` |
+| `api.backtesting` | `get_sweep_result` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}` |
+| `api.backtesting` | `cancel_sweep` | `DELETE /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}` |
+| `api.backtesting` | `get_sweep_sensitivity` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/sensitivity` |
+
+Seventeen of the spec's eighteen operations, all reachable through `qtsurfer.api.client.api` as
+listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
+openapi-python-client does not support, so no module is generated for it — call it through the
+underlying `httpx` client.
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
