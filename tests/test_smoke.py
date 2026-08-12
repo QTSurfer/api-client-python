@@ -215,15 +215,18 @@ def test_public_api_package_reexports_generated_endpoints() -> None:
 
 
 def test_spec_operation_ids_match_the_tables() -> None:
-    """Cross-check the tables against the spec itself, when the spec is on disk.
+    """Cross-check the tables against the spec itself.
 
-    ``openapi.yaml`` is fetched by ``scripts/regenerate.sh`` and is not
-    committed, so this skips in a fresh checkout and in CI — the package-side
-    assertions above are the ones that always run. It executes exactly when it
-    matters, right after a regeneration, and catches the one drift the
-    package-side checks structurally cannot see: a new spec operation that
-    produces no module at all, which is how ``compileStrategy`` slipped from
-    view in the first place.
+    This catches the one drift the package-side checks structurally cannot see:
+    a new spec operation that produces **no module at all**. Nothing appears, so
+    no set-comparison against the generated tree notices, and the counts still
+    agree — which is exactly how ``compileStrategy`` stayed invisible.
+
+    ``openapi.yaml`` is not committed; ``scripts/regenerate.sh`` fetches it, and
+    the CI ``test`` job fetches it too, so this runs there rather than skipping.
+    It skips only in a checkout where nobody has fetched the spec — the
+    package-side assertions above still run in that case, but this particular
+    gap is open until someone does.
     """
     if not _SPEC_PATH.is_file():
         pytest.skip(f"{_SPEC_PATH.name} absent (fetched by scripts/regenerate.sh); package-side checks still ran")

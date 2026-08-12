@@ -39,6 +39,12 @@ jobs:
       - name: Mypy (--strict)
         run: uv run mypy src/ tests/
 
+      # openapi.yaml is not committed (scripts/regenerate.sh fetches it), so without this the
+      # spec cross-check in tests/test_smoke.py skips here and the suite cannot see a spec
+      # operation that generates no module at all — the drift that hid compileStrategy.
+      - name: Fetch openapi.yaml
+        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer.github.io/main/openapi.yaml -o openapi.yaml
+
       - name: Pytest
         run: uv run pytest -v
 
