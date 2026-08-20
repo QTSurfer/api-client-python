@@ -10,14 +10,29 @@ import httpx
 import pytest
 import respx
 
-from qtsurfer.api.client import AuthenticatedClient
+from qtsurfer.api.client import AuthenticatedClient, types
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
+from qtsurfer.api.client.api.strategy import (
+    delete_strategy,
+    get_strategy,
+    get_strategy_code,
+    list_strategies,
+    validate_strategy,
+)
 from qtsurfer.api.client.models import (
     CoverageWindow,
+    DeleteStrategyResponse200,
     Exchange,
+    GetStrategyCodeResponse200,
+    HalLink,
     InstrumentCoverage,
     InstrumentDetail,
     InstrumentListResponse,
+    ListStrategiesResponse200,
+    ResponseError,
+    StrategyLinks,
+    StrategyState,
+    StrategySummary,
 )
 
 BASE_URL = "https://api.qtsurfer.test/v1"
@@ -116,3 +131,130 @@ def test_list_instruments_detailed_returns_status(client: AuthenticatedClient) -
     assert response.status_code == 404
     # parsed is the ResponseError model on the documented 404 branch.
     assert response.parsed is not None
+
+
+@respx.mock
+def test_list_strategies_request_and_response(client: AuthenticatedClient) -> None:
+    payload = {
+        "strategies": [
+            {
+                "strategyId": "6bsh31ikwkuivhtgcoa6s4",
+                "compiledAt": "2026-08-19T10:15:00Z",
+                "requiredSources": ["Ticker"],
+            },
+            {"strategyId": "2ul144qe9tlwzu5anhwvc6"},
+        ]
+    }
+    route = respx.get(f"{BASE_URL}/strategies").mock(return_value=httpx.Response(200, json=payload))
+
+    response = list_strategies.sync(client=client)
+
+    assert route.called
+    assert route.calls.last.request.method == "GET"
+    assert isinstance(response, ListStrategiesResponse200)
+    assert len(response.strategies) == 2
+    first = response.strategies[0]
+    assert isinstance(first, StrategySummary)
+    assert first.strategy_id == "6bsh31ikwkuivhtgcoa6s4"
+    assert first.required_sources == ["Ticker"]
+    # list_strategies never 404s and deliberately omits validation state — the
+    # item model carries no such field at all, unlike get_strategy's StrategyState.
+    assert not hasattr(first, "validation")
+
+
+@respx.mock
+def test_delete_strategy_request_and_response(client: AuthenticatedClient) -> None:
+    route = respx.delete(f"{BASE_URL}/strategy/6bsh31ikwkuivhtgcoa6s4").mock(
+        return_value=httpx.Response(200, json={"strategyId": "6bsh31ikwkuivhtgcoa6s4", "deleted": True})
+    )
+
+    response = delete_strategy.sync(strategy_id="6bsh31ikwkuivhtgcoa6s4", client=client)
+
+    assert route.called
+    sent = route.calls.last.request
+    assert sent.method == "DELETE"
+    assert sent.url == httpx.URL(f"{BASE_URL}/strategy/6bsh31ikwkuivhtgcoa6s4")
+    assert isinstance(response, DeleteStrategyResponse200)
+    assert response.strategy_id == "6bsh31ikwkuivhtgcoa6s4"
+    assert response.deleted is True
+
+
+@respx.mock
+def test_delete_strategy_not_found(client: AuthenticatedClient) -> None:
+    respx.delete(f"{BASE_URL}/strategy/unknown-id").mock(
+        return_value=httpx.Response(404, json={"code": 404, "message": "no such registered strategy"})
+    )
+
+    response = delete_strategy.sync_detailed(strategy_id="unknown-id", client=client)
+
+    assert response.status_code == 404
+    assert isinstance(response.parsed, ResponseError)
+    assert response.parsed.message == "no such registered strategy"
+
+
+@respx.mock
+def test_get_strategy_code_request_and_response(client: AuthenticatedClient) -> None:
+    source = "package strategy;\npublic class EmaCrossStrategy extends AbstractTickerStrategy { }\n"
+    route = respx.get(f"{BASE_URL}/strategy/6bsh31ikwkuivhtgcoa6s4/code").mock(
+        return_value=httpx.Response(200, json={"strategyId": "6bsh31ikwkuivhtgcoa6s4", "code": source})
+    )
+
+    response = get_strategy_code.sync(strategy_id="6bsh31ikwkuivhtgcoa6s4", client=client)
+
+    assert route.called
+    assert isinstance(response, GetStrategyCodeResponse200)
+    assert response.strategy_id == "6bsh31ikwkuivhtgcoa6s4"
+    assert response.code == source
+
+
+@respx.mock
+def test_get_strategy_response_carries_links(client: AuthenticatedClient) -> None:
+    payload = {
+        "strategyId": "6bsh31ikwkuivhtgcoa6s4",
+        "validation": "passed",
+        "_links": {"code": {"href": "/v1/strategy/6bsh31ikwkuivhtgcoa6s4/code"}},
+    }
+    route = respx.get(f"{BASE_URL}/strategy/6bsh31ikwkuivhtgcoa6s4").mock(
+        return_value=httpx.Response(200, json=payload)
+    )
+
+    response = get_strategy.sync(strategy_id="6bsh31ikwkuivhtgcoa6s4", client=client)
+
+    assert route.called
+    assert isinstance(response, StrategyState)
+    assert isinstance(response.field_links, StrategyLinks)
+    assert isinstance(response.field_links.code, HalLink)
+    assert response.field_links.code.href == "/v1/strategy/6bsh31ikwkuivhtgcoa6s4/code"
+
+
+@respx.mock
+def test_validate_strategy_202_omits_links(client: AuthenticatedClient) -> None:
+    # A 202 means a check was just queued — a deliberately partial stub with
+    # nothing to link to yet, so `_links` is absent entirely rather than null.
+    # `field_links` must come back Unset, not None or a default StrategyLinks.
+    payload = {"strategyId": "6bsh31ikwkuivhtgcoa6s4", "validation": "pending"}
+    respx.post(f"{BASE_URL}/strategy/6bsh31ikwkuivhtgcoa6s4/validate").mock(
+        return_value=httpx.Response(202, json=payload)
+    )
+
+    response = validate_strategy.sync_detailed(strategy_id="6bsh31ikwkuivhtgcoa6s4", client=client)
+
+    assert response.status_code == 202
+    assert isinstance(response.parsed, StrategyState)
+    assert isinstance(response.parsed.field_links, types.Unset)
+
+
+@respx.mock
+def test_get_strategy_code_not_found_covers_two_cases(client: AuthenticatedClient) -> None:
+    # 404 here is deliberately the same shape whether the id was never
+    # registered by this caller or resolves only through a shared/marketplace
+    # reference with no source of its own — the response cannot and does not
+    # distinguish them.
+    respx.get(f"{BASE_URL}/strategy/reference-only/code").mock(
+        return_value=httpx.Response(404, json={"code": 404, "message": "no source available for this strategy"})
+    )
+
+    response = get_strategy_code.sync_detailed(strategy_id="reference-only", client=client)
+
+    assert response.status_code == 404
+    assert isinstance(response.parsed, ResponseError)

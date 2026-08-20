@@ -9,10 +9,16 @@ import datetime as _dt
 from qtsurfer.api.client.models import (
     CoverageWindow,
     Exchange,
+    HalLink,
     InstrumentCoverage,
     InstrumentDetail,
     JobState,
     JobStateStatus,
+    ListStrategiesResponse200,
+    StrategyLinks,
+    StrategyState,
+    StrategyStateValidation,
+    StrategySummary,
 )
 
 
@@ -61,6 +67,61 @@ def test_instrument_detail_roundtrip_with_datetime() -> None:
     assert parsed.coverage.tickers.from_ == data_from
     assert parsed.coverage.tickers.to == data_to
     assert parsed.last_price == 84250.5
+
+
+def test_strategy_state_roundtrip_with_links() -> None:
+    original = StrategyState(
+        strategy_id="6bsh31ikwkuivhtgcoa6s4",
+        validation=StrategyStateValidation.PASSED,
+        field_links=StrategyLinks(code=HalLink(href="/v1/strategy/6bsh31ikwkuivhtgcoa6s4/code")),
+    )
+    payload = original.to_dict()
+    # wire key is `_links`, nested under it `code.href` — same envelope shape as
+    # InstrumentListResponse's `_links`, just a different link set.
+    assert payload["_links"]["code"]["href"] == "/v1/strategy/6bsh31ikwkuivhtgcoa6s4/code"
+
+    parsed = StrategyState.from_dict(payload)
+    assert isinstance(parsed.field_links, StrategyLinks)
+    assert isinstance(parsed.field_links.code, HalLink)
+    assert parsed.field_links.code.href == "/v1/strategy/6bsh31ikwkuivhtgcoa6s4/code"
+
+
+def test_strategy_state_roundtrip_without_links() -> None:
+    # The 202 from validate_strategy omits `_links` entirely — field_links must
+    # stay Unset rather than become None or a default-constructed StrategyLinks.
+    original = StrategyState(strategy_id="6bsh31ikwkuivhtgcoa6s4", validation=StrategyStateValidation.PENDING)
+    payload = original.to_dict()
+    assert "_links" not in payload
+
+    parsed = StrategyState.from_dict(payload)
+    assert isinstance(parsed.field_links, type(original.field_links))
+
+
+def test_list_strategies_response_roundtrip() -> None:
+    original = ListStrategiesResponse200(
+        strategies=[
+            StrategySummary(
+                strategy_id="6bsh31ikwkuivhtgcoa6s4",
+                compiled_at=_dt.datetime(2026, 8, 19, 10, 15, 0, tzinfo=_dt.UTC),
+                required_sources=["Ticker"],
+            ),
+            # requiredSources/compiledAt are both optional — a strategy the platform
+            # could not introspect carries neither.
+            StrategySummary(strategy_id="2ul144qe9tlwzu5anhwvc6"),
+        ]
+    )
+    payload = original.to_dict()
+    first, second = payload["strategies"]
+    assert first["strategyId"] == "6bsh31ikwkuivhtgcoa6s4"
+    assert first["compiledAt"].startswith("2026-08-19T10:15:00")
+    assert first["requiredSources"] == ["Ticker"]
+    assert "compiledAt" not in second
+    assert "requiredSources" not in second
+
+    parsed = ListStrategiesResponse200.from_dict(payload)
+    assert len(parsed.strategies) == 2
+    assert parsed.strategies[0].compiled_at == original.strategies[0].compiled_at
+    assert isinstance(parsed.strategies[1].compiled_at, type(original.strategies[1].compiled_at))
 
 
 def test_job_state_roundtrip_with_enum() -> None:

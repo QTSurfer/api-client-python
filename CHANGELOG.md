@@ -6,6 +6,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.109.2] — 2026-08-20
+
+Regenerated against OpenAPI spec `0.109.2` (from `0.107.0`). Everything below is additive — no
+request shape changes, nothing removed, nothing renamed.
+
+### Added ✨
+
+- `list_strategies` — `GET /strategies` — every strategy you have registered and not deleted, most
+  recently compiled first. Returns `ListStrategiesResponse200`
+  (`strategies: list[StrategySummary]`), each item carrying `strategy_id`
+  and the same optional `compiled_at` / `required_sources` provenance `get_strategy` reports —
+  deliberately *without* `validation`, so listing stays cheap no matter how many strategies you
+  have. Check a specific strategy's validation with `get_strategy`. Never `404`s — an empty list
+  means you have none registered. Generated under `qtsurfer.api.client._generated.api.strategy`
+  and re-exported from `qtsurfer.api.client.api.strategy`.
+- `delete_strategy` — `DELETE /strategy/{strategyId}` — removes a strategy from both `get_strategy`
+  and `list_strategies`. Returns `DeleteStrategyResponse200` (`strategy_id`, `deleted: True`) on
+  `200`, or `ResponseError` on `404` (no such registered strategy for this caller). Doesn't undo
+  anything that already happened: backtests already run against the strategy are unaffected, and
+  it only ever removes your own registration — deleting your copy of a shared/marketplace strategy
+  never affects anyone else's copy. Re-submitting the same source to `compile_strategy` afterwards
+  registers a brand-new strategy with a brand-new id; the deleted id does not come back.
+- `get_strategy_code` — `GET /strategy/{strategyId}/code` — the exact source last submitted for a
+  strategy id. Returns `GetStrategyCodeResponse200` (`strategy_id`, `code`) on `200`, or
+  `ResponseError` on `404`. The `404` deliberately covers two indistinguishable cases: the id was
+  never registered by this caller, or it resolves only through a shared/marketplace reference that
+  carries no source of its own — both read as the same "nothing to return."
+- `StrategyState` gains an optional `field_links` (`_links` on the wire), typed `StrategyLinks`
+  (`code: HalLink`) pointing at `get_strategy_code` (`href` = `/v1/strategy/{strategyId}/code`).
+  Present on a full `StrategyState` body — `get_strategy`'s response, and `validate_strategy`'s
+  already-validated `200` — and absent from that same endpoint's `202`, a deliberately partial stub
+  carrying only what is known before a check has even started. Following `code` can still `404`,
+  for the same two reasons `get_strategy_code` documents.
+
+### Not changed
+
+- `compile_strategy` (`POST /strategy`) remains absent — its `text/plain` request body is still
+  unsupported by `openapi-python-client`. Unrelated to this spec bump; call it directly via the
+  underlying `httpx` client (see the README).
+- The spec's `servers` block renamed its staging entry's host
+  (`https://api.staging.qtsurfer.com` → `https://api.qtsurfer.net`) and reworded both server
+  descriptions. This repo does not hardcode the old staging hostname anywhere, so no README or
+  test changes were needed for it.
+
 ## [0.107.0] — 2026-08-12
 
 Regenerated against OpenAPI spec `0.107.0`. This client's version tracks the spec version it was

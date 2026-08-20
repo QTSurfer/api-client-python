@@ -22,7 +22,7 @@ PUBLIC_API = "qtsurfer.api.client.api"
 #: Operations declared by the OpenAPI spec this package is generated from.
 #: Every one of them must be accounted for below, either as a generated module
 #: or as a documented exception.
-SPEC_OPERATION_COUNT = 18
+SPEC_OPERATION_COUNT = 21
 
 #: Each spec ``operationId`` the generator turns into an endpoint module, mapped
 #: to the ``(tag package, module name)`` it lands under.
@@ -52,6 +52,9 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "downloadKlines": ("exchange", "download_klines"),
     "validateStrategy": ("strategy", "validate_strategy"),
     "getStrategy": ("strategy", "get_strategy"),
+    "listStrategies": ("strategy", "list_strategies"),
+    "deleteStrategy": ("strategy", "delete_strategy"),
+    "getStrategyCode": ("strategy", "get_strategy_code"),
     "prepareBacktest": ("backtesting", "prepare_backtest"),
     "getPrepareStatus": ("backtesting", "get_prepare_status"),
     "executeSweep": ("backtesting", "execute_sweep"),
@@ -64,8 +67,8 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
 }
 
 #: Spec operations that deliberately have **no** generated module, and why.
-#: Naming them is the point: an assertion that accepts 17 modules against 18
-#: operations because someone typed 17 documents nothing and would swallow a
+#: Naming them is the point: an assertion that accepts 20 modules against 21
+#: operations because someone typed 20 documents nothing and would swallow a
 #: second disappearance. Recording the exception explicitly keeps the shortfall
 #: legible and keeps every *other* operation mandatory.
 GENERATOR_UNSUPPORTED: dict[str, str] = {
@@ -156,7 +159,7 @@ def test_known_endpoints_are_present() -> None:
 
 
 def test_every_spec_operation_is_accounted_for() -> None:
-    """17 modules against 18 spec operations — say which one is missing, and why.
+    """20 modules against 21 spec operations — say which one is missing, and why.
 
     A bare count would pass for any reason at all. This pins the shortfall to a
     named operation with a stated cause, so a *second* operation going missing

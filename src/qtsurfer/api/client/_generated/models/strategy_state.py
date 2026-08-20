@@ -14,6 +14,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.notice import Notice
+    from ..models.strategy_links import StrategyLinks
 
 
 T = TypeVar("T", bound="StrategyState")
@@ -31,7 +32,7 @@ class StrategyState:
             {'strategyId': '6bsh31ikwkuivhtgcoa6s4', 'validation': 'passed', 'compiledAt': '2026-08-04T16:23:04Z',
                 'requiredSources': ['Ticker'], 'validatedAt': '2026-08-04T16:24:11Z', 'notices': [{'level': 'WARN', 'code':
                 'indicator.bar-data-on-ticker-path', 'message': 'Indicator requires bar data but is on the ticker path',
-                'provenance': 'compile-dry-run'}]}
+                'provenance': 'compile-dry-run'}], '_links': {'code': {'href': '/v1/strategy/6bsh31ikwkuivhtgcoa6s4/code'}}}
 
         Attributes:
             strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
@@ -73,6 +74,13 @@ class StrategyState:
             validation_stalled (bool | Unset): A queued check has not reported for far longer than one takes. Nothing is
                 disproved about
                 the strategy — the check has not run. Stop waiting and re-request it later.
+            field_links (StrategyLinks | Unset): HAL `_links` for a strategy — present on a full `StrategyState` body (`GET
+                /strategy/{strategyId}`, and `POST /strategy/{strategyId}/validate`'s already-validated
+                `200`), absent from that same endpoint's `202` — a deliberately partial stub carrying only
+                what is known before a check has even started. Following `code` can still `404` once
+                present: it documents its own honest "nothing to return" for a strategy with no source of
+                its own (a `REFERENCE` marketplace copy, or one resolved only through the platform's shared
+                pool). This link says where to look, not that something is there.
     """
 
     strategy_id: str
@@ -85,6 +93,7 @@ class StrategyState:
     notices_truncated: int | Unset = UNSET
     dry_run_incomplete: bool | Unset = UNSET
     validation_stalled: bool | Unset = UNSET
+    field_links: StrategyLinks | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -122,6 +131,10 @@ class StrategyState:
 
         validation_stalled = self.validation_stalled
 
+        field_links: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.field_links, Unset):
+            field_links = self.field_links.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -146,12 +159,15 @@ class StrategyState:
             field_dict["dryRunIncomplete"] = dry_run_incomplete
         if validation_stalled is not UNSET:
             field_dict["validationStalled"] = validation_stalled
+        if field_links is not UNSET:
+            field_dict["_links"] = field_links
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.notice import Notice
+        from ..models.strategy_links import StrategyLinks
 
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
@@ -198,6 +214,13 @@ class StrategyState:
 
         validation_stalled = d.pop("validationStalled", UNSET)
 
+        _field_links = d.pop("_links", UNSET)
+        field_links: StrategyLinks | Unset
+        if isinstance(_field_links, Unset):
+            field_links = UNSET
+        else:
+            field_links = StrategyLinks.from_dict(_field_links)
+
         strategy_state = cls(
             strategy_id=strategy_id,
             validation=validation,
@@ -209,6 +232,7 @@ class StrategyState:
             notices_truncated=notices_truncated,
             dry_run_incomplete=dry_run_incomplete,
             validation_stalled=validation_stalled,
+            field_links=field_links,
         )
 
         strategy_state.additional_properties = d
