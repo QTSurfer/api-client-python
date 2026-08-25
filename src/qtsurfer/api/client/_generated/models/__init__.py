@@ -13,7 +13,20 @@ from .cancel_sweep_response_200 import CancelSweepResponse200
 from .cancel_sweep_response_200_status import CancelSweepResponse200Status
 from .compile_strategy_response_200 import CompileStrategyResponse200
 from .coverage_window import CoverageWindow
+from .create_dataset_body import CreateDatasetBody
 from .data_source_type import DataSourceType
+from .dataset import Dataset
+from .dataset_created import DatasetCreated
+from .dataset_created_upload import DatasetCreatedUpload
+from .dataset_type import DatasetType
+from .dataset_upload_state import DatasetUploadState
+from .dataset_upload_state_status import DatasetUploadStateStatus
+from .dataset_version import DatasetVersion
+from .dataset_version_timestamp_unit import DatasetVersionTimestampUnit
+from .dataset_with_links import DatasetWithLinks
+from .dataset_with_links_links import DatasetWithLinksLinks
+from .dataset_with_links_links_self import DatasetWithLinksLinksSelf
+from .delete_dataset_response_200 import DeleteDatasetResponse200
 from .delete_strategy_response_200 import DeleteStrategyResponse200
 from .download_klines_format import DownloadKlinesFormat
 from .download_tickers_format import DownloadTickersFormat
@@ -27,6 +40,7 @@ from .execute_sweep_result_objective import ExecuteSweepResultObjective
 from .execute_sweep_result_order import ExecuteSweepResultOrder
 from .execute_sweep_result_ranking import ExecuteSweepResultRanking
 from .execute_sweep_result_status import ExecuteSweepResultStatus
+from .finalize_dataset_upload_response_202 import FinalizeDatasetUploadResponse202
 from .get_backtest_result_response_202 import GetBacktestResultResponse202
 from .get_strategy_code_response_200 import GetStrategyCodeResponse200
 from .get_sweep_result_objective import GetSweepResultObjective
@@ -42,6 +56,7 @@ from .instrument_list_meta_segment import InstrumentListMetaSegment
 from .instrument_list_response import InstrumentListResponse
 from .job_state import JobState
 from .job_state_status import JobStateStatus
+from .list_datasets_response_200 import ListDatasetsResponse200
 from .list_segment_instruments_segment import ListSegmentInstrumentsSegment
 from .list_strategies_response_200 import ListStrategiesResponse200
 from .notice import Notice
@@ -97,7 +112,20 @@ __all__ = (
     "CancelSweepResponse200Status",
     "CompileStrategyResponse200",
     "CoverageWindow",
+    "CreateDatasetBody",
+    "Dataset",
+    "DatasetCreated",
+    "DatasetCreatedUpload",
+    "DatasetType",
+    "DatasetUploadState",
+    "DatasetUploadStateStatus",
+    "DatasetVersion",
+    "DatasetVersionTimestampUnit",
+    "DatasetWithLinks",
+    "DatasetWithLinksLinks",
+    "DatasetWithLinksLinksSelf",
     "DataSourceType",
+    "DeleteDatasetResponse200",
     "DeleteStrategyResponse200",
     "DownloadKlinesFormat",
     "DownloadTickersFormat",
@@ -111,6 +139,7 @@ __all__ = (
     "ExecuteSweepResultOrder",
     "ExecuteSweepResultRanking",
     "ExecuteSweepResultStatus",
+    "FinalizeDatasetUploadResponse202",
     "GetBacktestResultResponse202",
     "GetStrategyCodeResponse200",
     "GetSweepResultObjective",
@@ -126,6 +155,7 @@ __all__ = (
     "InstrumentListResponse",
     "JobState",
     "JobStateStatus",
+    "ListDatasetsResponse200",
     "ListSegmentInstrumentsSegment",
     "ListStrategiesResponse200",
     "Notice",

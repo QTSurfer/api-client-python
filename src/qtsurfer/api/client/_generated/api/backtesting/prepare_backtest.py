@@ -92,12 +92,22 @@ def sync_detailed(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
+    exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
+    endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
+    two request shapes.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
-            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
+        body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
+            managed exchange,
+            `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the
+            reserved `exchangeId: user`, send `datasetId` instead of `instrument` — `instrument` is
+            ignored there, since it comes from the dataset itself.
+             Example: {'instrument': 'BTC/USDT', 'from': '2024-12-13T00:00:00Z', 'to':
+            '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -135,12 +145,22 @@ def sync(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
+    exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
+    endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
+    two request shapes.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
-            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
+        body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
+            managed exchange,
+            `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the
+            reserved `exchangeId: user`, send `datasetId` instead of `instrument` — `instrument` is
+            ignored there, since it comes from the dataset itself.
+             Example: {'instrument': 'BTC/USDT', 'from': '2024-12-13T00:00:00Z', 'to':
+            '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -173,12 +193,22 @@ async def asyncio_detailed(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
+    exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
+    endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
+    two request shapes.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
-            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
+        body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
+            managed exchange,
+            `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the
+            reserved `exchangeId: user`, send `datasetId` instead of `instrument` — `instrument` is
+            ignored there, since it comes from the dataset itself.
+             Example: {'instrument': 'BTC/USDT', 'from': '2024-12-13T00:00:00Z', 'to':
+            '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -214,12 +244,22 @@ async def asyncio(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
+    exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
+    endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
+    two request shapes.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
             ticker.
-        body (PrepareRequest):  Example: {'instrument': 'BTC/USDT', 'from':
-            '2024-12-13T00:00:00Z', 'to': '2024-12-14T00:00:00Z', 'cadence': '1m'}.
+        body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
+            managed exchange,
+            `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the
+            reserved `exchangeId: user`, send `datasetId` instead of `instrument` — `instrument` is
+            ignored there, since it comes from the dataset itself.
+             Example: {'instrument': 'BTC/USDT', 'from': '2024-12-13T00:00:00Z', 'to':
+            '2024-12-14T00:00:00Z', 'cadence': '1m'}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

@@ -6,6 +6,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.110.1] — 2026-08-25
+
+Regenerated against OpenAPI spec `0.110.1` (from `0.109.2`). Adds a new Dataset feature; everything
+else below is additive.
+
+### Added ✨
+
+- New `api.dataset` module — upload your own CSV ticker data and backtest against it via the
+  reserved `exchangeId: user` value on the existing `prepare_backtest`/`execute_backtest`
+  endpoints. Six endpoints, generated under `qtsurfer.api.client._generated.api.dataset` and
+  re-exported from `qtsurfer.api.client.api.dataset`:
+  - `create_dataset` — `POST /datasets` — creates a dataset and its first upload session in one
+    call, returning `DatasetCreated` (a `Dataset` plus `upload_id` and a presigned `upload.url` to
+    `PUT` the CSV to directly — no API credentials involved in that `PUT`).
+  - `list_datasets` — `GET /datasets` — every dataset you've created and not deleted, most
+    recently created first. Returns `ListDatasetsResponse200` (`datasets: list[Dataset]`). Never
+    `404`s — an empty list if you have none, same convention as `list_strategies`.
+  - `get_dataset` — `GET /datasets/{datasetId}` — returns `DatasetWithLinks` (a `Dataset` plus a
+    `_links.self` href).
+  - `delete_dataset` — `DELETE /datasets/{datasetId}` — returns `DeleteDatasetResponse200`
+    (`dataset_id`, `deleted: True`). Soft delete: the dataset stops being listed or preparable
+    from, but a backtest already running against one of its versions is not disrupted.
+  - `finalize_dataset_upload` — `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` — call
+    once the file has been `PUT` to `upload.url`; enqueues ingest and returns
+    `FinalizeDatasetUploadResponse202` (`job_id`). Idempotent — a repeat finalize of the same
+    upload returns the same `job_id` rather than enqueueing a second ingest.
+  - `get_dataset_upload` — `GET /datasets/{datasetId}/uploads/{uploadId}` — poll after finalize
+    until `status` (`DatasetUploadStateStatus`) is `ready` or `failed`; also reports `uploading`
+    before you finalize. Returns `DatasetUploadState`, which on `ready` carries a `version:
+    DatasetVersion` (`bytes`, `rows`, `cadence`, `timestamp_unit`, `gaps`, `largest_gap_steps`).
+- `PrepareRequest` gains optional `dataset_id` / `dataset_version_id` — send `dataset_id` (from
+  `create_dataset`) instead of `instrument` when `exchangeId` is the reserved `user`;
+  `dataset_version_id` optionally pins a specific past version instead of the dataset's current
+  one.
+- `PrepareRequest.cadence` (`PrepareRequestCadence`) gains `3m`, `30m`, `2h`, `8h`, `12h`, `1w`,
+  `1q` — widened from `1s | 5s | 1m | 5m | 15m | 1h | 4h | 1d` to fifteen values.
+- `PrepareJobState` gains three optional fields, populated only for a dataset-backed prepare
+  (`exchangeId: user`): `cadence` (the dataset version's own discovered cadence), `gaps`, and
+  `largest_gap_steps` (both from the coverage walk at its own cadence, mirroring the managed-
+  exchange `total_hours`/`hours_with_data`/`hours_without_data` triplet that stays absent in this
+  case).
+
+### Changed 🔄
+
+- `PrepareRequest.instrument` moved from required to optional — required shrank from
+  `[instrument, from, to]` to `[from, to]`, since `instrument` is meaningless against a
+  dataset-backed prepare. No hand-written code in this repo constructs `PrepareRequest`
+  positionally, but the generated dataclass's field order changed accordingly (`from_, to,
+  instrument, dataset_id, dataset_version_id, cadence` instead of `instrument, from_, to,
+  cadence`) — construct it with keyword arguments, as the README examples already do.
+
+### Not changed
+
+- `compile_strategy` (`POST /strategy`) remains absent — its `text/plain` request body is still
+  unsupported by `openapi-python-client`. Unrelated to this spec bump; call it directly via the
+  underlying `httpx` client (see the README).
+
 ## [0.109.2] — 2026-08-20
 
 Regenerated against OpenAPI spec `0.109.2` (from `0.107.0`). Everything below is additive — no

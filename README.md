@@ -120,15 +120,33 @@ Each generated endpoint module exposes four entrypoints:
 | `api.backtesting` | `get_sweep_result` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}` |
 | `api.backtesting` | `cancel_sweep` | `DELETE /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}` |
 | `api.backtesting` | `get_sweep_sensitivity` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/sensitivity` |
+| `api.dataset` | `create_dataset` | `POST /datasets` — create a dataset and get a presigned upload URL |
+| `api.dataset` | `list_datasets` | `GET /datasets` |
+| `api.dataset` | `get_dataset` | `GET /datasets/{datasetId}` |
+| `api.dataset` | `delete_dataset` | `DELETE /datasets/{datasetId}` |
+| `api.dataset` | `finalize_dataset_upload` | `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` |
+| `api.dataset` | `get_dataset_upload` | `GET /datasets/{datasetId}/uploads/{uploadId}` |
 
-Twenty of the spec's twenty-one operations, all reachable through `qtsurfer.api.client.api` as
-listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
+Twenty-six of the spec's twenty-seven operations, all reachable through `qtsurfer.api.client.api`
+as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
 openapi-python-client does not support, so no module is generated for it — call it through the
 underlying `httpx` client.
 
+### Datasets — backtest against your own data
+
+Upload CSV ticker data and prepare/execute a backtest against it via the reserved
+`exchangeId: user` value on the existing `prepare_backtest`/`execute_backtest` endpoints:
+`create_dataset` returns a `datasetId` plus a presigned URL to `PUT` the CSV to directly, then
+`finalize_dataset_upload` kicks off ingest and `get_dataset_upload` polls until `status` is
+`ready` or `failed`. `PrepareRequest.instrument` is optional for this reason — pass `dataset_id`
+(and optionally `dataset_version_id` to pin a specific past version) instead when the exchange is
+`user`. `list_datasets`/`get_dataset` never `404` for "none yet", same convention as
+`list_strategies`; `delete_dataset` is a soft delete that doesn't disrupt a backtest already
+running against one of the dataset's versions.
+
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
-All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
+All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, `Dataset`, `DatasetWithLinks`, `DatasetCreated`, `DatasetVersion`, `DatasetUploadState`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. Against a dataset-backed prepare (`exchangeId: user`), `PrepareJobState` reports coverage on the dataset's own cadence grid instead — `cadence`/`gaps`/`largest_gap_steps` — with `total_hours`/`hours_with_data`/`hours_without_data` absent in that case. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
 
 A full `StrategyState` (from `get_strategy`, and from `validate_strategy`'s already-validated `200`) carries an optional `field_links` (`_links` on the wire) — a `StrategyLinks` with a `code: HalLink` pointing at `get_strategy_code`. `validate_strategy`'s `202` omits it, since a check that just started has nothing to link to yet. `list_strategies` returns every strategy you've registered and not deleted, most recently compiled first, but deliberately without each one's `validation` state — check that per strategy with `get_strategy`. `delete_strategy` removes a strategy from both `get_strategy` and `list_strategies`; it doesn't touch backtests already run against it, and re-submitting the same source afterwards registers a new strategy under a new id. `get_strategy_code`'s `404` covers two indistinguishable cases: an id never registered by you, or one that resolves only through a shared/marketplace reference with no source of its own.
 

@@ -77,6 +77,9 @@ def sync_detailed(
      Retrieves the current state of the prepare job identified by `jobId`.
     Poll until `status` is `Completed`, `Failed`, or `Aborted`.
 
+    For a dataset prepare (`exchangeId: user`), coverage is reported against the dataset's own
+    cadence grid instead of hours — see `cadence`/`gaps`/`largestGapSteps` on `PrepareJobState`.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
@@ -116,6 +119,9 @@ def sync(
      Retrieves the current state of the prepare job identified by `jobId`.
     Poll until `status` is `Completed`, `Failed`, or `Aborted`.
 
+    For a dataset prepare (`exchangeId: user`), coverage is reported against the dataset's own
+    cadence grid instead of hours — see `cadence`/`gaps`/`largestGapSteps` on `PrepareJobState`.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
@@ -149,6 +155,9 @@ async def asyncio_detailed(
 
      Retrieves the current state of the prepare job identified by `jobId`.
     Poll until `status` is `Completed`, `Failed`, or `Aborted`.
+
+    For a dataset prepare (`exchangeId: user`), coverage is reported against the dataset's own
+    cadence grid instead of hours — see `cadence`/`gaps`/`largestGapSteps` on `PrepareJobState`.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -186,6 +195,9 @@ async def asyncio(
 
      Retrieves the current state of the prepare job identified by `jobId`.
     Poll until `status` is `Completed`, `Failed`, or `Aborted`.
+
+    For a dataset prepare (`exchangeId: user`), coverage is reported against the dataset's own
+    cadence grid instead of hours — see `cadence`/`gaps`/`largestGapSteps` on `PrepareJobState`.
 
     Args:
         exchange_id (str):  Example: binance.

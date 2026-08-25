@@ -96,6 +96,9 @@ def sync_detailed(
     The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
     `jobId` (idempotent).
 
+    Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
+    identical either way, since the instrument and range are recovered from `prepareJobId`.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
@@ -142,6 +145,9 @@ def sync(
     The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
     `jobId` (idempotent).
 
+    Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
+    identical either way, since the instrument and range are recovered from `prepareJobId`.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
@@ -182,6 +188,9 @@ async def asyncio_detailed(
 
     The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
     `jobId` (idempotent).
+
+    Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
+    identical either way, since the instrument and range are recovered from `prepareJobId`.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -226,6 +235,9 @@ async def asyncio(
 
     The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
     `jobId` (idempotent).
+
+    Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
+    identical either way, since the instrument and range are recovered from `prepareJobId`.
 
     Args:
         exchange_id (str):  Example: binance.

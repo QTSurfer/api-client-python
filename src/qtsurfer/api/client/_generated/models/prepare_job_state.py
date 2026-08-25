@@ -20,12 +20,19 @@ T = TypeVar("T", bound="PrepareJobState")
 
 @_attrs_define
 class PrepareJobState:
-    """State of a single-instrument prepare job — the `JobState` shape plus a per-hour
-    data-coverage summary. A single-instrument prepare is always terminal
-    (`status: Completed`): the client decides what to do from `coverageRatio` (e.g.
-    execute if it is at or above a chosen threshold) rather than polling for missing
-    hours that may never arrive — a missing hour for one instrument usually means low
-    activity, not missing data.
+    """State of a single-instrument prepare job — the `JobState` shape plus a coverage summary.
+    A single-instrument prepare is always terminal (`status: Completed`): the client decides
+    what to do from `coverageRatio` (e.g. execute if it is at or above a chosen threshold)
+    rather than polling for missing hours that may never arrive — a missing hour for one
+    instrument usually means low activity, not missing data.
+
+    **Two coverage shapes, by exchange vs. dataset.** Against a managed exchange, coverage is
+    walked hour by hour: `totalHours`/`hoursWithData`/`hoursWithoutData`. Against a
+    dataset-backed prepare (`exchangeId: user`), coverage is reported on the dataset's own
+    cadence grid instead — hour-walking a daily dataset would report `1/24` and read as
+    broken — via `cadence`/`gaps`/`largestGapSteps`; `totalHours`/`hoursWithData`/
+    `hoursWithoutData` are absent in that case. `dataFrom`/`dataTo`/`coverageRatio` are present
+    either way, computed accordingly.
 
         Attributes:
             context_id (str): Opaque context identifier for the job Example: ctx_2o8heaioicr0edvx5ybcap.
@@ -46,13 +53,28 @@ class PrepareJobState:
                 Example: 2026-04-14T13:00:00Z.
             data_to (datetime.datetime | None | Unset): End of the available data range for the prepared instrument.
                 Example: 2026-04-14T15:30:05Z.
-            coverage_ratio (float | Unset): `hoursWithData / totalHours` in `[0,1]` (`1.0` when `totalHours` is 0) — the
-                fraction of hours in the requested range that have served data.
+            coverage_ratio (float | Unset): Against a managed exchange: `hoursWithData / totalHours` in `[0,1]` (`1.0` when
+                `totalHours` is 0), the fraction of hours in the requested range that have served
+                data. Against a dataset (`exchangeId: user`): `rows / expectedStepsAtCadence`
+                over the dataset version's own range — echoing what ingest computed once, not
+                recomputed against a narrower prepare request.
                  Example: 0.994.
-            total_hours (int | Unset): Number of whole hours in the requested prepare range. Example: 168.
-            hours_with_data (int | Unset): Number of hours in the range that have data. Example: 167.
+            total_hours (int | Unset): Number of whole hours in the requested prepare range. Managed exchanges only —
+                absent for a dataset-backed prepare.
+                 Example: 168.
+            hours_with_data (int | Unset): Number of hours in the range that have data. Managed exchanges only — absent for
+                a dataset-backed prepare.
+                 Example: 167.
+            cadence (str | Unset): The dataset version's own discovered cadence (e.g. `1m`, `1h`). Only present for a
+                dataset-backed prepare (`exchangeId: user`).
+                 Example: 1m.
+            gaps (int | Unset): Number of gaps in the dataset version at its own cadence, as discovered at ingest
+                time. Only present for a dataset-backed prepare.
+            largest_gap_steps (int | Unset): The largest gap in the dataset version, in units of its own cadence step. Only
+                present for a dataset-backed prepare.
             hours_without_data (list[PrepareJobStateHoursWithoutDataItem] | Unset): One entry per hour in the range that has
-                no data, with a rationale.
+                no data, with a rationale. Managed
+                exchanges only — absent for a dataset-backed prepare.
     """
 
     context_id: str
@@ -67,6 +89,9 @@ class PrepareJobState:
     coverage_ratio: float | Unset = UNSET
     total_hours: int | Unset = UNSET
     hours_with_data: int | Unset = UNSET
+    cadence: str | Unset = UNSET
+    gaps: int | Unset = UNSET
+    largest_gap_steps: int | Unset = UNSET
     hours_without_data: list[PrepareJobStateHoursWithoutDataItem] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -123,6 +148,12 @@ class PrepareJobState:
 
         hours_with_data = self.hours_with_data
 
+        cadence = self.cadence
+
+        gaps = self.gaps
+
+        largest_gap_steps = self.largest_gap_steps
+
         hours_without_data: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.hours_without_data, Unset):
             hours_without_data = []
@@ -156,6 +187,12 @@ class PrepareJobState:
             field_dict["totalHours"] = total_hours
         if hours_with_data is not UNSET:
             field_dict["hoursWithData"] = hours_with_data
+        if cadence is not UNSET:
+            field_dict["cadence"] = cadence
+        if gaps is not UNSET:
+            field_dict["gaps"] = gaps
+        if largest_gap_steps is not UNSET:
+            field_dict["largestGapSteps"] = largest_gap_steps
         if hours_without_data is not UNSET:
             field_dict["hoursWithoutData"] = hours_without_data
 
@@ -257,6 +294,12 @@ class PrepareJobState:
 
         hours_with_data = d.pop("hoursWithData", UNSET)
 
+        cadence = d.pop("cadence", UNSET)
+
+        gaps = d.pop("gaps", UNSET)
+
+        largest_gap_steps = d.pop("largestGapSteps", UNSET)
+
         _hours_without_data = d.pop("hoursWithoutData", UNSET)
         hours_without_data: list[PrepareJobStateHoursWithoutDataItem] | Unset = UNSET
         if _hours_without_data is not UNSET:
@@ -279,6 +322,9 @@ class PrepareJobState:
             coverage_ratio=coverage_ratio,
             total_hours=total_hours,
             hours_with_data=hours_with_data,
+            cadence=cadence,
+            gaps=gaps,
+            largest_gap_steps=largest_gap_steps,
             hours_without_data=hours_without_data,
         )
 
