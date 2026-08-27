@@ -22,7 +22,7 @@ PUBLIC_API = "qtsurfer.api.client.api"
 #: Operations declared by the OpenAPI spec this package is generated from.
 #: Every one of them must be accounted for below, either as a generated module
 #: or as a documented exception.
-SPEC_OPERATION_COUNT = 27
+SPEC_OPERATION_COUNT = 28
 
 #: Each spec ``operationId`` the generator turns into an endpoint module, mapped
 #: to the ``(tag package, module name)`` it lands under.
@@ -61,6 +61,7 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "getSweepResult": ("backtesting", "get_sweep_result"),
     "cancelSweep": ("backtesting", "cancel_sweep"),
     "getSweepSensitivity": ("backtesting", "get_sweep_sensitivity"),
+    "getSweepRunEquityCurve": ("backtesting", "get_sweep_run_equity_curve"),
     "executeBacktest": ("backtesting", "execute_backtest"),
     "cancelBacktest": ("backtesting", "cancel_backtest"),
     "getBacktestResult": ("backtesting", "get_backtest_result"),
@@ -165,7 +166,7 @@ def test_known_endpoints_are_present() -> None:
 
 
 def test_every_spec_operation_is_accounted_for() -> None:
-    """20 modules against 21 spec operations — say which one is missing, and why.
+    """Every ungenerated spec operation has a named, current reason.
 
     A bare count would pass for any reason at all. This pins the shortfall to a
     named operation with a stated cause, so a *second* operation going missing

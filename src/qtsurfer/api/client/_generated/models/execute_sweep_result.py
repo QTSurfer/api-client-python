@@ -13,6 +13,7 @@ from ..models.execute_sweep_result_status import ExecuteSweepResultStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.job_state import JobState
     from ..models.sweep_progress import SweepProgress
     from ..models.sweep_run_row import SweepRunRow
     from ..models.walk_forward_result import WalkForwardResult
@@ -26,7 +27,8 @@ class ExecuteSweepResult:
     """
     Attributes:
         sweep_id (str):
-        status (ExecuteSweepResultStatus):
+        status (ExecuteSweepResultStatus): The sweep's own status vocabulary — not the same set `state.status` below
+            uses. See `state` for why.
         objective (ExecuteSweepResultObjective):
         order (ExecuteSweepResultOrder):
         progress (SweepProgress): How far along a sweep is, and — when the sweep is still running — enough to tell a
@@ -35,6 +37,7 @@ class ExecuteSweepResult:
         leaderboard_size (int): Total result rows currently available.
         truncated (bool): True only when the ranked view exceeds its display limit.
         leaderboard (list[SweepRunRow]):
+        state (JobState): Information about a single job
         ranking (ExecuteSweepResultRanking | Unset): Which ordering was actually applied, which is not always the one
             requested: a sweep with no stored parameter grid cannot be plateau-ranked and falls back to `raw`. Always `raw`
             when `order=natural`.
@@ -64,6 +67,7 @@ class ExecuteSweepResult:
     leaderboard_size: int
     truncated: bool
     leaderboard: list[SweepRunRow]
+    state: JobState
     ranking: ExecuteSweepResultRanking | Unset = UNSET
     pbo: float | Unset = UNSET
     pbo_splits: int | Unset = UNSET
@@ -91,6 +95,8 @@ class ExecuteSweepResult:
             leaderboard_item = leaderboard_item_data.to_dict()
             leaderboard.append(leaderboard_item)
 
+        state = self.state.to_dict()
+
         ranking: str | Unset = UNSET
         if not isinstance(self.ranking, Unset):
             ranking = self.ranking.value
@@ -117,6 +123,7 @@ class ExecuteSweepResult:
                 "leaderboardSize": leaderboard_size,
                 "truncated": truncated,
                 "leaderboard": leaderboard,
+                "state": state,
             }
         )
         if ranking is not UNSET:
@@ -134,6 +141,7 @@ class ExecuteSweepResult:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.job_state import JobState
         from ..models.sweep_progress import SweepProgress
         from ..models.sweep_run_row import SweepRunRow
         from ..models.walk_forward_result import WalkForwardResult
@@ -159,6 +167,8 @@ class ExecuteSweepResult:
             leaderboard_item = SweepRunRow.from_dict(leaderboard_item_data)
 
             leaderboard.append(leaderboard_item)
+
+        state = JobState.from_dict(d.pop("state"))
 
         _ranking = d.pop("ranking", UNSET)
         ranking: ExecuteSweepResultRanking | Unset
@@ -189,6 +199,7 @@ class ExecuteSweepResult:
             leaderboard_size=leaderboard_size,
             truncated=truncated,
             leaderboard=leaderboard,
+            state=state,
             ranking=ranking,
             pbo=pbo,
             pbo_splits=pbo_splits,

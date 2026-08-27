@@ -8,6 +8,7 @@ from qtsurfer.api.client._generated.api.backtesting import (
     get_backtest_result,
     get_prepare_status,
     get_sweep_result,
+    get_sweep_run_equity_curve,
     get_sweep_sensitivity,
     prepare_backtest,
 )
@@ -19,6 +20,7 @@ __all__ = [
     "execute_sweep",
     "get_backtest_result",
     "get_prepare_status",
+    "get_sweep_run_equity_curve",
     "get_sweep_result",
     "get_sweep_sensitivity",
     "prepare_backtest",

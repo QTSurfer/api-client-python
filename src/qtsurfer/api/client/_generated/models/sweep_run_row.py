@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.equity_curve_result import EquityCurveResult
     from ..models.sweep_run_row_params import SweepRunRowParams
 
 
@@ -43,6 +44,11 @@ class SweepRunRow:
             from however many parameter vectors were tried. Above ~0.95 the result survives the multiple-testing correction;
             near 0.5 or below it is indistinguishable from the best of a pile of coin flips. Absent on aborted runs, and on
             sweeps with too few trials to establish any dispersion to deflate against.
+        equity_curve (EquityCurveResult | Unset): An equity curve, shaped per `meta.outMode`: `points` when `ARRAY`,
+            `timestamps` + `equities` (parallel arrays) when `SHORT`. Used identically wherever a curve is returned — a
+            plain backtest's inline `equityCurve` and a sweep row's `equityCurve` are the same type. `url` is present
+            *instead of* any points when the curve is served by pointer rather than inline (a sweep row's top-N winners
+            only): `GET` it separately to fetch this exact same shape with the points populated.
     """
 
     run_ix: int
@@ -62,6 +68,7 @@ class SweepRunRow:
     plateau_score: float | Unset = UNSET
     neighbour_count: int | Unset = UNSET
     deflated_sharpe: float | Unset = UNSET
+    equity_curve: EquityCurveResult | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -99,6 +106,10 @@ class SweepRunRow:
 
         deflated_sharpe = self.deflated_sharpe
 
+        equity_curve: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.equity_curve, Unset):
+            equity_curve = self.equity_curve.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -126,11 +137,14 @@ class SweepRunRow:
             field_dict["neighbourCount"] = neighbour_count
         if deflated_sharpe is not UNSET:
             field_dict["deflatedSharpe"] = deflated_sharpe
+        if equity_curve is not UNSET:
+            field_dict["equityCurve"] = equity_curve
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.equity_curve_result import EquityCurveResult
         from ..models.sweep_run_row_params import SweepRunRowParams
 
         d = dict(src_dict)
@@ -168,6 +182,13 @@ class SweepRunRow:
 
         deflated_sharpe = d.pop("deflatedSharpe", UNSET)
 
+        _equity_curve = d.pop("equityCurve", UNSET)
+        equity_curve: EquityCurveResult | Unset
+        if isinstance(_equity_curve, Unset):
+            equity_curve = UNSET
+        else:
+            equity_curve = EquityCurveResult.from_dict(_equity_curve)
+
         sweep_run_row = cls(
             run_ix=run_ix,
             params=params,
@@ -186,6 +207,7 @@ class SweepRunRow:
             plateau_score=plateau_score,
             neighbour_count=neighbour_count,
             deflated_sharpe=deflated_sharpe,
+            equity_curve=equity_curve,
         )
 
         sweep_run_row.additional_properties = d

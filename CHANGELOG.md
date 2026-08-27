@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.110.3] — 2026-08-27
+
+Regenerated against OpenAPI spec `0.110.3` (from `0.110.1`).
+
+### Added ✨
+
+- `get_sweep_run_equity_curve` — `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/runs/{runIx}/equityCurve` — retrieves a retained trial curve as an `EquityCurveResult`. The optional `resample`, `differential`, and `out_mode` query parameters shape the response; read `meta` to determine the shape actually served.
+- `EquityCurveOptions` configures an individual backtest's returned curve. `EquityCurveRequest` adds retention selection (`mode`, `n`, `max_pct`) for sweep trials. Both use `EquityCurveOutMode` to choose point objects (`ARRAY`) or parallel arrays (`SHORT`).
+- `DeclaredProperty` is available as the typed `declared_properties` field on `CompileStrategyResponse200` for callers that invoke the currently unsupported `compileStrategy` operation through the underlying HTTP client.
+
+### Changed 🔄
+
+- `ResultMap.equity_curve` and `SweepRunRow.equity_curve` now use `EquityCurveResult`, which carries points or compact parallel arrays together with outcome metadata, rather than a bare point list.
+- `ExecuteBacktestBody` and `ExecuteSweepRequest` gain optional `equity_curve` request fields.
+
 ## [0.110.1] — 2026-08-25
 
 Regenerated against OpenAPI spec `0.110.1` (from `0.109.2`). Adds a new Dataset feature; everything

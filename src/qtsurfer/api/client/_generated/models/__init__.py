@@ -26,10 +26,17 @@ from .dataset_version_timestamp_unit import DatasetVersionTimestampUnit
 from .dataset_with_links import DatasetWithLinks
 from .dataset_with_links_links import DatasetWithLinksLinks
 from .dataset_with_links_links_self import DatasetWithLinksLinksSelf
+from .declared_property import DeclaredProperty
 from .delete_dataset_response_200 import DeleteDatasetResponse200
 from .delete_strategy_response_200 import DeleteStrategyResponse200
 from .download_klines_format import DownloadKlinesFormat
 from .download_tickers_format import DownloadTickersFormat
+from .equity_curve_meta import EquityCurveMeta
+from .equity_curve_options import EquityCurveOptions
+from .equity_curve_out_mode import EquityCurveOutMode
+from .equity_curve_request import EquityCurveRequest
+from .equity_curve_request_mode import EquityCurveRequestMode
+from .equity_curve_result import EquityCurveResult
 from .equity_point import EquityPoint
 from .exchange import Exchange
 from .execute_backtest_body import ExecuteBacktestBody
@@ -125,10 +132,17 @@ __all__ = (
     "DatasetWithLinksLinks",
     "DatasetWithLinksLinksSelf",
     "DataSourceType",
+    "DeclaredProperty",
     "DeleteDatasetResponse200",
     "DeleteStrategyResponse200",
     "DownloadKlinesFormat",
     "DownloadTickersFormat",
+    "EquityCurveMeta",
+    "EquityCurveOptions",
+    "EquityCurveOutMode",
+    "EquityCurveRequest",
+    "EquityCurveRequestMode",
+    "EquityCurveResult",
     "EquityPoint",
     "Exchange",
     "ExecuteBacktestBody",

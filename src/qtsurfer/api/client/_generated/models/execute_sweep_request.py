@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.equity_curve_request import EquityCurveRequest
     from ..models.sweep_base_config import SweepBaseConfig
     from ..models.sweep_spec_request import SweepSpecRequest
     from ..models.walk_forward_request import WalkForwardRequest
@@ -34,6 +35,10 @@ class ExecuteSweepRequest:
         walk_forward (WalkForwardRequest | Unset): Opt in to walk-forward validation. Present, the sweep runs as F
             sequential folds and the result gains a `walkForward` section; absent, nothing about the sweep changes. Two
             requests that differ only in this block are two different sweeps and do not deduplicate against each other.
+        equity_curve (EquityCurveRequest | Unset): Selection (`mode`/`n`/`maxPct`) plus the transform preference
+            (`resample`/`differential`/`outMode`) applied by `GET .../equityCurve` whenever ITS OWN query params are absent,
+            for a curve this sweep retained. The transform half never affects retention or `sweepId` — a caller can always
+            override it per-request at read time regardless of what was submitted here.
     """
 
     strategy_id: str
@@ -43,6 +48,7 @@ class ExecuteSweepRequest:
     shards: int | Unset = 0
     min_trade_floor: int | Unset = 30
     walk_forward: WalkForwardRequest | Unset = UNSET
+    equity_curve: EquityCurveRequest | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -64,6 +70,10 @@ class ExecuteSweepRequest:
         if not isinstance(self.walk_forward, Unset):
             walk_forward = self.walk_forward.to_dict()
 
+        equity_curve: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.equity_curve, Unset):
+            equity_curve = self.equity_curve.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -82,11 +92,14 @@ class ExecuteSweepRequest:
             field_dict["minTradeFloor"] = min_trade_floor
         if walk_forward is not UNSET:
             field_dict["walkForward"] = walk_forward
+        if equity_curve is not UNSET:
+            field_dict["equityCurve"] = equity_curve
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.equity_curve_request import EquityCurveRequest
         from ..models.sweep_base_config import SweepBaseConfig
         from ..models.sweep_spec_request import SweepSpecRequest
         from ..models.walk_forward_request import WalkForwardRequest
@@ -116,6 +129,13 @@ class ExecuteSweepRequest:
         else:
             walk_forward = WalkForwardRequest.from_dict(_walk_forward)
 
+        _equity_curve = d.pop("equityCurve", UNSET)
+        equity_curve: EquityCurveRequest | Unset
+        if isinstance(_equity_curve, Unset):
+            equity_curve = UNSET
+        else:
+            equity_curve = EquityCurveRequest.from_dict(_equity_curve)
+
         execute_sweep_request = cls(
             strategy_id=strategy_id,
             sweep=sweep,
@@ -124,6 +144,7 @@ class ExecuteSweepRequest:
             shards=shards,
             min_trade_floor=min_trade_floor,
             walk_forward=walk_forward,
+            equity_curve=equity_curve,
         )
 
         execute_sweep_request.additional_properties = d

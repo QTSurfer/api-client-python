@@ -93,8 +93,9 @@ def sync_detailed(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`) always
+    return the same `jobId` (idempotent) — a request that omits `equityCurve` dedupes exactly
+    as it did before that field existed.
 
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.
@@ -142,8 +143,9 @@ def sync(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`) always
+    return the same `jobId` (idempotent) — a request that omits `equityCurve` dedupes exactly
+    as it did before that field existed.
 
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.
@@ -186,8 +188,9 @@ async def asyncio_detailed(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`) always
+    return the same `jobId` (idempotent) — a request that omits `equityCurve` dedupes exactly
+    as it did before that field existed.
 
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.
@@ -233,8 +236,9 @@ async def asyncio(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
-    The same params (same `prepareJobId`, `strategyId`, `storeSignals`) always return the same
-    `jobId` (idempotent).
+    The same params (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`) always
+    return the same `jobId` (idempotent) — a request that omits `equityCurve` dedupes exactly
+    as it did before that field existed.
 
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.

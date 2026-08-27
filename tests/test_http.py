@@ -11,6 +11,7 @@ import pytest
 import respx
 
 from qtsurfer.api.client import AuthenticatedClient, types
+from qtsurfer.api.client.api.backtesting import get_sweep_run_equity_curve
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 from qtsurfer.api.client.api.strategy import (
     delete_strategy,
@@ -21,7 +22,9 @@ from qtsurfer.api.client.api.strategy import (
 )
 from qtsurfer.api.client.models import (
     CoverageWindow,
+    DataSourceType,
     DeleteStrategyResponse200,
+    EquityCurveResult,
     Exchange,
     GetStrategyCodeResponse200,
     HalLink,
@@ -258,3 +261,38 @@ def test_get_strategy_code_not_found_covers_two_cases(client: AuthenticatedClien
 
     assert response.status_code == 404
     assert isinstance(response.parsed, ResponseError)
+
+
+@respx.mock
+def test_get_sweep_run_equity_curve_request_and_response(client: AuthenticatedClient) -> None:
+    route = respx.get(f"{BASE_URL}/backtest/binance/ticker/executeSweep/request-1/sweep-1/runs/3/equityCurve").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "points": [{"timestamp": 1_700_000_000_000, "equity": 100.0}],
+                "meta": {
+                    "inputPointCount": 1,
+                    "outputPointCount": 1,
+                    "resampled": False,
+                    "differential": False,
+                    "outMode": "ARRAY",
+                },
+            },
+        )
+    )
+
+    response = get_sweep_run_equity_curve.sync(
+        exchange_id="binance",
+        type_=DataSourceType.TICKER,
+        request_id="request-1",
+        sweep_id="sweep-1",
+        run_ix=3,
+        resample=200,
+        client=client,
+    )
+
+    assert route.called
+    assert route.calls.last.request.url.params["outMode"] == "ARRAY"
+    assert route.calls.last.request.url.params["resample"] == "200"
+    assert isinstance(response, EquityCurveResult)
+    assert response.points[0].timestamp == 1_700_000_000_000

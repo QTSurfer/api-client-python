@@ -12,7 +12,7 @@ from ..models.result_map_signals_upload import ResultMapSignalsUpload
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.equity_point import EquityPoint
+    from ..models.equity_curve_result import EquityCurveResult
     from ..models.notice import Notice
 
 
@@ -62,11 +62,11 @@ class ResultMap:
             cagr (float | Unset): Compound Annual Growth Rate Example: 0.1534.
             max_drawdown (float | Unset): Maximum absolute drawdown in the output currency Example: 12.5.
             max_drawdown_percent (float | Unset): Maximum percentage drawdown from peak equity Example: 8.75.
-            equity_curve (list[EquityPoint] | Unset): Equity curve over the backtest. Element 0 is an anchor at the backtest
-                `from` with `initialCapital`; the remaining points are one sample per emitted yield, in order. Use it to plot
-                the strategy's running equity without re-deriving it from the yield history. Example: [{'timestamp':
-                1700000000000, 'equity': 100.0}, {'timestamp': 1700000060000, 'equity': 110.5}, {'timestamp': 1700000120000,
-                'equity': 90.25}].
+            equity_curve (EquityCurveResult | Unset): An equity curve, shaped per `meta.outMode`: `points` when `ARRAY`,
+                `timestamps` + `equities` (parallel arrays) when `SHORT`. Used identically wherever a curve is returned — a
+                plain backtest's inline `equityCurve` and a sweep row's `equityCurve` are the same type. `url` is present
+                *instead of* any points when the curve is served by pointer rather than inline (a sweep row's top-N winners
+                only): `GET` it separately to fetch this exact same shape with the points populated.
             signal_count (int | Unset): Number of signals emitted during strategy execution Example: 100000.
             signals_id (str | Unset): Storage key for the signals file. Treat as opaque; use signalsUrl to download.
                 Example: 00000000-0000-0000-0000-000000000000/exec/binance/3vsndwikcuaatjmb83fjtl.
@@ -96,7 +96,7 @@ class ResultMap:
     cagr: float | Unset = UNSET
     max_drawdown: float | Unset = UNSET
     max_drawdown_percent: float | Unset = UNSET
-    equity_curve: list[EquityPoint] | Unset = UNSET
+    equity_curve: EquityCurveResult | Unset = UNSET
     signal_count: int | Unset = UNSET
     signals_id: str | Unset = UNSET
     signals_url: str | Unset = UNSET
@@ -141,12 +141,9 @@ class ResultMap:
 
         max_drawdown_percent = self.max_drawdown_percent
 
-        equity_curve: list[dict[str, Any]] | Unset = UNSET
+        equity_curve: dict[str, Any] | Unset = UNSET
         if not isinstance(self.equity_curve, Unset):
-            equity_curve = []
-            for equity_curve_item_data in self.equity_curve:
-                equity_curve_item = equity_curve_item_data.to_dict()
-                equity_curve.append(equity_curve_item)
+            equity_curve = self.equity_curve.to_dict()
 
         signal_count = self.signal_count
 
@@ -217,7 +214,7 @@ class ResultMap:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.equity_point import EquityPoint
+        from ..models.equity_curve_result import EquityCurveResult
         from ..models.notice import Notice
 
         d = dict(src_dict)
@@ -259,13 +256,11 @@ class ResultMap:
         max_drawdown_percent = d.pop("maxDrawdownPercent", UNSET)
 
         _equity_curve = d.pop("equityCurve", UNSET)
-        equity_curve: list[EquityPoint] | Unset = UNSET
-        if _equity_curve is not UNSET:
-            equity_curve = []
-            for equity_curve_item_data in _equity_curve:
-                equity_curve_item = EquityPoint.from_dict(equity_curve_item_data)
-
-                equity_curve.append(equity_curve_item)
+        equity_curve: EquityCurveResult | Unset
+        if isinstance(_equity_curve, Unset):
+            equity_curve = UNSET
+        else:
+            equity_curve = EquityCurveResult.from_dict(_equity_curve)
 
         signal_count = d.pop("signalCount", UNSET)
 

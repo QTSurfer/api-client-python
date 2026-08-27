@@ -8,6 +8,10 @@ import datetime as _dt
 
 from qtsurfer.api.client.models import (
     CoverageWindow,
+    EquityCurveMeta,
+    EquityCurveOutMode,
+    EquityCurveResult,
+    EquityPoint,
     Exchange,
     HalLink,
     InstrumentCoverage,
@@ -141,3 +145,24 @@ def test_job_state_roundtrip_with_enum() -> None:
     assert parsed.status == a_status
     assert parsed.size == 100
     assert parsed.completed == 42
+
+
+def test_equity_curve_result_roundtrip() -> None:
+    original = EquityCurveResult(
+        meta=EquityCurveMeta(
+            input_point_count=3,
+            output_point_count=2,
+            resampled=True,
+            differential=False,
+            out_mode=EquityCurveOutMode.ARRAY,
+        ),
+        points=[EquityPoint(timestamp=1_700_000_000_000, equity=100.0)],
+    )
+
+    payload = original.to_dict()
+    assert payload["meta"]["outMode"] == "ARRAY"
+    assert payload["points"] == [{"timestamp": 1_700_000_000_000, "equity": 100.0}]
+
+    parsed = EquityCurveResult.from_dict(payload)
+    assert parsed.meta.output_point_count == 2
+    assert parsed.points[0].equity == 100.0
