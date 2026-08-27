@@ -295,4 +295,5 @@ def test_get_sweep_run_equity_curve_request_and_response(client: AuthenticatedCl
     assert route.calls.last.request.url.params["outMode"] == "ARRAY"
     assert route.calls.last.request.url.params["resample"] == "200"
     assert isinstance(response, EquityCurveResult)
+    assert not isinstance(response.points, types.Unset)
     assert response.points[0].timestamp == 1_700_000_000_000

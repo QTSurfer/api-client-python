@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import datetime as _dt
 
+from qtsurfer.api.client import types
 from qtsurfer.api.client.models import (
     CoverageWindow,
     EquityCurveMeta,
@@ -165,4 +166,5 @@ def test_equity_curve_result_roundtrip() -> None:
 
     parsed = EquityCurveResult.from_dict(payload)
     assert parsed.meta.output_point_count == 2
+    assert not isinstance(parsed.points, types.Unset)
     assert parsed.points[0].equity == 100.0
