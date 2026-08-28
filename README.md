@@ -18,7 +18,7 @@
 
 ---
 
-Intentionally thin: one function per endpoint, 1:1 with the spec. For workflow orchestration (polling, retries, domain objects, unified errors), use [`qtsurfer-sdk`](https://github.com/QTSurfer/sdk-python) (coming soon).
+Intentionally thin: one function per endpoint, 1:1 with the spec. For workflow orchestration (polling, retries, domain objects, unified errors), use [`qtsurfer-sdk`](https://github.com/QTSurfer/sdk-python).
 
 - **Sync-first, httpx-powered** — same call site shape as the Java/TS siblings.
 - **Spec-driven** — generated sources fetched from [`QTSurfer/qtsurfer-api`](https://github.com/QTSurfer/qtsurfer-api) by `scripts/regenerate.sh`.
