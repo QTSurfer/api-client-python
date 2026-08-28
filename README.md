@@ -125,10 +125,11 @@ Each generated endpoint module exposes four entrypoints:
 | `api.dataset` | `list_datasets` | `GET /datasets` |
 | `api.dataset` | `get_dataset` | `GET /datasets/{datasetId}` |
 | `api.dataset` | `delete_dataset` | `DELETE /datasets/{datasetId}` |
+| `api.dataset` | `open_dataset_upload` | `POST /datasets/{datasetId}/uploads` — open the next upload session |
 | `api.dataset` | `finalize_dataset_upload` | `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` |
 | `api.dataset` | `get_dataset_upload` | `GET /datasets/{datasetId}/uploads/{uploadId}` |
 
-Twenty-seven of the spec's twenty-eight operations, all reachable through `qtsurfer.api.client.api`
+Twenty-eight of the spec's twenty-nine operations, all reachable through `qtsurfer.api.client.api`
 as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
 openapi-python-client does not support, so no module is generated for it — call it through the
 underlying `httpx` client.
@@ -144,6 +145,15 @@ Upload CSV ticker data and prepare/execute a backtest against it via the reserve
 `user`. `list_datasets`/`get_dataset` never `404` for "none yet", same convention as
 `list_strategies`; `delete_dataset` is a soft delete that doesn't disrupt a backtest already
 running against one of the dataset's versions.
+
+`DatasetCreated` contains only the metadata known immediately after creation (`dataset_id`, `name`,
+`type_`, `instrument`) and its first upload session. Query `get_dataset` for version-derived range,
+cadence, and current-version metadata after the relevant lifecycle stage completes.
+
+To add a later version, call `open_dataset_upload(dataset_id)` to obtain a `DatasetUploadSession`.
+It returns the currently open session again if a previous response was lost. After finalization,
+open a new session before uploading again: finalizing an upload that already produced a version
+returns `409`.
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 

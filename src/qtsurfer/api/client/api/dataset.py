@@ -12,6 +12,11 @@ credentials involved in that ``PUT``. Call ``finalize_dataset_upload`` once
 the upload completes to kick off ingest, then poll ``get_dataset_upload``
 until ``status`` is ``ready`` or ``failed``.
 
+``open_dataset_upload`` returns the current open upload session for an
+existing dataset, or starts the next one after a finalized upload. A finalized
+``upload_id`` cannot be reused: ``finalize_dataset_upload`` returns ``409``;
+open a new session instead.
+
 ``list_datasets`` / ``get_dataset`` never ``404`` for "no datasets" — an
 empty list, same convention as ``list_strategies``. ``delete_dataset`` is a
 soft delete: the dataset stops being listed or preparable from, but a
@@ -25,6 +30,7 @@ from qtsurfer.api.client._generated.api.dataset import (
     get_dataset,
     get_dataset_upload,
     list_datasets,
+    open_dataset_upload,
 )
 
 __all__ = [
@@ -34,4 +40,5 @@ __all__ = [
     "get_dataset",
     "get_dataset_upload",
     "list_datasets",
+    "open_dataset_upload",
 ]

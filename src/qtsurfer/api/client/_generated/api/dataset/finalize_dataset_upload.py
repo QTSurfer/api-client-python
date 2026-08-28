@@ -40,6 +40,11 @@ def _parse_response(
 
         return response_404
 
+    if response.status_code == 409:
+        response_409 = ResponseError.from_dict(response.json())
+
+        return response_409
+
     if response.status_code == 413:
         response_413 = ResponseError.from_dict(response.json())
 
@@ -70,12 +75,15 @@ def sync_detailed(
 ) -> Response[FinalizeDatasetUploadResponse202 | ResponseError]:
     """Finalize an uploaded file and start ingest
 
-     Call once the file has been PUT to the `upload.url` from `POST /datasets`. Enqueues ingest
-    and returns immediately; poll
+     Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
+    `POST /datasets/{datasetId}/uploads`). Enqueues ingest and returns immediately; poll
     `GET /datasets/{datasetId}/uploads/{uploadId}` for the result.
 
-    Idempotent — a repeat finalize of the same upload returns the same `jobId` rather than
-    enqueueing a second ingest.
+    Idempotent while the upload is still open — a repeat finalize before it has produced a
+    version returns the same `jobId` rather than enqueueing a second ingest. Once it HAS
+    produced a version, `uploadId` is spent: finalizing it again is a `409`, even with
+    different bytes freshly PUT to the same URL — open a new upload session instead
+    (`POST /datasets/{datasetId}/uploads`) rather than reusing a spent one.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.
@@ -109,12 +117,15 @@ def sync(
 ) -> FinalizeDatasetUploadResponse202 | ResponseError | None:
     """Finalize an uploaded file and start ingest
 
-     Call once the file has been PUT to the `upload.url` from `POST /datasets`. Enqueues ingest
-    and returns immediately; poll
+     Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
+    `POST /datasets/{datasetId}/uploads`). Enqueues ingest and returns immediately; poll
     `GET /datasets/{datasetId}/uploads/{uploadId}` for the result.
 
-    Idempotent — a repeat finalize of the same upload returns the same `jobId` rather than
-    enqueueing a second ingest.
+    Idempotent while the upload is still open — a repeat finalize before it has produced a
+    version returns the same `jobId` rather than enqueueing a second ingest. Once it HAS
+    produced a version, `uploadId` is spent: finalizing it again is a `409`, even with
+    different bytes freshly PUT to the same URL — open a new upload session instead
+    (`POST /datasets/{datasetId}/uploads`) rather than reusing a spent one.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.
@@ -143,12 +154,15 @@ async def asyncio_detailed(
 ) -> Response[FinalizeDatasetUploadResponse202 | ResponseError]:
     """Finalize an uploaded file and start ingest
 
-     Call once the file has been PUT to the `upload.url` from `POST /datasets`. Enqueues ingest
-    and returns immediately; poll
+     Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
+    `POST /datasets/{datasetId}/uploads`). Enqueues ingest and returns immediately; poll
     `GET /datasets/{datasetId}/uploads/{uploadId}` for the result.
 
-    Idempotent — a repeat finalize of the same upload returns the same `jobId` rather than
-    enqueueing a second ingest.
+    Idempotent while the upload is still open — a repeat finalize before it has produced a
+    version returns the same `jobId` rather than enqueueing a second ingest. Once it HAS
+    produced a version, `uploadId` is spent: finalizing it again is a `409`, even with
+    different bytes freshly PUT to the same URL — open a new upload session instead
+    (`POST /datasets/{datasetId}/uploads`) rather than reusing a spent one.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.
@@ -180,12 +194,15 @@ async def asyncio(
 ) -> FinalizeDatasetUploadResponse202 | ResponseError | None:
     """Finalize an uploaded file and start ingest
 
-     Call once the file has been PUT to the `upload.url` from `POST /datasets`. Enqueues ingest
-    and returns immediately; poll
+     Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
+    `POST /datasets/{datasetId}/uploads`). Enqueues ingest and returns immediately; poll
     `GET /datasets/{datasetId}/uploads/{uploadId}` for the result.
 
-    Idempotent — a repeat finalize of the same upload returns the same `jobId` rather than
-    enqueueing a second ingest.
+    Idempotent while the upload is still open — a repeat finalize before it has produced a
+    version returns the same `jobId` rather than enqueueing a second ingest. Once it HAS
+    produced a version, `uploadId` is spent: finalizing it again is a `409`, even with
+    different bytes freshly PUT to the same URL — open a new upload session instead
+    (`POST /datasets/{datasetId}/uploads`) rather than reusing a spent one.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.

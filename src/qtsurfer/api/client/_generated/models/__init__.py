@@ -17,10 +17,12 @@ from .create_dataset_body import CreateDatasetBody
 from .data_source_type import DataSourceType
 from .dataset import Dataset
 from .dataset_created import DatasetCreated
-from .dataset_created_upload import DatasetCreatedUpload
+from .dataset_created_type import DatasetCreatedType
 from .dataset_type import DatasetType
+from .dataset_upload_session import DatasetUploadSession
 from .dataset_upload_state import DatasetUploadState
 from .dataset_upload_state_status import DatasetUploadStateStatus
+from .dataset_upload_target import DatasetUploadTarget
 from .dataset_version import DatasetVersion
 from .dataset_version_timestamp_unit import DatasetVersionTimestampUnit
 from .dataset_with_links import DatasetWithLinks
@@ -122,10 +124,12 @@ __all__ = (
     "CreateDatasetBody",
     "Dataset",
     "DatasetCreated",
-    "DatasetCreatedUpload",
+    "DatasetCreatedType",
     "DatasetType",
+    "DatasetUploadSession",
     "DatasetUploadState",
     "DatasetUploadStateStatus",
+    "DatasetUploadTarget",
     "DatasetVersion",
     "DatasetVersionTimestampUnit",
     "DatasetWithLinks",

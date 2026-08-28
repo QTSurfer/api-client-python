@@ -6,16 +6,17 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="DatasetCreatedUpload")
+T = TypeVar("T", bound="DatasetUploadTarget")
 
 
 @_attrs_define
-class DatasetCreatedUpload:
-    """
+class DatasetUploadTarget:
+    """A presigned destination for uploading a raw dataset file directly to storage.
+
     Attributes:
-        url (str): Presigned URL. `PUT` the raw CSV file here directly — no `Authorization`
-            header, no other API credentials.
-             Example: https://storage.qtsurfer.com/00000000-.../uploads/up_1a2b3c4d5e6f7a8b/raw.csv?X-Amz-....
+        url (str): Presigned URL. `PUT` the raw CSV file here directly — no `Authorization` header,
+            no other API credentials.
+             Example: https://storage.qtsurfer.com/uploads/00000000-.../up_1a2b3c4d5e6f7a8b/raw.csv?X-Amz-....
         expires_in_minutes (int): How long `url` stays valid. Example: 15.
     """
 
@@ -46,13 +47,13 @@ class DatasetCreatedUpload:
 
         expires_in_minutes = d.pop("expiresInMinutes")
 
-        dataset_created_upload = cls(
+        dataset_upload_target = cls(
             url=url,
             expires_in_minutes=expires_in_minutes,
         )
 
-        dataset_created_upload.additional_properties = d
-        return dataset_created_upload
+        dataset_upload_target.additional_properties = d
+        return dataset_upload_target
 
     @property
     def additional_keys(self) -> list[str]:

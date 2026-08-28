@@ -12,6 +12,7 @@ import respx
 
 from qtsurfer.api.client import AuthenticatedClient, types
 from qtsurfer.api.client.api.backtesting import get_sweep_run_equity_curve
+from qtsurfer.api.client.api.dataset import finalize_dataset_upload, open_dataset_upload
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 from qtsurfer.api.client.api.strategy import (
     delete_strategy,
@@ -22,6 +23,7 @@ from qtsurfer.api.client.api.strategy import (
 )
 from qtsurfer.api.client.models import (
     CoverageWindow,
+    DatasetUploadSession,
     DataSourceType,
     DeleteStrategyResponse200,
     EquityCurveResult,
@@ -297,3 +299,30 @@ def test_get_sweep_run_equity_curve_request_and_response(client: AuthenticatedCl
     assert isinstance(response, EquityCurveResult)
     assert not isinstance(response.points, types.Unset)
     assert response.points[0].timestamp == 1_700_000_000_000
+
+
+@respx.mock
+def test_open_dataset_upload_and_finalize_spent_upload(client: AuthenticatedClient) -> None:
+    session_route = respx.post(f"{BASE_URL}/datasets/dataset-1/uploads").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "uploadId": "upload-2",
+                "upload": {"url": "https://storage.example/upload-2", "expiresInMinutes": 15},
+            },
+        )
+    )
+    finalized_route = respx.post(f"{BASE_URL}/datasets/dataset-1/uploads/upload-1/finalize").mock(
+        return_value=httpx.Response(409, json={"code": 409, "message": "upload already finalized"})
+    )
+
+    opened = open_dataset_upload.sync(dataset_id="dataset-1", client=client)
+    finalized = finalize_dataset_upload.sync_detailed(dataset_id="dataset-1", upload_id="upload-1", client=client)
+
+    assert session_route.called
+    assert isinstance(opened, DatasetUploadSession)
+    assert opened.upload_id == "upload-2"
+    assert opened.upload.url == "https://storage.example/upload-2"
+    assert finalized_route.called
+    assert finalized.status_code == 409
+    assert isinstance(finalized.parsed, ResponseError)

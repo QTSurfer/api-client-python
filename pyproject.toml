@@ -1,6 +1,6 @@
 [project]
 name = "qtsurfer-api-client"
-version = "0.110.3"
+version = "0.111.2"
 description = "Auto-generated Python client for the QTSurfer API."
 readme = "README.md"
 license = "Apache-2.0"

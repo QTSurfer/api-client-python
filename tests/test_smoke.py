@@ -22,7 +22,7 @@ PUBLIC_API = "qtsurfer.api.client.api"
 #: Operations declared by the OpenAPI spec this package is generated from.
 #: Every one of them must be accounted for below, either as a generated module
 #: or as a documented exception.
-SPEC_OPERATION_COUNT = 28
+SPEC_OPERATION_COUNT = 29
 
 #: Each spec ``operationId`` the generator turns into an endpoint module, mapped
 #: to the ``(tag package, module name)`` it lands under.
@@ -71,6 +71,7 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "deleteDataset": ("dataset", "delete_dataset"),
     "finalizeDatasetUpload": ("dataset", "finalize_dataset_upload"),
     "getDatasetUpload": ("dataset", "get_dataset_upload"),
+    "openDatasetUpload": ("dataset", "open_dataset_upload"),
 }
 
 #: Spec operations that deliberately have **no** generated module, and why.

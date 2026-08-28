@@ -82,6 +82,10 @@ def sync_detailed(
     `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` once the upload completes to kick
     off ingest.
 
+    Losing this response loses nothing: calling this dataset's
+    `POST /datasets/{datasetId}/uploads` returns the very same upload session again rather than
+    opening a new one, as long as nothing has been finalized against it yet.
+
     v1 is ticker data only — `type` is not a request field, it is always `\"ticker\"` in the
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative
     forms (e.g. `BTC/USDT:USDT`) are rejected.
@@ -126,6 +130,10 @@ def sync(
     `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` once the upload completes to kick
     off ingest.
 
+    Losing this response loses nothing: calling this dataset's
+    `POST /datasets/{datasetId}/uploads` returns the very same upload session again rather than
+    opening a new one, as long as nothing has been finalized against it yet.
+
     v1 is ticker data only — `type` is not a request field, it is always `\"ticker\"` in the
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative
     forms (e.g. `BTC/USDT:USDT`) are rejected.
@@ -164,6 +172,10 @@ async def asyncio_detailed(
     PUTs the file to directly, no API credentials involved in that PUT. Call
     `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` once the upload completes to kick
     off ingest.
+
+    Losing this response loses nothing: calling this dataset's
+    `POST /datasets/{datasetId}/uploads` returns the very same upload session again rather than
+    opening a new one, as long as nothing has been finalized against it yet.
 
     v1 is ticker data only — `type` is not a request field, it is always `\"ticker\"` in the
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative
@@ -206,6 +218,10 @@ async def asyncio(
     PUTs the file to directly, no API credentials involved in that PUT. Call
     `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` once the upload completes to kick
     off ingest.
+
+    Losing this response loses nothing: calling this dataset's
+    `POST /datasets/{datasetId}/uploads` returns the very same upload session again rather than
+    opening a new one, as long as nothing has been finalized against it yet.
 
     v1 is ticker data only — `type` is not a request field, it is always `\"ticker\"` in the
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative

@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.111.2] — 2026-08-28
+
+Regenerated against OpenAPI spec `0.111.2` (from `0.110.3`).
+
+### Added ✨
+
+- `open_dataset_upload` — `POST /datasets/{datasetId}/uploads` — returns a `DatasetUploadSession` for the current open upload or the next dataset version. `DatasetUploadTarget` names the presigned upload target shape shared by this response and `DatasetCreated`.
+
+### Changed 🔄
+
+- `finalize_dataset_upload` now parses the documented `409` response when an upload session has already produced a version. Open a new upload session instead of reusing that `upload_id`.
+- `DatasetCreated` now mirrors the immediate creation response: its upload session plus `dataset_id`, `name`, `type_`, and `instrument`. Version-derived metadata is obtained through `get_dataset` after its lifecycle stage has completed.
+
 ## [0.110.3] — 2026-08-27
 
 Regenerated against OpenAPI spec `0.110.3` (from `0.110.1`).

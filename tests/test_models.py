@@ -9,6 +9,9 @@ import datetime as _dt
 from qtsurfer.api.client import types
 from qtsurfer.api.client.models import (
     CoverageWindow,
+    DatasetCreated,
+    DatasetCreatedType,
+    DatasetUploadTarget,
     EquityCurveMeta,
     EquityCurveOutMode,
     EquityCurveResult,
@@ -168,3 +171,23 @@ def test_equity_curve_result_roundtrip() -> None:
     assert parsed.meta.output_point_count == 2
     assert not isinstance(parsed.points, types.Unset)
     assert parsed.points[0].equity == 100.0
+
+
+def test_dataset_created_roundtrip_has_only_immediate_metadata() -> None:
+    original = DatasetCreated(
+        upload_id="upload-1",
+        upload=DatasetUploadTarget(url="https://uploads.example/upload-1", expires_in_minutes=15),
+        dataset_id="dataset-1",
+        name="BTC ticks",
+        type_=DatasetCreatedType.TICKER,
+        instrument="BTC/USDT",
+    )
+
+    payload = original.to_dict()
+    assert payload["datasetId"] == "dataset-1"
+    assert "createdAt" not in payload
+    assert "currentVersionId" not in payload
+
+    parsed = DatasetCreated.from_dict(payload)
+    assert parsed.instrument == "BTC/USDT"
+    assert parsed.upload.url == "https://uploads.example/upload-1"
