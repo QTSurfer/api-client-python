@@ -11,18 +11,28 @@ from qtsurfer.api.client.models import (
     CoverageWindow,
     DatasetCreated,
     DatasetCreatedType,
+    DatasetType,
     DatasetUploadTarget,
+    DatasetVersion,
+    DatasetVersionDataFormat,
+    DatasetWithLinks,
+    DatasetWithLinksDataFormat,
     EquityCurveMeta,
     EquityCurveOutMode,
     EquityCurveResult,
     EquityPoint,
     Exchange,
+    ExecuteBacktestBody,
+    ExecuteBacktestBodyParams,
     HalLink,
     InstrumentCoverage,
     InstrumentDetail,
     JobState,
     JobStateStatus,
     ListStrategiesResponse200,
+    ResultMap,
+    ResultMapParams,
+    ScalarStrategyParamValue,
     StrategyLinks,
     StrategyState,
     StrategyStateValidation,
@@ -173,6 +183,36 @@ def test_equity_curve_result_roundtrip() -> None:
     assert parsed.points[0].equity == 100.0
 
 
+def test_execute_backtest_params_roundtrip_and_result_echo() -> None:
+    """The single-run params map supports every documented scalar type."""
+    label: ScalarStrategyParamValue = "fast"
+    request_params = ExecuteBacktestBodyParams()
+    request_params.additional_properties = {
+        "ema.fast.period": 9,
+        "risk.pct": 0.5,
+        "useTrendFilter": True,
+        "strategy.label": label,
+    }
+    request = ExecuteBacktestBody(
+        prepare_job_id="prepare-1",
+        strategy_id="strategy-1",
+        params=request_params,
+    )
+
+    request_payload = request.to_dict()
+    assert request_payload["params"] == request_params.additional_properties
+    parsed_request = ExecuteBacktestBody.from_dict(request_payload)
+    assert not isinstance(parsed_request.params, types.Unset)
+    assert parsed_request.params.to_dict() == request_params.additional_properties
+
+    result_params = ResultMapParams.from_dict(request_params.to_dict())
+    result = ResultMap(strategy_id="strategy-1", instrument="BTC/USDT", params=result_params)
+    assert result.to_dict()["params"] == request_params.additional_properties
+    parsed_result = ResultMap.from_dict(result.to_dict())
+    assert not isinstance(parsed_result.params, types.Unset)
+    assert parsed_result.params.to_dict() == request_params.additional_properties
+
+
 def test_dataset_created_roundtrip_has_only_immediate_metadata() -> None:
     original = DatasetCreated(
         upload_id="upload-1",
@@ -191,3 +231,35 @@ def test_dataset_created_roundtrip_has_only_immediate_metadata() -> None:
     parsed = DatasetCreated.from_dict(payload)
     assert parsed.instrument == "BTC/USDT"
     assert parsed.upload.url == "https://uploads.example/upload-1"
+
+
+def test_dataset_data_location_roundtrip() -> None:
+    """Ready datasets describe the stored bytes with a URL and exact format."""
+    data_url = "https://storage.example/datasets/dsv-1.parquet?signature=example"
+    version = DatasetVersion(
+        dataset_id="dataset-1",
+        data_url=data_url,
+        data_format=DatasetVersionDataFormat.PARQUET,
+    )
+    version_payload = version.to_dict()
+    assert version_payload["dataUrl"] == data_url
+    assert version_payload["dataFormat"] == "parquet"
+    parsed_version = DatasetVersion.from_dict(version_payload)
+    assert parsed_version.data_url == data_url
+    assert parsed_version.data_format is DatasetVersionDataFormat.PARQUET
+
+    dataset = DatasetWithLinks(
+        dataset_id="dataset-1",
+        name="BTC ticks",
+        type_=DatasetType.TICKER,
+        instrument="BTC/USDT",
+        created_at=_dt.datetime(2026, 9, 7, tzinfo=_dt.UTC),
+        data_url=data_url,
+        data_format=DatasetWithLinksDataFormat.PARQUET,
+    )
+    dataset_payload = dataset.to_dict()
+    assert dataset_payload["dataUrl"] == data_url
+    assert dataset_payload["dataFormat"] == "parquet"
+    parsed_dataset = DatasetWithLinks.from_dict(dataset_payload)
+    assert parsed_dataset.data_url == data_url
+    assert parsed_dataset.data_format is DatasetWithLinksDataFormat.PARQUET

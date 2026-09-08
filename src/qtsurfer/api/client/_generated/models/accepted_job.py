@@ -18,7 +18,9 @@ class AcceptedJob:
             {'jobId': '13RBLGQlPnfDjO6wyKSX8i'}
 
         Attributes:
-            job_id (str): Unique job identifier; use this to poll for completion. Example: 13RBLGQlPnfDjO6wyKSX8i.
+            job_id (str): Unique job identifier; use this to poll for completion. For a sweep, pass this same value as the
+                `requestId` path parameter to `executeSweep` — same identifier, different name at that call site. Example:
+                13RBLGQlPnfDjO6wyKSX8i.
     """
 
     job_id: str

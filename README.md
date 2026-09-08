@@ -136,9 +136,10 @@ underlying `httpx` client.
 
 ### Datasets — backtest against your own data
 
-Upload CSV ticker data and prepare/execute a backtest against it via the reserved
+Upload CSV or parquet ticker data and prepare/execute a backtest against it via the reserved
 `exchangeId: user` value on the existing `prepare_backtest`/`execute_backtest` endpoints:
-`create_dataset` returns a `datasetId` plus a presigned URL to `PUT` the CSV to directly, then
+`create_dataset` returns a `datasetId` plus a presigned URL to `PUT` the file to directly (or a
+gzip/zip containing exactly one file), then
 `finalize_dataset_upload` kicks off ingest and `get_dataset_upload` polls until `status` is
 `ready` or `failed`. `PrepareRequest.instrument` is optional for this reason — pass `dataset_id`
 (and optionally `dataset_version_id` to pin a specific past version) instead when the exchange is
@@ -148,7 +149,9 @@ running against one of the dataset's versions.
 
 `DatasetCreated` contains only the metadata known immediately after creation (`dataset_id`, `name`,
 `type_`, `instrument`) and its first upload session. Query `get_dataset` for version-derived range,
-cadence, and current-version metadata after the relevant lifecycle stage completes.
+cadence, and current-version metadata after the relevant lifecycle stage completes. Once ready,
+`data_url` is a presigned URL for the stored data and `data_format` tells whether it is `lastra` or
+`parquet`; choose the reader from `data_format`, not from the uploaded file name.
 
 To add a later version, call `open_dataset_upload(dataset_id)` to obtain a `DatasetUploadSession`.
 It returns the currently open session again if a previous response was lost. After finalization,
@@ -164,11 +167,13 @@ A full `StrategyState` (from `get_strategy`, and from `validate_strategy`'s alre
 ### Equity curves
 
 `execute_backtest` accepts optional `EquityCurveOptions` (`resample`, `differential`, and
-`out_mode`) to shape the returned `ResultMap.equity_curve`. Sweep submissions accept
+`out_mode`) to shape the returned `ResultMap.equity_curve`, plus `params` for one scalar strategy
+property vector. `ResultMap.params` echoes that vector when one was supplied. Sweep submissions accept
 `EquityCurveRequest`, which also controls which trial curves are retained. A retained trial curve
-is exposed as an `EquityCurveResult.url` on its sweep row; use `get_sweep_run_equity_curve` to
-retrieve it. The returned `EquityCurveResult.meta` describes the shape actually served, including
-any server-applied size guard, so treat it as authoritative over requested defaults.
+is exposed as an `EquityCurveResult.url` on its sweep row and may also be inline in the natural
+view; inspect `points` or `equities` to tell. Use `get_sweep_run_equity_curve` to retrieve a chosen
+transform. The returned `EquityCurveResult.meta` describes the shape actually served, including any
+server-applied size guard, so treat it as authoritative over requested defaults.
 
 > **`POST /strategy` (`compileStrategy`)** is currently omitted by the generator because the spec declares its request body as `text/plain` and `openapi-python-client` only emits JSON / form / multipart bodies. Call it directly via the underlying `httpx` client (`client.get_httpx_client().post("/strategy", content=src, headers={"Content-Type": "text/plain"})`) until the spec is restructured. The other `api.strategy` operations have no such restriction and generate normally.
 

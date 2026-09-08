@@ -6,6 +6,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.dataset_version_data_format import DatasetVersionDataFormat
 from ..models.dataset_version_timestamp_unit import DatasetVersionTimestampUnit
 from ..types import UNSET, Unset
 
@@ -21,7 +22,9 @@ class DatasetVersion:
             dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.
             id (str | Unset): The version id. Pass as `datasetVersionId` on `POST .../prepare` to pin it. Example:
                 dsv_8e2b4f19c6a03d7e.
-            bytes_ (int | Unset): Size of the uploaded file. Example: 4831022.
+            bytes_ (int | Unset): Size of the stored file `dataUrl` points at — a converted `lastra` for a CSV/gzip/zip
+                upload, or the parquet file itself, unconverted, for a parquet upload. Not the size of the bytes originally PUT
+                to storage; see `dataFormat`. Example: 4831022.
             rows (int | Unset): Number of data rows. Example: 86400.
             cadence (str | Unset): The discovered bar cadence (e.g. `1s`, `1m`, `1h`). Example: 1s.
             timestamp_unit (DatasetVersionTimestampUnit | Unset): The unit the `timestamp` column was uploaded in —
@@ -30,6 +33,18 @@ class DatasetVersion:
                  Example: iso.
             gaps (int | Unset): Number of gaps at the discovered cadence.
             largest_gap_steps (int | Unset): The largest gap, in units of the discovered cadence step.
+            data_url (str | Unset): Presigned GET URL to the stored file — see `dataFormat` for which format it's in.
+                Present once the version is `ready`. Long-lived (day-scale, not permanent): a
+                DuckDB-WASM/`lastra-ts`-style reader issues HTTP range requests against it lazily over
+                an extended viewing session, not in one shot like a browser upload.
+                 Example: https://storage.qtsurfer.com/00000000-
+                .../ds_3f9a1c2e7b0d4a5f/dsv_8e2b4f19c6a03d7e/ticker_BTC_USDT_1700000000000_1700086400000_1m.lastra?X-Amz-....
+            data_format (DatasetVersionDataFormat | Unset): Which format `dataUrl` is actually in — check this rather than
+                assuming it matches
+                how you uploaded it. `lastra` — our native columnar format — for a CSV (or gzip/zip
+                of one) upload, always converted on ingest. `parquet` for a parquet upload, stored
+                as-is today.
+                 Example: lastra.
     """
 
     dataset_id: str
@@ -40,6 +55,8 @@ class DatasetVersion:
     timestamp_unit: DatasetVersionTimestampUnit | Unset = UNSET
     gaps: int | Unset = UNSET
     largest_gap_steps: int | Unset = UNSET
+    data_url: str | Unset = UNSET
+    data_format: DatasetVersionDataFormat | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -60,6 +77,12 @@ class DatasetVersion:
         gaps = self.gaps
 
         largest_gap_steps = self.largest_gap_steps
+
+        data_url = self.data_url
+
+        data_format: str | Unset = UNSET
+        if not isinstance(self.data_format, Unset):
+            data_format = self.data_format.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -82,6 +105,10 @@ class DatasetVersion:
             field_dict["gaps"] = gaps
         if largest_gap_steps is not UNSET:
             field_dict["largestGapSteps"] = largest_gap_steps
+        if data_url is not UNSET:
+            field_dict["dataUrl"] = data_url
+        if data_format is not UNSET:
+            field_dict["dataFormat"] = data_format
 
         return field_dict
 
@@ -109,6 +136,15 @@ class DatasetVersion:
 
         largest_gap_steps = d.pop("largestGapSteps", UNSET)
 
+        data_url = d.pop("dataUrl", UNSET)
+
+        _data_format = d.pop("dataFormat", UNSET)
+        data_format: DatasetVersionDataFormat | Unset
+        if isinstance(_data_format, Unset):
+            data_format = UNSET
+        else:
+            data_format = DatasetVersionDataFormat(_data_format)
+
         dataset_version = cls(
             dataset_id=dataset_id,
             id=id,
@@ -118,6 +154,8 @@ class DatasetVersion:
             timestamp_unit=timestamp_unit,
             gaps=gaps,
             largest_gap_steps=largest_gap_steps,
+            data_url=data_url,
+            data_format=data_format,
         )
 
         dataset_version.additional_properties = d

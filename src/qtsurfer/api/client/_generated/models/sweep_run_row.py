@@ -25,11 +25,12 @@ class SweepRunRow:
         sharpe (float):
         sortino (float):
         pnl (float): Absolute net PnL in the output currency.
-        pnl_pct (float):
-        cagr (float):
-        max_dd_pct (float):
+        pnl_pct (float): Same units as `pnlTotalPercent` on the single-run result — percent (0-100 scale).
+        cagr (float): Same units as `cagr` on the single-run result — a ratio, not a percent.
+        max_dd_pct (float): Same units as `maxDrawdownPercent` on the single-run result — percent (0-100 scale).
         trades (int):
-        win_rate (float):
+        win_rate (float): Same units as `winRate` on the single-run result — a fraction, 0.0-1.0 (a rate, not a
+            percent).
         below_trade_floor (bool):
         aborted (bool):
         runtime_ms (int):
@@ -42,8 +43,10 @@ class SweepRunRow:
             be distinguished from a genuinely robust one.
         deflated_sharpe (float | Unset): Probability that this run's Sharpe reflects real edge rather than the best draw
             from however many parameter vectors were tried. Above ~0.95 the result survives the multiple-testing correction;
-            near 0.5 or below it is indistinguishable from the best of a pile of coin flips. Absent on aborted runs, and on
-            sweeps with too few trials to establish any dispersion to deflate against.
+            near 0.5 or below it is indistinguishable from the best of a pile of coin flips. Absent on aborted runs, on
+            sweeps with too few trials to establish any dispersion to deflate against, on runs with fewer than 3 period
+            returns, and on a degenerate (near-constant) return series — all cases where the underlying statistic isn't
+            meaningfully computable, rather than genuinely zero. A present value is the computed probability, however small.
         equity_curve (EquityCurveResult | Unset): An equity curve, shaped per `meta.outMode`: `points` when `ARRAY`,
             `timestamps` + `equities` (parallel arrays) when `SHORT`. Used identically wherever a curve is returned — a
             plain backtest's inline `equityCurve` and a sweep row's `equityCurve` are the same type. `url` is present

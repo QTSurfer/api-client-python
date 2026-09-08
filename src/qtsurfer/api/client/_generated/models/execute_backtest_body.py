@@ -10,6 +10,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.equity_curve_options import EquityCurveOptions
+    from ..models.execute_backtest_body_params import ExecuteBacktestBodyParams
 
 
 T = TypeVar("T", bound="ExecuteBacktestBody")
@@ -32,12 +33,31 @@ class ExecuteBacktestBody:
             pipeline order: `resample` (point count) then `differential` (encoding) then `outMode` (JSON shape) — each stage
             assumes the previous one already ran. A server-side size guard can still force a smaller/deflated shape above
             its thresholds regardless of what is requested here — see `EquityCurveMeta` for what actually happened.
+        params (ExecuteBacktestBodyParams | Unset): Strategy properties to apply to this run. Omit to run the strategy's
+            declared
+            defaults, which is exactly what a request without this field has always done.
+
+            Each key is the `name` declared on the strategy's `@StrategyProperty`, which
+            need NOT match the Java field it annotates — `GET`/`POST /strategy` returns
+            `declaredProperties` for precisely this. A key naming no declared property is
+            rejected: the job fails with the list of names the strategy does declare,
+            rather than completing at the defaults and handing back a plausible result for
+            parameters nobody chose.
+
+            Scalars only — number, string or boolean. Ranges and lists belong to
+            `executeSweep`; one request here is one run. `null` is not a value: leave the
+            key out to keep a property at its default. Keys are made of letters, digits,
+            `_`, `-` and dots, and may not be `strategyId`, `storeSignals`, `equityCurve`,
+            `backtestEnabled` or `backtestFakeExecution` — those configure the job rather
+            than the strategy.
+             Example: {'ema.fast.period': 9, 'ema.slow.period': 21, 'risk.pct': 0.5}.
     """
 
     prepare_job_id: str
     strategy_id: str
     store_signals: bool | Unset = False
     equity_curve: EquityCurveOptions | Unset = UNSET
+    params: ExecuteBacktestBodyParams | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -51,6 +71,10 @@ class ExecuteBacktestBody:
         if not isinstance(self.equity_curve, Unset):
             equity_curve = self.equity_curve.to_dict()
 
+        params: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.params, Unset):
+            params = self.params.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -63,12 +87,15 @@ class ExecuteBacktestBody:
             field_dict["storeSignals"] = store_signals
         if equity_curve is not UNSET:
             field_dict["equityCurve"] = equity_curve
+        if params is not UNSET:
+            field_dict["params"] = params
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.equity_curve_options import EquityCurveOptions
+        from ..models.execute_backtest_body_params import ExecuteBacktestBodyParams
 
         d = dict(src_dict)
         prepare_job_id = d.pop("prepareJobId")
@@ -84,11 +111,19 @@ class ExecuteBacktestBody:
         else:
             equity_curve = EquityCurveOptions.from_dict(_equity_curve)
 
+        _params = d.pop("params", UNSET)
+        params: ExecuteBacktestBodyParams | Unset
+        if isinstance(_params, Unset):
+            params = UNSET
+        else:
+            params = ExecuteBacktestBodyParams.from_dict(_params)
+
         execute_backtest_body = cls(
             prepare_job_id=prepare_job_id,
             strategy_id=strategy_id,
             store_signals=store_signals,
             equity_curve=equity_curve,
+            params=params,
         )
 
         execute_backtest_body.additional_properties = d

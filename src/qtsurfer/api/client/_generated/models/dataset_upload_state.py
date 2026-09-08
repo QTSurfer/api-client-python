@@ -18,7 +18,7 @@ T = TypeVar("T", bound="DatasetUploadState")
 
 @_attrs_define
 class DatasetUploadState:
-    """Progress of one upload, from staged through ingest. Postgres-backed once a version exists,
+    """Progress of one upload, from staged through ingest. Durably recorded once a version exists,
     so `ready`/`failed` are permanent answers; `uploading`/`ingesting` reflect in-flight state
     that can itself age out — see the `404` case on `GET .../uploads/{uploadId}`.
 
@@ -29,7 +29,8 @@ class DatasetUploadState:
                   called yet.
                 * `ingesting` — `finalize` was called; the worker is parsing and validating the file.
                 * `ready` — ingested successfully. `version` carries the result.
-                * `failed` — ingest rejected the file (e.g. bad CSV contract, mixed timestamp units).
+                * `failed` — ingest rejected the file (e.g. bad CSV contract, mixed timestamp units, a
+                  `.zip` with no file inside or more than one).
                  Example: ready.
             job_id (str | Unset): The ingest job id, while `status` is `ingesting`.
             version (DatasetVersion | Unset): One successfully ingested upload. Cadence and timestamp unit are discovered

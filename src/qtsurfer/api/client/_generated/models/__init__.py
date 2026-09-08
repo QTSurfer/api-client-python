@@ -24,8 +24,10 @@ from .dataset_upload_state import DatasetUploadState
 from .dataset_upload_state_status import DatasetUploadStateStatus
 from .dataset_upload_target import DatasetUploadTarget
 from .dataset_version import DatasetVersion
+from .dataset_version_data_format import DatasetVersionDataFormat
 from .dataset_version_timestamp_unit import DatasetVersionTimestampUnit
 from .dataset_with_links import DatasetWithLinks
+from .dataset_with_links_data_format import DatasetWithLinksDataFormat
 from .dataset_with_links_links import DatasetWithLinksLinks
 from .dataset_with_links_links_self import DatasetWithLinksLinksSelf
 from .declared_property import DeclaredProperty
@@ -42,6 +44,7 @@ from .equity_curve_result import EquityCurveResult
 from .equity_point import EquityPoint
 from .exchange import Exchange
 from .execute_backtest_body import ExecuteBacktestBody
+from .execute_backtest_body_params import ExecuteBacktestBodyParams
 from .execute_sweep_accepted import ExecuteSweepAccepted
 from .execute_sweep_request import ExecuteSweepRequest
 from .execute_sweep_result import ExecuteSweepResult
@@ -77,6 +80,7 @@ from .prepare_request import PrepareRequest
 from .prepare_request_cadence import PrepareRequestCadence
 from .response_error import ResponseError
 from .result_map import ResultMap
+from .result_map_params import ResultMapParams
 from .result_map_signals_upload import ResultMapSignalsUpload
 from .strategy_links import StrategyLinks
 from .strategy_state import StrategyState
@@ -131,8 +135,10 @@ __all__ = (
     "DatasetUploadStateStatus",
     "DatasetUploadTarget",
     "DatasetVersion",
+    "DatasetVersionDataFormat",
     "DatasetVersionTimestampUnit",
     "DatasetWithLinks",
+    "DatasetWithLinksDataFormat",
     "DatasetWithLinksLinks",
     "DatasetWithLinksLinksSelf",
     "DataSourceType",
@@ -150,6 +156,7 @@ __all__ = (
     "EquityPoint",
     "Exchange",
     "ExecuteBacktestBody",
+    "ExecuteBacktestBodyParams",
     "ExecuteSweepAccepted",
     "ExecuteSweepRequest",
     "ExecuteSweepResult",
@@ -185,6 +192,7 @@ __all__ = (
     "PrepareRequestCadence",
     "ResponseError",
     "ResultMap",
+    "ResultMapParams",
     "ResultMapSignalsUpload",
     "StrategyLinks",
     "StrategyState",

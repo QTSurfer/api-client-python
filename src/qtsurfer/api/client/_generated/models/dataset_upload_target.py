@@ -14,8 +14,9 @@ class DatasetUploadTarget:
     """A presigned destination for uploading a raw dataset file directly to storage.
 
     Attributes:
-        url (str): Presigned URL. `PUT` the raw CSV file here directly — no `Authorization` header,
-            no other API credentials.
+        url (str): Presigned URL. `PUT` the file here directly — the CSV or parquet itself, or a `.gz`/`.zip` of it
+            (see `createDataset`'s own description) — no `Authorization` header, no other API
+            credentials.
              Example: https://storage.qtsurfer.com/uploads/00000000-.../up_1a2b3c4d5e6f7a8b/raw.csv?X-Amz-....
         expires_in_minutes (int): How long `url` stays valid. Example: 15.
     """

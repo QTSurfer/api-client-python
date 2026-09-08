@@ -14,6 +14,7 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.equity_curve_result import EquityCurveResult
     from ..models.notice import Notice
+    from ..models.result_map_params import ResultMapParams
 
 
 T = TypeVar("T", bound="ResultMap")
@@ -54,12 +55,13 @@ class ResultMap:
             pnl_total_percent (float | Unset): Total PnL as a percentage of the initial capital (`backtestFunding`). Zero
                 when `backtestFunding` is 0. Example: 42.75.
             total_trades (int | Unset): Total number of trades executed by the strategy Example: 156.
-            win_rate (float | Unset): Percentage of profitable trades (0-100) Example: 58.33.
+            win_rate (float | Unset): Fraction of profitable trades, 0.0-1.0 (a rate, not a percent — multiply by 100 to
+                display as one). Zero when `totalTrades` is 0. Example: 0.5833.
             sharpe_ratio (float | Unset): Risk-adjusted return ratio (mean return / standard deviation of returns) Example:
                 1.245.
             sortino_ratio (float | Unset): Downside risk-adjusted return ratio (mean return / downside deviation) Example:
                 1.872.
-            cagr (float | Unset): Compound Annual Growth Rate Example: 0.1534.
+            cagr (float | Unset): Compound Annual Growth Rate (eg. 0.15 for 15%) Example: 0.1534.
             max_drawdown (float | Unset): Maximum absolute drawdown in the output currency Example: 12.5.
             max_drawdown_percent (float | Unset): Maximum percentage drawdown from peak equity Example: 8.75.
             equity_curve (EquityCurveResult | Unset): An equity curve, shaped per `meta.outMode`: `points` when `ARRAY`,
@@ -67,6 +69,10 @@ class ResultMap:
                 plain backtest's inline `equityCurve` and a sweep row's `equityCurve` are the same type. `url` is present
                 *instead of* any points when the curve is served by pointer rather than inline (a sweep row's top-N winners
                 only): `GET` it separately to fetch this exact same shape with the points populated.
+            params (ResultMapParams | Unset): The strategy properties this run was given, echoed back as sent. Absent when
+                the request carried none, so its presence is what distinguishes a parameterised run from one at the declared
+                defaults — a stored result cannot otherwise say which vector produced it, and this endpoint is meant to be
+                called repeatedly over one prepare. Example: {'ema.fast.period': 9, 'ema.slow.period': 21}.
             signal_count (int | Unset): Number of signals emitted during strategy execution Example: 100000.
             signals_id (str | Unset): Storage key for the signals file. Treat as opaque; use signalsUrl to download.
                 Example: 00000000-0000-0000-0000-000000000000/exec/binance/3vsndwikcuaatjmb83fjtl.
@@ -97,6 +103,7 @@ class ResultMap:
     max_drawdown: float | Unset = UNSET
     max_drawdown_percent: float | Unset = UNSET
     equity_curve: EquityCurveResult | Unset = UNSET
+    params: ResultMapParams | Unset = UNSET
     signal_count: int | Unset = UNSET
     signals_id: str | Unset = UNSET
     signals_url: str | Unset = UNSET
@@ -144,6 +151,10 @@ class ResultMap:
         equity_curve: dict[str, Any] | Unset = UNSET
         if not isinstance(self.equity_curve, Unset):
             equity_curve = self.equity_curve.to_dict()
+
+        params: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.params, Unset):
+            params = self.params.to_dict()
 
         signal_count = self.signal_count
 
@@ -197,6 +208,8 @@ class ResultMap:
             field_dict["maxDrawdownPercent"] = max_drawdown_percent
         if equity_curve is not UNSET:
             field_dict["equityCurve"] = equity_curve
+        if params is not UNSET:
+            field_dict["params"] = params
         if signal_count is not UNSET:
             field_dict["signalCount"] = signal_count
         if signals_id is not UNSET:
@@ -216,6 +229,7 @@ class ResultMap:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.equity_curve_result import EquityCurveResult
         from ..models.notice import Notice
+        from ..models.result_map_params import ResultMapParams
 
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
@@ -262,6 +276,13 @@ class ResultMap:
         else:
             equity_curve = EquityCurveResult.from_dict(_equity_curve)
 
+        _params = d.pop("params", UNSET)
+        params: ResultMapParams | Unset
+        if isinstance(_params, Unset):
+            params = UNSET
+        else:
+            params = ResultMapParams.from_dict(_params)
+
         signal_count = d.pop("signalCount", UNSET)
 
         signals_id = d.pop("signalsId", UNSET)
@@ -301,6 +322,7 @@ class ResultMap:
             max_drawdown=max_drawdown,
             max_drawdown_percent=max_drawdown_percent,
             equity_curve=equity_curve,
+            params=params,
             signal_count=signal_count,
             signals_id=signals_id,
             signals_url=signals_url,

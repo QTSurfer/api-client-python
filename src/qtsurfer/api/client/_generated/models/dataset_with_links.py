@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
 from ..models.dataset_type import DatasetType
+from ..models.dataset_with_links_data_format import DatasetWithLinksDataFormat
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -45,6 +46,19 @@ class DatasetWithLinks:
         cadence (str | Unset): `currentVersionId`'s own discovered bar cadence (e.g. `1s`, `1m`, `1h`). Absent until a
             version exists.
              Example: 1m.
+        data_url (str | Unset): Presigned GET URL to the current version's stored file — see `dataFormat` for
+            which format it's actually in. Present only once the current version's status is
+            `ready`. Long-lived (day-scale, not permanent): a DuckDB-WASM/`lastra-ts`-style
+            reader issues HTTP range requests against it lazily over an extended viewing
+            session, not in one shot like a browser upload.
+             Example: https://storage.qtsurfer.com/00000000-
+            .../ds_3f9a1c2e7b0d4a5f/dsv_8e2b4f19c6a03d7e/ticker_BTC_USDT_1700000000000_1700086400000_1m.lastra?X-Amz-....
+        data_format (DatasetWithLinksDataFormat | Unset): Which format `dataUrl` is actually in — check this rather than
+            assuming it
+            matches how you uploaded it. `lastra` — our native columnar format — for a CSV (or
+            gzip/zip of one) upload, always converted on ingest. `parquet` for a parquet
+            upload, stored as-is today.
+             Example: lastra.
         field_links (DatasetWithLinksLinks | Unset):
     """
 
@@ -58,6 +72,8 @@ class DatasetWithLinks:
     from_: datetime.datetime | Unset = UNSET
     to: datetime.datetime | Unset = UNSET
     cadence: str | Unset = UNSET
+    data_url: str | Unset = UNSET
+    data_format: DatasetWithLinksDataFormat | Unset = UNSET
     field_links: DatasetWithLinksLinks | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -88,6 +104,12 @@ class DatasetWithLinks:
 
         cadence = self.cadence
 
+        data_url = self.data_url
+
+        data_format: str | Unset = UNSET
+        if not isinstance(self.data_format, Unset):
+            data_format = self.data_format.value
+
         field_links: dict[str, Any] | Unset = UNSET
         if not isinstance(self.field_links, Unset):
             field_links = self.field_links.to_dict()
@@ -113,6 +135,10 @@ class DatasetWithLinks:
             field_dict["to"] = to
         if cadence is not UNSET:
             field_dict["cadence"] = cadence
+        if data_url is not UNSET:
+            field_dict["dataUrl"] = data_url
+        if data_format is not UNSET:
+            field_dict["dataFormat"] = data_format
         if field_links is not UNSET:
             field_dict["_links"] = field_links
 
@@ -158,6 +184,15 @@ class DatasetWithLinks:
 
         cadence = d.pop("cadence", UNSET)
 
+        data_url = d.pop("dataUrl", UNSET)
+
+        _data_format = d.pop("dataFormat", UNSET)
+        data_format: DatasetWithLinksDataFormat | Unset
+        if isinstance(_data_format, Unset):
+            data_format = UNSET
+        else:
+            data_format = DatasetWithLinksDataFormat(_data_format)
+
         _field_links = d.pop("_links", UNSET)
         field_links: DatasetWithLinksLinks | Unset
         if isinstance(_field_links, Unset):
@@ -176,6 +211,8 @@ class DatasetWithLinks:
             from_=from_,
             to=to,
             cadence=cadence,
+            data_url=data_url,
+            data_format=data_format,
             field_links=field_links,
         )
 
