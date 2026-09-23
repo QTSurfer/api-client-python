@@ -20,8 +20,9 @@ class CompileStrategyResponse200:
     """
     Attributes:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
-            always yields the same id, for every caller, whatever its formatting. See
-            `POST /strategy` for exactly which rewrites preserve it and which do not.
+            always yields the same id, for every caller. How much formatting the id ignores depends on
+            the language — see `POST /strategy` for exactly which rewrites preserve it and which do
+            not.
              Example: 6bsh31ikwkuivhtgcoa6s4.
         declared_properties (list[DeclaredProperty] | Unset): What could be established about this strategy's sweep-key
             vocabulary without

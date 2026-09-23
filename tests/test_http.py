@@ -11,9 +11,10 @@ import pytest
 import respx
 
 from qtsurfer.api.client import AuthenticatedClient, types
-from qtsurfer.api.client.api.backtesting import get_sweep_run_equity_curve
+from qtsurfer.api.client.api.backtesting import get_backtest_result, get_sweep_run_equity_curve
 from qtsurfer.api.client.api.dataset import finalize_dataset_upload, open_dataset_upload
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
+from qtsurfer.api.client.api.live_execution import get_live_run_signals
 from qtsurfer.api.client.api.strategy import (
     delete_strategy,
     get_strategy,
@@ -28,6 +29,7 @@ from qtsurfer.api.client.models import (
     DeleteStrategyResponse200,
     EquityCurveResult,
     Exchange,
+    GetBacktestResultResponse202,
     GetStrategyCodeResponse200,
     HalLink,
     InstrumentCoverage,
@@ -136,6 +138,21 @@ def test_list_instruments_detailed_returns_status(client: AuthenticatedClient) -
     assert response.status_code == 404
     # parsed is the ResponseError model on the documented 404 branch.
     assert response.parsed is not None
+
+
+@respx.mock
+def test_get_backtest_result_202_is_not_deserialized_as_a_result_map(client: AuthenticatedClient) -> None:
+    respx.get(f"{BASE_URL}/backtest/binance/ticker/execute/queued-job").mock(return_value=httpx.Response(202, json={}))
+
+    response = get_backtest_result.sync_detailed(
+        client=client,
+        exchange_id="binance",
+        type_=DataSourceType.TICKER,
+        job_id="queued-job",
+    )
+
+    assert response.status_code == 202
+    assert isinstance(response.parsed, GetBacktestResultResponse202)
 
 
 @respx.mock
@@ -326,3 +343,21 @@ def test_open_dataset_upload_and_finalize_spent_upload(client: AuthenticatedClie
     assert finalized_route.called
     assert finalized.status_code == 409
     assert isinstance(finalized.parsed, ResponseError)
+
+
+@respx.mock
+def test_get_live_run_signals_expired_cursor_is_a_typed_response(client: AuthenticatedClient) -> None:
+    route = respx.get(f"{BASE_URL}/live/run-1/signals").mock(
+        return_value=httpx.Response(
+            410,
+            json={"code": 410, "message": "cursor expired", "availableSinceMs": 1_700_000_000_000},
+        )
+    )
+
+    response = get_live_run_signals.sync_detailed(run_id="run-1", cursor="expired", client=client)
+
+    assert route.called
+    assert route.calls.last.request.url.params["cursor"] == "expired"
+    assert response.status_code == 410
+    assert isinstance(response.parsed, ResponseError)
+    assert response.parsed.additional_properties["availableSinceMs"] == 1_700_000_000_000

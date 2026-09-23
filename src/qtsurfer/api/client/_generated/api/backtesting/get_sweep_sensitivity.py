@@ -112,8 +112,19 @@ def sync_detailed(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         request_id (str):
         sweep_id (str):
         objective (GetSweepSensitivityObjective | Unset):
@@ -177,8 +188,19 @@ def sync(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         request_id (str):
         sweep_id (str):
         objective (GetSweepSensitivityObjective | Unset):
@@ -237,8 +259,19 @@ async def asyncio_detailed(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         request_id (str):
         sweep_id (str):
         objective (GetSweepSensitivityObjective | Unset):
@@ -300,8 +333,19 @@ async def asyncio(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         request_id (str):
         sweep_id (str):
         objective (GetSweepSensitivityObjective | Unset):

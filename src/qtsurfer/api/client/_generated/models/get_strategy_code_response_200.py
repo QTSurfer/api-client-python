@@ -14,10 +14,11 @@ class GetStrategyCodeResponse200:
     """
     Attributes:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
-            always yields the same id, for every caller, whatever its formatting. See
-            `POST /strategy` for exactly which rewrites preserve it and which do not.
+            always yields the same id, for every caller. How much formatting the id ignores depends on
+            the language — see `POST /strategy` for exactly which rewrites preserve it and which do
+            not.
              Example: 6bsh31ikwkuivhtgcoa6s4.
-        code (str): Raw strategy Java source code, exactly as registered.
+        code (str): Raw strategy source code (Java or QTScript), exactly as registered.
     """
 
     strategy_id: str

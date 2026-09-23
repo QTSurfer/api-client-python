@@ -23,11 +23,12 @@ class JobState:
             encoding the data source type, an internal user id, the exchange, the job id, and the instrument — but that
             structure is not a committed contract and may change without notice. Treat it as an opaque token: store and pass
             it back, don't parse it. Example:
-            jctx:ticker:76b90203-03c2-46f6-b366-9944f167e818:binance:5ikyamio8b3v9wcnfxztzg:btc/usdt:0vicnz3thzhrqvfczks1pu.
+            jctx:ticker:00000000-0000-0000-0000-000000000000:binance:5ikyamio8b3v9wcnfxztzg:btc/usdt:0vicnz3thzhrqvfczks1pu.
         status (JobStateStatus): Current status of the job. Treat `Completed | Aborted | Failed` as
             terminal; `New | Started` mean keep polling. A single-instrument prepare
             is always terminal (`Completed`) — decide from
-            `PrepareJobState.coverageRatio`, not by polling.
+            `PrepareJobState.coverageRatio` (or `dataFrom`/`dataTo` against an `rt` dataset,
+            which has no ratio), not by polling.
              Example: Completed.
         size (int): Total size of the data being prepared Example: 100.
         completed (int): The amount of data processed so far Example: 50.

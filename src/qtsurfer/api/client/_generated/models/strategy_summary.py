@@ -22,8 +22,9 @@ class StrategySummary:
 
         Attributes:
             strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
-                always yields the same id, for every caller, whatever its formatting. See
-                `POST /strategy` for exactly which rewrites preserve it and which do not.
+                always yields the same id, for every caller. How much formatting the id ignores depends on
+                the language — see `POST /strategy` for exactly which rewrites preserve it and which do
+                not.
                  Example: 6bsh31ikwkuivhtgcoa6s4.
             compiled_at (datetime.datetime | Unset): When the live compilation was produced.
             required_sources (list[str] | Unset): The market data this strategy needs. Absent, not empty, when it could

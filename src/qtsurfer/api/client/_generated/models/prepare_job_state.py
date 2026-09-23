@@ -31,19 +31,22 @@ class PrepareJobState:
     dataset-backed prepare (`exchangeId: user`), coverage is reported on the dataset's own
     cadence grid instead — hour-walking a daily dataset would report `1/24` and read as
     broken — via `cadence`/`gaps`/`largestGapSteps`; `totalHours`/`hoursWithData`/
-    `hoursWithoutData` are absent in that case. `dataFrom`/`dataTo`/`coverageRatio` are present
-    either way, computed accordingly.
+    `hoursWithoutData` are absent in that case. `dataFrom`/`dataTo` are present either way, and
+    `coverageRatio` too, computed accordingly — except against a dataset whose `cadence` is `rt`:
+    with no fixed step there is no expected row count to measure against, so `coverageRatio`
+    is absent and `gaps`/`largestGapSteps` are `0`.
 
         Attributes:
             context_id (str): Identifier for the job's execution context. Its current shape is a colon-delimited string
                 encoding the data source type, an internal user id, the exchange, the job id, and the instrument — but that
                 structure is not a committed contract and may change without notice. Treat it as an opaque token: store and pass
                 it back, don't parse it. Example:
-                jctx:ticker:76b90203-03c2-46f6-b366-9944f167e818:binance:5ikyamio8b3v9wcnfxztzg:btc/usdt:0vicnz3thzhrqvfczks1pu.
+                jctx:ticker:00000000-0000-0000-0000-000000000000:binance:5ikyamio8b3v9wcnfxztzg:btc/usdt:0vicnz3thzhrqvfczks1pu.
             status (JobStateStatus): Current status of the job. Treat `Completed | Aborted | Failed` as
                 terminal; `New | Started` mean keep polling. A single-instrument prepare
                 is always terminal (`Completed`) — decide from
-                `PrepareJobState.coverageRatio`, not by polling.
+                `PrepareJobState.coverageRatio` (or `dataFrom`/`dataTo` against an `rt` dataset,
+                which has no ratio), not by polling.
                  Example: Completed.
             size (int): Total size of the data being prepared Example: 100.
             completed (int): The amount of data processed so far Example: 50.
@@ -61,7 +64,8 @@ class PrepareJobState:
                 `totalHours` is 0), the fraction of hours in the requested range that have served
                 data. Against a dataset (`exchangeId: user`): `rows / expectedStepsAtCadence`
                 over the dataset version's own range — echoing what ingest computed once, not
-                recomputed against a narrower prepare request.
+                recomputed against a narrower prepare request. Absent for an `rt` dataset (no
+                fixed step, so no expected row count).
                  Example: 0.994.
             total_hours (int | Unset): Number of whole hours in the requested prepare range. Managed exchanges only —
                 absent for a dataset-backed prepare.
@@ -69,13 +73,15 @@ class PrepareJobState:
             hours_with_data (int | Unset): Number of hours in the range that have data. Managed exchanges only — absent for
                 a dataset-backed prepare.
                  Example: 167.
-            cadence (str | Unset): The dataset version's own discovered cadence (e.g. `1m`, `1h`). Only present for a
-                dataset-backed prepare (`exchangeId: user`).
+            cadence (str | Unset): The dataset version's own discovered cadence — a fixed grid (e.g. `1m`, `1h`) or
+                `rt` (see `DatasetVersion.cadence`). Only present for a dataset-backed prepare
+                (`exchangeId: user`).
                  Example: 1m.
             gaps (int | Unset): Number of gaps in the dataset version at its own cadence, as discovered at ingest
-                time. Only present for a dataset-backed prepare.
-            largest_gap_steps (int | Unset): The largest gap in the dataset version, in units of its own cadence step. Only
-                present for a dataset-backed prepare.
+                time. `0` for `rt`. Only present for a dataset-backed prepare.
+            largest_gap_steps (int | Unset): The largest gap in the dataset version, in units of its own cadence step. `0`
+                for
+                `rt`. Only present for a dataset-backed prepare.
             hours_without_data (list[PrepareJobStateHoursWithoutDataItem] | Unset): One entry per hour in the range that has
                 no data, with a rationale. Managed
                 exchanges only — absent for a dataset-backed prepare.

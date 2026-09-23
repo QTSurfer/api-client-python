@@ -16,7 +16,7 @@ T = TypeVar("T", bound="SweepBaseConfig")
 class SweepBaseConfig:
     """
     Attributes:
-        initial_funding (float | Unset):  Default: 10000.0.
+        initial_funding (float | Unset):  Default: 100.0.
         fee_rate (float | Unset):  Default: 0.001.
         buy_fee_rate (float | Unset):
         sell_fee_rate (float | Unset):
@@ -24,7 +24,7 @@ class SweepBaseConfig:
         percent_amount_to_lock (float | Unset):
     """
 
-    initial_funding: float | Unset = 10000.0
+    initial_funding: float | Unset = 100.0
     fee_rate: float | Unset = 0.001
     buy_fee_rate: float | Unset = UNSET
     sell_fee_rate: float | Unset = UNSET

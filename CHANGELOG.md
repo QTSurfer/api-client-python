@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.126.1] — 2026-09-23
+
+- Represent nullable live-signal fields correctly.
+
+## [0.126.0] — 2026-09-23
+
+Regenerated against OpenAPI spec `0.126.0` (from `0.115.1`).
+
+### Added ✨
+
+- Account and account-usage endpoints.
+- Dataset source imports, dataset lifecycle metadata, and timestamp-unit metadata.
+- Live Execution endpoints, including recorded-signal pagination. An expired signal cursor is
+  parsed as a typed `410` response; restart from its `availableSinceMs` value.
+
+### Changed 🔄
+
+- Backtesting accepts `kline` sources where the API permits them, with cadence represented as a
+  string rather than the removed `PrepareRequestCadence` enum.
+
 ## [0.115.1] — 2026-09-08
 
 Regenerated against OpenAPI spec `0.115.1` (from `0.111.2`).

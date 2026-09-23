@@ -8,6 +8,8 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
+from ..models.dataset_status import DatasetStatus
+from ..models.dataset_timestamp_unit import DatasetTimestampUnit
 from ..models.dataset_type import DatasetType
 from ..models.dataset_with_links_data_format import DatasetWithLinksDataFormat
 from ..types import UNSET, Unset
@@ -26,9 +28,19 @@ class DatasetWithLinks:
     Attributes:
         dataset_id (str): Opaque id, returned by `POST /datasets`. Example: ds_3f9a1c2e7b0d4a5f.
         name (str): Unique among your datasets. Example: My BTC ticks.
-        type_ (DatasetType): Always `ticker` in v1. Example: ticker.
+        type_ (DatasetType): `ticker` for an upload or a `dex` import with no `cadence` requested (native per-trade
+            data). `klines` for a `dex` import that requested a candle `cadence` — pre-aggregated
+            bars rather than raw ticks. Purely informational; both shapes are read the same way.
+             Example: ticker.
         instrument (str): Exchange instrument identifier (e.g. a currency pair) Example: BTC/USDT.
         created_at (datetime.datetime): When the dataset was created. Example: 2026-08-20T09:00:00Z.
+        status (DatasetStatus): * `ready` — `currentVersionId` is set; `from`/`to`/`cadence`/`bytes`/`rows`/`gaps`/
+              `largestGapSteps` describe it.
+            * `failed` — the most recent upload/import attempt failed. `currentVersionId` and the
+              fields above are absent — there is nothing to read yet. See `error`.
+            * `pending` — nothing has ever been attempted (just created, or an upload was never
+              finalized).
+             Example: ready.
         current_version_id (str | Unset): The id of the most recently finalized, successfully ingested version. Absent
             until at
             least one upload has finished ingesting.
@@ -43,9 +55,25 @@ class DatasetWithLinks:
             until
             a version exists.
              Example: 2026-03-08T00:00:00Z.
-        cadence (str | Unset): `currentVersionId`'s own discovered bar cadence (e.g. `1s`, `1m`, `1h`). Absent until a
-            version exists.
+        cadence (str | Unset): `currentVersionId`'s own discovered cadence — a fixed grid (e.g. `1s`, `1m`, `1h`) or
+            `rt` (see `DatasetVersion.cadence`). Absent until a version exists.
              Example: 1m.
+        timestamp_unit (DatasetTimestampUnit | Unset): `currentVersionId`'s own timestamp unit (see
+            `DatasetVersion.timestampUnit`) — decode
+            the `timestamp` column of `dataUrl`'s file accordingly. Present only when `status` is
+            `ready`.
+             Example: iso.
+        bytes_ (int | Unset): Size of `currentVersionId`'s own stored file. Present only when `status` is `ready` —
+            see `DatasetVersion.bytes` for what it measures exactly.
+             Example: 4831022.
+        rows (int | Unset): `currentVersionId`'s own row count. Present only when `status` is `ready`. Example: 86400.
+        gaps (int | Unset): `currentVersionId`'s own gap count at its discovered cadence. Present only when `status` is
+            `ready`.
+        largest_gap_steps (int | Unset): `currentVersionId`'s own largest gap, in units of its discovered cadence step.
+            Present only when `status` is `ready`.
+        error (str | Unset): A human-readable reason the most recent upload/import attempt failed. Present only
+            when `status` is `failed`.
+             Example: line 3: column 'close' is not a number: not-a-number.
         data_url (str | Unset): Presigned GET URL to the current version's stored file — see `dataFormat` for
             which format it's actually in. Present only once the current version's status is
             `ready`. Long-lived (day-scale, not permanent): a DuckDB-WASM/`lastra-ts`-style
@@ -56,8 +84,9 @@ class DatasetWithLinks:
         data_format (DatasetWithLinksDataFormat | Unset): Which format `dataUrl` is actually in — check this rather than
             assuming it
             matches how you uploaded it. `lastra` — our native columnar format — for a CSV (or
-            gzip/zip of one) upload, always converted on ingest. `parquet` for a parquet
-            upload, stored as-is today.
+            gzip/zip of one) upload, always converted on ingest, or for a lastra upload,
+            stored as-is (the value alone doesn't tell you which). `parquet` for a parquet
+            upload, also stored as-is today.
              Example: lastra.
         field_links (DatasetWithLinksLinks | Unset):
     """
@@ -67,11 +96,18 @@ class DatasetWithLinks:
     type_: DatasetType
     instrument: str
     created_at: datetime.datetime
+    status: DatasetStatus
     current_version_id: str | Unset = UNSET
     updated_at: datetime.datetime | Unset = UNSET
     from_: datetime.datetime | Unset = UNSET
     to: datetime.datetime | Unset = UNSET
     cadence: str | Unset = UNSET
+    timestamp_unit: DatasetTimestampUnit | Unset = UNSET
+    bytes_: int | Unset = UNSET
+    rows: int | Unset = UNSET
+    gaps: int | Unset = UNSET
+    largest_gap_steps: int | Unset = UNSET
+    error: str | Unset = UNSET
     data_url: str | Unset = UNSET
     data_format: DatasetWithLinksDataFormat | Unset = UNSET
     field_links: DatasetWithLinksLinks | Unset = UNSET
@@ -88,6 +124,8 @@ class DatasetWithLinks:
 
         created_at = self.created_at.isoformat()
 
+        status = self.status.value
+
         current_version_id = self.current_version_id
 
         updated_at: str | Unset = UNSET
@@ -103,6 +141,20 @@ class DatasetWithLinks:
             to = self.to.isoformat()
 
         cadence = self.cadence
+
+        timestamp_unit: str | Unset = UNSET
+        if not isinstance(self.timestamp_unit, Unset):
+            timestamp_unit = self.timestamp_unit.value
+
+        bytes_ = self.bytes_
+
+        rows = self.rows
+
+        gaps = self.gaps
+
+        largest_gap_steps = self.largest_gap_steps
+
+        error = self.error
 
         data_url = self.data_url
 
@@ -123,6 +175,7 @@ class DatasetWithLinks:
                 "type": type_,
                 "instrument": instrument,
                 "createdAt": created_at,
+                "status": status,
             }
         )
         if current_version_id is not UNSET:
@@ -135,6 +188,18 @@ class DatasetWithLinks:
             field_dict["to"] = to
         if cadence is not UNSET:
             field_dict["cadence"] = cadence
+        if timestamp_unit is not UNSET:
+            field_dict["timestampUnit"] = timestamp_unit
+        if bytes_ is not UNSET:
+            field_dict["bytes"] = bytes_
+        if rows is not UNSET:
+            field_dict["rows"] = rows
+        if gaps is not UNSET:
+            field_dict["gaps"] = gaps
+        if largest_gap_steps is not UNSET:
+            field_dict["largestGapSteps"] = largest_gap_steps
+        if error is not UNSET:
+            field_dict["error"] = error
         if data_url is not UNSET:
             field_dict["dataUrl"] = data_url
         if data_format is not UNSET:
@@ -158,6 +223,8 @@ class DatasetWithLinks:
         instrument = d.pop("instrument")
 
         created_at = isoparse(d.pop("createdAt"))
+
+        status = DatasetStatus(d.pop("status"))
 
         current_version_id = d.pop("currentVersionId", UNSET)
 
@@ -184,6 +251,23 @@ class DatasetWithLinks:
 
         cadence = d.pop("cadence", UNSET)
 
+        _timestamp_unit = d.pop("timestampUnit", UNSET)
+        timestamp_unit: DatasetTimestampUnit | Unset
+        if isinstance(_timestamp_unit, Unset):
+            timestamp_unit = UNSET
+        else:
+            timestamp_unit = DatasetTimestampUnit(_timestamp_unit)
+
+        bytes_ = d.pop("bytes", UNSET)
+
+        rows = d.pop("rows", UNSET)
+
+        gaps = d.pop("gaps", UNSET)
+
+        largest_gap_steps = d.pop("largestGapSteps", UNSET)
+
+        error = d.pop("error", UNSET)
+
         data_url = d.pop("dataUrl", UNSET)
 
         _data_format = d.pop("dataFormat", UNSET)
@@ -206,11 +290,18 @@ class DatasetWithLinks:
             type_=type_,
             instrument=instrument,
             created_at=created_at,
+            status=status,
             current_version_id=current_version_id,
             updated_at=updated_at,
             from_=from_,
             to=to,
             cadence=cadence,
+            timestamp_unit=timestamp_unit,
+            bytes_=bytes_,
+            rows=rows,
+            gaps=gaps,
+            largest_gap_steps=largest_gap_steps,
+            error=error,
             data_url=data_url,
             data_format=data_format,
             field_links=field_links,

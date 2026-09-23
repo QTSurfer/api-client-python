@@ -8,6 +8,8 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
+from ..models.dataset_status import DatasetStatus
+from ..models.dataset_timestamp_unit import DatasetTimestampUnit
 from ..models.dataset_type import DatasetType
 from ..types import UNSET, Unset
 
@@ -19,16 +21,27 @@ class Dataset:
     """A dataset's own metadata — not its data. `currentVersionId` is what a prepare against
     `exchangeId: user` reads by default; see `DatasetVersion` for what a version carries.
 
-    `from`/`to`/`cadence` mirror that current version's own discovered range and cadence, so
-    you don't need a second call to `GET /datasets/{datasetId}/uploads/{uploadId}` just to see
-    what a dataset covers. Absent until a version exists.
+    `from`/`to`/`cadence`/`timestampUnit`/`bytes`/`rows`/`gaps`/`largestGapSteps` mirror that
+    current version's own discovered range, cadence, timestamp unit and metrics, so you don't
+    need a second call to `GET /datasets/{datasetId}/uploads/{uploadId}` just to see what a
+    dataset covers.
 
         Attributes:
             dataset_id (str): Opaque id, returned by `POST /datasets`. Example: ds_3f9a1c2e7b0d4a5f.
             name (str): Unique among your datasets. Example: My BTC ticks.
-            type_ (DatasetType): Always `ticker` in v1. Example: ticker.
+            type_ (DatasetType): `ticker` for an upload or a `dex` import with no `cadence` requested (native per-trade
+                data). `klines` for a `dex` import that requested a candle `cadence` — pre-aggregated
+                bars rather than raw ticks. Purely informational; both shapes are read the same way.
+                 Example: ticker.
             instrument (str): Exchange instrument identifier (e.g. a currency pair) Example: BTC/USDT.
             created_at (datetime.datetime): When the dataset was created. Example: 2026-08-20T09:00:00Z.
+            status (DatasetStatus): * `ready` — `currentVersionId` is set; `from`/`to`/`cadence`/`bytes`/`rows`/`gaps`/
+                  `largestGapSteps` describe it.
+                * `failed` — the most recent upload/import attempt failed. `currentVersionId` and the
+                  fields above are absent — there is nothing to read yet. See `error`.
+                * `pending` — nothing has ever been attempted (just created, or an upload was never
+                  finalized).
+                 Example: ready.
             current_version_id (str | Unset): The id of the most recently finalized, successfully ingested version. Absent
                 until at
                 least one upload has finished ingesting.
@@ -43,9 +56,25 @@ class Dataset:
                 until
                 a version exists.
                  Example: 2026-03-08T00:00:00Z.
-            cadence (str | Unset): `currentVersionId`'s own discovered bar cadence (e.g. `1s`, `1m`, `1h`). Absent until a
-                version exists.
+            cadence (str | Unset): `currentVersionId`'s own discovered cadence — a fixed grid (e.g. `1s`, `1m`, `1h`) or
+                `rt` (see `DatasetVersion.cadence`). Absent until a version exists.
                  Example: 1m.
+            timestamp_unit (DatasetTimestampUnit | Unset): `currentVersionId`'s own timestamp unit (see
+                `DatasetVersion.timestampUnit`) — decode
+                the `timestamp` column of `dataUrl`'s file accordingly. Present only when `status` is
+                `ready`.
+                 Example: iso.
+            bytes_ (int | Unset): Size of `currentVersionId`'s own stored file. Present only when `status` is `ready` —
+                see `DatasetVersion.bytes` for what it measures exactly.
+                 Example: 4831022.
+            rows (int | Unset): `currentVersionId`'s own row count. Present only when `status` is `ready`. Example: 86400.
+            gaps (int | Unset): `currentVersionId`'s own gap count at its discovered cadence. Present only when `status` is
+                `ready`.
+            largest_gap_steps (int | Unset): `currentVersionId`'s own largest gap, in units of its discovered cadence step.
+                Present only when `status` is `ready`.
+            error (str | Unset): A human-readable reason the most recent upload/import attempt failed. Present only
+                when `status` is `failed`.
+                 Example: line 3: column 'close' is not a number: not-a-number.
     """
 
     dataset_id: str
@@ -53,11 +82,18 @@ class Dataset:
     type_: DatasetType
     instrument: str
     created_at: datetime.datetime
+    status: DatasetStatus
     current_version_id: str | Unset = UNSET
     updated_at: datetime.datetime | Unset = UNSET
     from_: datetime.datetime | Unset = UNSET
     to: datetime.datetime | Unset = UNSET
     cadence: str | Unset = UNSET
+    timestamp_unit: DatasetTimestampUnit | Unset = UNSET
+    bytes_: int | Unset = UNSET
+    rows: int | Unset = UNSET
+    gaps: int | Unset = UNSET
+    largest_gap_steps: int | Unset = UNSET
+    error: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -70,6 +106,8 @@ class Dataset:
         instrument = self.instrument
 
         created_at = self.created_at.isoformat()
+
+        status = self.status.value
 
         current_version_id = self.current_version_id
 
@@ -87,6 +125,20 @@ class Dataset:
 
         cadence = self.cadence
 
+        timestamp_unit: str | Unset = UNSET
+        if not isinstance(self.timestamp_unit, Unset):
+            timestamp_unit = self.timestamp_unit.value
+
+        bytes_ = self.bytes_
+
+        rows = self.rows
+
+        gaps = self.gaps
+
+        largest_gap_steps = self.largest_gap_steps
+
+        error = self.error
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -96,6 +148,7 @@ class Dataset:
                 "type": type_,
                 "instrument": instrument,
                 "createdAt": created_at,
+                "status": status,
             }
         )
         if current_version_id is not UNSET:
@@ -108,6 +161,18 @@ class Dataset:
             field_dict["to"] = to
         if cadence is not UNSET:
             field_dict["cadence"] = cadence
+        if timestamp_unit is not UNSET:
+            field_dict["timestampUnit"] = timestamp_unit
+        if bytes_ is not UNSET:
+            field_dict["bytes"] = bytes_
+        if rows is not UNSET:
+            field_dict["rows"] = rows
+        if gaps is not UNSET:
+            field_dict["gaps"] = gaps
+        if largest_gap_steps is not UNSET:
+            field_dict["largestGapSteps"] = largest_gap_steps
+        if error is not UNSET:
+            field_dict["error"] = error
 
         return field_dict
 
@@ -123,6 +188,8 @@ class Dataset:
         instrument = d.pop("instrument")
 
         created_at = isoparse(d.pop("createdAt"))
+
+        status = DatasetStatus(d.pop("status"))
 
         current_version_id = d.pop("currentVersionId", UNSET)
 
@@ -149,17 +216,41 @@ class Dataset:
 
         cadence = d.pop("cadence", UNSET)
 
+        _timestamp_unit = d.pop("timestampUnit", UNSET)
+        timestamp_unit: DatasetTimestampUnit | Unset
+        if isinstance(_timestamp_unit, Unset):
+            timestamp_unit = UNSET
+        else:
+            timestamp_unit = DatasetTimestampUnit(_timestamp_unit)
+
+        bytes_ = d.pop("bytes", UNSET)
+
+        rows = d.pop("rows", UNSET)
+
+        gaps = d.pop("gaps", UNSET)
+
+        largest_gap_steps = d.pop("largestGapSteps", UNSET)
+
+        error = d.pop("error", UNSET)
+
         dataset = cls(
             dataset_id=dataset_id,
             name=name,
             type_=type_,
             instrument=instrument,
             created_at=created_at,
+            status=status,
             current_version_id=current_version_id,
             updated_at=updated_at,
             from_=from_,
             to=to,
             cadence=cadence,
+            timestamp_unit=timestamp_unit,
+            bytes_=bytes_,
+            rows=rows,
+            gaps=gaps,
+            largest_gap_steps=largest_gap_steps,
+            error=error,
         )
 
         dataset.additional_properties = d

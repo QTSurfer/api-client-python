@@ -92,6 +92,10 @@ def sync_detailed(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
+    data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
+    the bar width from `cadence` — see `PrepareRequest`.
+
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
@@ -99,8 +103,19 @@ def sync_detailed(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
             managed exchange,
             `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the
@@ -145,6 +160,10 @@ def sync(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
+    data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
+    the bar width from `cadence` — see `PrepareRequest`.
+
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
@@ -152,8 +171,19 @@ def sync(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
             managed exchange,
             `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the
@@ -193,6 +223,10 @@ async def asyncio_detailed(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
+    data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
+    the bar width from `cadence` — see `PrepareRequest`.
+
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
@@ -200,8 +234,19 @@ async def asyncio_detailed(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
             managed exchange,
             `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the
@@ -244,6 +289,10 @@ async def asyncio(
     The same params always return the same `jobId` (idempotent). Repeated calls with identical
     params do not enqueue duplicate work — they reuse the existing job.
 
+    Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
+    data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
+    the bar width from `cadence` — see `PrepareRequest`.
+
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
@@ -251,8 +300,19 @@ async def asyncio(
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (PrepareRequest): Two shapes, chosen by the `exchangeId` path segment. Against a
             managed exchange,
             `instrument` is required and `datasetId`/`datasetVersionId` are ignored. Against the

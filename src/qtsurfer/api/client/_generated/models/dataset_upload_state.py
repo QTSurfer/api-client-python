@@ -33,6 +33,11 @@ class DatasetUploadState:
                   `.zip` with no file inside or more than one).
                  Example: ready.
             job_id (str | Unset): The ingest job id, while `status` is `ingesting`.
+            error (str | Unset): A human-readable reason, present when `status` is `failed` (e.g. bad CSV contract,
+                mixed timestamp units, a `.zip` with no file inside or more than one). Durably
+                recorded alongside the failure itself, so it stays available however long after the
+                fact you poll — not tied to how recently the failure happened.
+                 Example: line 3: column 'close' is not a number: not-a-number.
             version (DatasetVersion | Unset): One successfully ingested upload. Cadence and timestamp unit are discovered
                 from the file,
                 not declared by the caller.
@@ -41,6 +46,7 @@ class DatasetUploadState:
     upload_id: str
     status: DatasetUploadStateStatus
     job_id: str | Unset = UNSET
+    error: str | Unset = UNSET
     version: DatasetVersion | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -50,6 +56,8 @@ class DatasetUploadState:
         status = self.status.value
 
         job_id = self.job_id
+
+        error = self.error
 
         version: dict[str, Any] | Unset = UNSET
         if not isinstance(self.version, Unset):
@@ -65,6 +73,8 @@ class DatasetUploadState:
         )
         if job_id is not UNSET:
             field_dict["jobId"] = job_id
+        if error is not UNSET:
+            field_dict["error"] = error
         if version is not UNSET:
             field_dict["version"] = version
 
@@ -81,6 +91,8 @@ class DatasetUploadState:
 
         job_id = d.pop("jobId", UNSET)
 
+        error = d.pop("error", UNSET)
+
         _version = d.pop("version", UNSET)
         version: DatasetVersion | Unset
         if isinstance(_version, Unset):
@@ -92,6 +104,7 @@ class DatasetUploadState:
             upload_id=upload_id,
             status=status,
             job_id=job_id,
+            error=error,
             version=version,
         )
 

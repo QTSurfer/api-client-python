@@ -6,7 +6,6 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.prepare_request_cadence import PrepareRequestCadence
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="PrepareRequest")
@@ -42,12 +41,24 @@ class PrepareRequest:
                 version of
                 the dataset instead of its current one. Defaults to the dataset's current version.
                  Example: dsv_8e2b4f19c6a03d7e.
-            cadence (PrepareRequestCadence | Unset): Output bar cadence for the prepared range. Defaults to the publisher's
-                native cadence (`1s`); coarser cadences are produced on demand via
-                resampling and stored alongside the native blob in cache. Coarser-than-
-                source values must be exact multiples of the source cadence — invalid
-                labels return `400`.
-                 Default: PrepareRequestCadence.VALUE_0.
+            cadence (str | Unset): Output bar cadence for the prepared range. Coarser cadences are produced on demand by
+                resampling the source and stored alongside the native blob in cache. A target finer
+                than the source, or not an exact multiple of it, returns `400`. What's accepted, and
+                what omitting it means, depends on the source:
+
+                * Managed exchange, `ticker` or `funding` — one of `1s`, `5s`, `1m`, `3m`, `5m`, `15m`,
+                  `30m`, `1h`, `2h`, `4h`, `8h`, `12h`, `1d`, `1w`, `1q`; any other label returns `400`.
+                  Omitted = `1s`, the publisher's native cadence.
+                * Managed exchange, `kline` — one of `1s`, `1m`, `5m`, `15m`, `30m`, `1h`, `4h`, `1d`;
+                  any other label, including `5s`, `3m` and `8h`, returns `400` and names the accepted
+                  ones. Omitted = `1s`. This is the width of the bars a run reads: it is chosen here,
+                  once, and the same strategy can be run at several cadences by preparing the range at
+                  each.
+                * Dataset (`exchangeId: user`) — omitted = the dataset version's own discovered
+                  `cadence` (see `DatasetVersion.cadence`), served as-is. Any cadence equal to or
+                  coarser than it and an exact multiple of it is accepted, including ones outside the
+                  managed-exchange list (e.g. `15s`); an `rt` dataset can be resampled to any fixed
+                  cadence.
     """
 
     from_: str
@@ -55,7 +66,7 @@ class PrepareRequest:
     instrument: str | Unset = UNSET
     dataset_id: str | Unset = UNSET
     dataset_version_id: str | Unset = UNSET
-    cadence: PrepareRequestCadence | Unset = PrepareRequestCadence.VALUE_0
+    cadence: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -69,9 +80,7 @@ class PrepareRequest:
 
         dataset_version_id = self.dataset_version_id
 
-        cadence: str | Unset = UNSET
-        if not isinstance(self.cadence, Unset):
-            cadence = self.cadence.value
+        cadence = self.cadence
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -105,12 +114,7 @@ class PrepareRequest:
 
         dataset_version_id = d.pop("datasetVersionId", UNSET)
 
-        _cadence = d.pop("cadence", UNSET)
-        cadence: PrepareRequestCadence | Unset
-        if isinstance(_cadence, Unset):
-            cadence = UNSET
-        else:
-            cadence = PrepareRequestCadence(_cadence)
+        cadence = d.pop("cadence", UNSET)
 
         prepare_request = cls(
             from_=from_,

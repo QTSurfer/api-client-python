@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Regenerate the QTSurfer Python API client from the upstream OpenAPI spec.
 #
-# - Fetches the canonical openapi.yaml from QTSurfer/qtsurfer.github.io.
+# - Fetches the canonical openapi.yaml from QTSurfer/qtsurfer-api.
 # - Wipes and regenerates src/qtsurfer/api/client/_generated/.
 # - Pins pyproject.toml's `version` to the spec's `info.version`.
 # - Re-runs ruff fix + format on generated sources.
@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT_DIR"
 
-SPEC_URL="${SPEC_URL:-https://raw.githubusercontent.com/QTSurfer/qtsurfer.github.io/main/openapi.yaml}"
+SPEC_URL="${SPEC_URL:-https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml}"
 GEN_OUT="${TMPDIR:-/tmp}/qtsurfer-client-gen"
 TARGET_DIR="src/qtsurfer/api/client/_generated"
 GENERATED_PKG="qtsurfer_api_client"

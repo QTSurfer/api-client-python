@@ -22,7 +22,7 @@ PUBLIC_API = "qtsurfer.api.client.api"
 #: Operations declared by the OpenAPI spec this package is generated from.
 #: Every one of them must be accounted for below, either as a generated module
 #: or as a documented exception.
-SPEC_OPERATION_COUNT = 29
+SPEC_OPERATION_COUNT = 41
 
 #: Each spec ``operationId`` the generator turns into an endpoint module, mapped
 #: to the ``(tag package, module name)`` it lands under.
@@ -45,6 +45,8 @@ SPEC_OPERATION_COUNT = 29
 #: operationIds by a camelCase-to-snake_case rule.
 SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "authenticate": ("auth", "authenticate"),
+    "getAccount": ("account", "get_account"),
+    "getAccountUsage": ("account", "get_account_usage"),
     "listExchanges": ("exchange", "list_exchanges"),
     "listInstruments": ("exchange", "list_instruments"),
     "listSegmentInstruments": ("exchange", "list_segment_instruments"),
@@ -72,6 +74,16 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "finalizeDatasetUpload": ("dataset", "finalize_dataset_upload"),
     "getDatasetUpload": ("dataset", "get_dataset_upload"),
     "openDatasetUpload": ("dataset", "open_dataset_upload"),
+    "importDataset": ("dataset", "import_dataset"),
+    "getDatasetImport": ("dataset", "get_dataset_import"),
+    "startLive": ("live_execution", "start_live"),
+    "getLive": ("live_execution", "get_live"),
+    "stopLive": ("live_execution", "stop_live"),
+    "listPublicLive": ("live_execution", "list_public_live"),
+    "updateLive": ("live_execution", "update_live"),
+    "updateLiveParams": ("live_execution", "update_live_params"),
+    "getLiveRunSignals": ("live_execution", "get_live_run_signals"),
+    "mintLiveConnectionToken": ("live_execution", "mint_live_connection_token"),
 }
 
 #: Spec operations that deliberately have **no** generated module, and why.

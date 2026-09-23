@@ -26,13 +26,19 @@ class DatasetVersion:
                 upload, or the parquet file itself, unconverted, for a parquet upload. Not the size of the bytes originally PUT
                 to storage; see `dataFormat`. Example: 4831022.
             rows (int | Unset): Number of data rows. Example: 86400.
-            cadence (str | Unset): The discovered bar cadence (e.g. `1s`, `1m`, `1h`). Example: 1s.
+            cadence (str | Unset): The cadence discovered from the data's own timestamps. Either a fixed grid — `1s`,
+                `5s`, `15s`, `1m`, `5m`, `15m`, `30m`, `1h`, `4h`, `1d` — when at least half the
+                intervals between consecutive rows fall on that step (small clock jitter tolerated), or
+                `rt`: native data at the rate it was captured, each row at its own timestamp with no
+                fixed step — per-trade on-chain swaps, block-spaced or sub-second ticks, irregular
+                intervals. An `rt` dataset can be resampled to any fixed cadence at prepare time.
+                 Example: 1s.
             timestamp_unit (DatasetVersionTimestampUnit | Unset): The unit the `timestamp` column was uploaded in —
                 ISO-8601, or the epoch band its
                 numeric values fell in (seconds, millis, or micros).
                  Example: iso.
-            gaps (int | Unset): Number of gaps at the discovered cadence.
-            largest_gap_steps (int | Unset): The largest gap, in units of the discovered cadence step.
+            gaps (int | Unset): Number of gaps at the discovered cadence. Always `0` for `rt`.
+            largest_gap_steps (int | Unset): The largest gap, in units of the discovered cadence step. Always `0` for `rt`.
             data_url (str | Unset): Presigned GET URL to the stored file — see `dataFormat` for which format it's in.
                 Present once the version is `ready`. Long-lived (day-scale, not permanent): a
                 DuckDB-WASM/`lastra-ts`-style reader issues HTTP range requests against it lazily over
@@ -42,8 +48,9 @@ class DatasetVersion:
             data_format (DatasetVersionDataFormat | Unset): Which format `dataUrl` is actually in — check this rather than
                 assuming it matches
                 how you uploaded it. `lastra` — our native columnar format — for a CSV (or gzip/zip
-                of one) upload, always converted on ingest. `parquet` for a parquet upload, stored
-                as-is today.
+                of one) upload, always converted on ingest, or for a lastra upload, stored as-is
+                (the value alone doesn't tell you which). `parquet` for a parquet upload, also
+                stored as-is today.
                  Example: lastra.
     """
 

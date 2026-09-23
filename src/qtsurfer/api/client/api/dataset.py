@@ -17,6 +17,9 @@ existing dataset, or starts the next one after a finalized upload. A finalized
 ``upload_id`` cannot be reused: ``finalize_dataset_upload`` returns ``409``;
 open a new session instead.
 
+``import_dataset`` creates a dataset by fetching source history; poll
+``get_dataset_import`` until its status is ``ready`` or ``failed``.
+
 ``list_datasets`` / ``get_dataset`` never ``404`` for "no datasets" — an
 empty list, same convention as ``list_strategies``. ``delete_dataset`` is a
 soft delete: the dataset stops being listed or preparable from, but a
@@ -28,7 +31,9 @@ from qtsurfer.api.client._generated.api.dataset import (
     delete_dataset,
     finalize_dataset_upload,
     get_dataset,
+    get_dataset_import,
     get_dataset_upload,
+    import_dataset,
     list_datasets,
     open_dataset_upload,
 )
@@ -38,7 +43,9 @@ __all__ = [
     "delete_dataset",
     "finalize_dataset_upload",
     "get_dataset",
+    "get_dataset_import",
     "get_dataset_upload",
+    "import_dataset",
     "list_datasets",
     "open_dataset_upload",
 ]

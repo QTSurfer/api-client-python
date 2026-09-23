@@ -101,6 +101,8 @@ Each generated endpoint module exposes four entrypoints:
 | Module | Operation | Method · Path |
 | --- | --- | --- |
 | `api.auth` | `authenticate` | `POST /auth/token` — exchange API key for a short-lived JWT |
+| `api.account` | `get_account` | `GET /account` |
+| `api.account` | `get_account_usage` | `GET /account/usage` |
 | `api.exchange` | `list_exchanges` | `GET /exchanges` |
 | `api.exchange` | `list_instruments` | `GET /exchange/{exchangeId}/instruments` (default `spot` segment) |
 | `api.exchange` | `list_segment_instruments` | `GET /exchange/{exchangeId}/{segment}/instruments` |
@@ -128,8 +130,18 @@ Each generated endpoint module exposes four entrypoints:
 | `api.dataset` | `open_dataset_upload` | `POST /datasets/{datasetId}/uploads` — open the next upload session |
 | `api.dataset` | `finalize_dataset_upload` | `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` |
 | `api.dataset` | `get_dataset_upload` | `GET /datasets/{datasetId}/uploads/{uploadId}` |
+| `api.dataset` | `import_dataset` | `POST /datasets/imports` — create a dataset from source history |
+| `api.dataset` | `get_dataset_import` | `GET /datasets/{datasetId}/imports/{importId}` |
+| `api.live_execution` | `start_live` | `POST /strategy/{strategyId}/live` |
+| `api.live_execution` | `get_live` | `GET /strategy/{strategyId}/live` |
+| `api.live_execution` | `stop_live` | `DELETE /live/{runId}` |
+| `api.live_execution` | `list_public_live` | `GET /live/public` |
+| `api.live_execution` | `update_live` | `PATCH /live/{runId}` |
+| `api.live_execution` | `update_live_params` | `PUT /live/{runId}/params` |
+| `api.live_execution` | `get_live_run_signals` | `GET /live/{runId}/signals` |
+| `api.live_execution` | `mint_live_connection_token` | `POST /live/{runId}/connection-token` |
 
-Twenty-eight of the spec's twenty-nine operations, all reachable through `qtsurfer.api.client.api`
+Forty of the spec's forty-one operations, all reachable through `qtsurfer.api.client.api`
 as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
 openapi-python-client does not support, so no module is generated for it — call it through the
 underlying `httpx` client.
@@ -157,6 +169,24 @@ To add a later version, call `open_dataset_upload(dataset_id)` to obtain a `Data
 It returns the currently open session again if a previous response was lost. After finalization,
 open a new session before uploading again: finalizing an upload that already produced a version
 returns `409`.
+
+### Datasets — import source history
+
+`import_dataset` starts a source-side dataset import and returns `DatasetImportCreated` with the
+new dataset and import ids. Poll `get_dataset_import(dataset_id, import_id)` until the status is
+`ready` or `failed`. A ready response carries the resulting `DatasetVersion`; a failed response
+carries its error. Dataset listings now include the current version's `status`, timestamp unit,
+and coverage metrics, so select the timestamp decoder from `timestamp_unit` when reading stored
+data.
+
+### Live execution
+
+`start_live` starts a compiled strategy against one live source. Use `get_live` to inspect its
+latest state, `update_live` and `update_live_params` to change it, and `stop_live` to stop it.
+`list_public_live` is the unauthenticated listing for public runs. `get_live_run_signals` pages
+recorded signals regardless of WebSocket relay: a `410` response means the supplied cursor has
+expired, so restart from its `availableSinceMs` value. `mint_live_connection_token` creates a
+short-lived WebSocket connection token for a run.
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 

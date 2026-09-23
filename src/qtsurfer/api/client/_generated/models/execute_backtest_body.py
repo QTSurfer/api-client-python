@@ -11,6 +11,7 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.equity_curve_options import EquityCurveOptions
     from ..models.execute_backtest_body_params import ExecuteBacktestBodyParams
+    from ..models.sweep_base_config import SweepBaseConfig
 
 
 T = TypeVar("T", bound="ExecuteBacktestBody")
@@ -23,8 +24,9 @@ class ExecuteBacktestBody:
         prepare_job_id (str): Job ID returned by `POST /prepare` (must be in `Completed` state) Example:
             13RBLGQlPnfDjO6wyKSX8i.
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
-            always yields the same id, for every caller, whatever its formatting. See
-            `POST /strategy` for exactly which rewrites preserve it and which do not.
+            always yields the same id, for every caller. How much formatting the id ignores depends on
+            the language — see `POST /strategy` for exactly which rewrites preserve it and which do
+            not.
              Example: 6bsh31ikwkuivhtgcoa6s4.
         store_signals (bool | Unset): When true, the worker uploads emitted signals to object storage and the
             response includes `signalsUrl` / `signalsId` fields. Defaults to false.
@@ -33,6 +35,7 @@ class ExecuteBacktestBody:
             pipeline order: `resample` (point count) then `differential` (encoding) then `outMode` (JSON shape) — each stage
             assumes the previous one already ran. A server-side size guard can still force a smaller/deflated shape above
             its thresholds regardless of what is requested here — see `EquityCurveMeta` for what actually happened.
+        base_config (SweepBaseConfig | Unset):
         params (ExecuteBacktestBodyParams | Unset): Strategy properties to apply to this run. Omit to run the strategy's
             declared
             defaults, which is exactly what a request without this field has always done.
@@ -57,6 +60,7 @@ class ExecuteBacktestBody:
     strategy_id: str
     store_signals: bool | Unset = False
     equity_curve: EquityCurveOptions | Unset = UNSET
+    base_config: SweepBaseConfig | Unset = UNSET
     params: ExecuteBacktestBodyParams | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -70,6 +74,10 @@ class ExecuteBacktestBody:
         equity_curve: dict[str, Any] | Unset = UNSET
         if not isinstance(self.equity_curve, Unset):
             equity_curve = self.equity_curve.to_dict()
+
+        base_config: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.base_config, Unset):
+            base_config = self.base_config.to_dict()
 
         params: dict[str, Any] | Unset = UNSET
         if not isinstance(self.params, Unset):
@@ -87,6 +95,8 @@ class ExecuteBacktestBody:
             field_dict["storeSignals"] = store_signals
         if equity_curve is not UNSET:
             field_dict["equityCurve"] = equity_curve
+        if base_config is not UNSET:
+            field_dict["baseConfig"] = base_config
         if params is not UNSET:
             field_dict["params"] = params
 
@@ -96,6 +106,7 @@ class ExecuteBacktestBody:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.equity_curve_options import EquityCurveOptions
         from ..models.execute_backtest_body_params import ExecuteBacktestBodyParams
+        from ..models.sweep_base_config import SweepBaseConfig
 
         d = dict(src_dict)
         prepare_job_id = d.pop("prepareJobId")
@@ -111,6 +122,13 @@ class ExecuteBacktestBody:
         else:
             equity_curve = EquityCurveOptions.from_dict(_equity_curve)
 
+        _base_config = d.pop("baseConfig", UNSET)
+        base_config: SweepBaseConfig | Unset
+        if isinstance(_base_config, Unset):
+            base_config = UNSET
+        else:
+            base_config = SweepBaseConfig.from_dict(_base_config)
+
         _params = d.pop("params", UNSET)
         params: ExecuteBacktestBodyParams | Unset
         if isinstance(_params, Unset):
@@ -123,6 +141,7 @@ class ExecuteBacktestBody:
             strategy_id=strategy_id,
             store_signals=store_signals,
             equity_curve=equity_curve,
+            base_config=base_config,
             params=params,
         )
 

@@ -11,6 +11,8 @@ from qtsurfer.api.client.models import (
     CoverageWindow,
     DatasetCreated,
     DatasetCreatedType,
+    DatasetStatus,
+    DatasetTimestampUnit,
     DatasetType,
     DatasetUploadTarget,
     DatasetVersion,
@@ -30,6 +32,11 @@ from qtsurfer.api.client.models import (
     JobState,
     JobStateStatus,
     ListStrategiesResponse200,
+    LiveSignal,
+    LiveSignalInstrument,
+    LiveSignalPage,
+    LiveSignalStage,
+    LiveSignalType,
     ResultMap,
     ResultMapParams,
     ScalarStrategyParamValue,
@@ -254,8 +261,12 @@ def test_dataset_data_location_roundtrip() -> None:
         type_=DatasetType.TICKER,
         instrument="BTC/USDT",
         created_at=_dt.datetime(2026, 9, 7, tzinfo=_dt.UTC),
+        status=DatasetStatus.READY,
         data_url=data_url,
         data_format=DatasetWithLinksDataFormat.PARQUET,
+        timestamp_unit=DatasetTimestampUnit.US,
+        bytes_=4_831_022,
+        rows=86_400,
     )
     dataset_payload = dataset.to_dict()
     assert dataset_payload["dataUrl"] == data_url
@@ -263,3 +274,29 @@ def test_dataset_data_location_roundtrip() -> None:
     parsed_dataset = DatasetWithLinks.from_dict(dataset_payload)
     assert parsed_dataset.data_url == data_url
     assert parsed_dataset.data_format is DatasetWithLinksDataFormat.PARQUET
+    assert parsed_dataset.timestamp_unit is DatasetTimestampUnit.US
+    assert parsed_dataset.bytes_ == 4_831_022
+    assert parsed_dataset.rows == 86_400
+
+
+def test_live_signal_page_roundtrip() -> None:
+    signal = LiveSignal(
+        v=1,
+        signal_id="signal-1",
+        run_id="run-1",
+        stage=LiveSignalStage.LIVE,
+        type_=LiveSignalType.HINT,
+        event_ts_ms=1_700_000_000_000,
+        emitted_at_ms=1_700_000_000_001,
+        instrument=LiveSignalInstrument(symbol="BTC/USDT"),
+        digest="digest-1",
+    )
+    page = LiveSignalPage(signals=[signal], available_since_ms=1_699_999_000_000)
+
+    payload = page.to_dict()
+    assert payload["signals"][0]["signalId"] == "signal-1"
+    assert payload["availableSinceMs"] == 1_699_999_000_000
+
+    parsed = LiveSignalPage.from_dict(payload)
+    assert parsed.signals[0].instrument.symbol == "BTC/USDT"
+    assert parsed.available_since_ms == 1_699_999_000_000

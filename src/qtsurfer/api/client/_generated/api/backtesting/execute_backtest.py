@@ -93,6 +93,11 @@ def sync_detailed(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
+    `type` must be a source that can be executed: `ticker` or `kline`. A `kline` strategy is fed
+    bars of the cadence its `prepareJobId` was prepared at — chosen by you when preparing, not by
+    the strategy. `funding` can be prepared but not executed yet: it is rejected with `400`
+    before anything is queued.
+
     Optionally takes `params`: strategy properties for this one run, applied without
     recompiling. This is how a sweep leaderboard winner gets re-run for its `equityCurve` —
     a sweep row carries the ten ranking metrics but never a curve, whatever its size. Compile
@@ -100,22 +105,40 @@ def sync_detailed(
     backtest result with the curve included.
 
     The same request (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`,
-    `params`) always returns the same `jobId` (idempotent) — a request that omits `equityCurve`
-    or `params` dedupes exactly as it did before those fields existed. Two different `params`
-    vectors over one prepare are two different jobs, and `9` and `9.0` are the same one.
+    `baseConfig`, `params`) always returns the same `jobId` (idempotent) — a request that omits
+    `equityCurve`, `baseConfig` or `params` dedupes exactly as it did before those fields
+    existed. Two different `params` vectors over one prepare are two different jobs, and `9`
+    and `9.0` are the same one.
 
     The re-run is an independent execution rather than a replay of the sweep trial — the two
     paths do not share a simulator — but they are pinned to agree: one vector run both ways
     matches on every leaderboard metric, asserted as a regression test. Treat a difference as a
     bug worth reporting, not as expected behaviour.
 
+    Optionally takes `baseConfig`, the same `SweepBaseConfig` shape `executeSweep` accepts —
+    `initialFunding`, `feeRate`, `percentAmountToLock`, etc. — so the same object can be reused
+    against either endpoint. This endpoint has one effective fee rate rather than a sweep's
+    independent buy/sell legs: a `baseConfig` that resolves to different buy/sell rates, or sets
+    a non-default `feeLeg`, is rejected with `400` rather than silently collapsed to one side.
+
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (ExecuteBacktestBody):
 
     Raises:
@@ -155,6 +178,11 @@ def sync(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
+    `type` must be a source that can be executed: `ticker` or `kline`. A `kline` strategy is fed
+    bars of the cadence its `prepareJobId` was prepared at — chosen by you when preparing, not by
+    the strategy. `funding` can be prepared but not executed yet: it is rejected with `400`
+    before anything is queued.
+
     Optionally takes `params`: strategy properties for this one run, applied without
     recompiling. This is how a sweep leaderboard winner gets re-run for its `equityCurve` —
     a sweep row carries the ten ranking metrics but never a curve, whatever its size. Compile
@@ -162,22 +190,40 @@ def sync(
     backtest result with the curve included.
 
     The same request (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`,
-    `params`) always returns the same `jobId` (idempotent) — a request that omits `equityCurve`
-    or `params` dedupes exactly as it did before those fields existed. Two different `params`
-    vectors over one prepare are two different jobs, and `9` and `9.0` are the same one.
+    `baseConfig`, `params`) always returns the same `jobId` (idempotent) — a request that omits
+    `equityCurve`, `baseConfig` or `params` dedupes exactly as it did before those fields
+    existed. Two different `params` vectors over one prepare are two different jobs, and `9`
+    and `9.0` are the same one.
 
     The re-run is an independent execution rather than a replay of the sweep trial — the two
     paths do not share a simulator — but they are pinned to agree: one vector run both ways
     matches on every leaderboard metric, asserted as a regression test. Treat a difference as a
     bug worth reporting, not as expected behaviour.
 
+    Optionally takes `baseConfig`, the same `SweepBaseConfig` shape `executeSweep` accepts —
+    `initialFunding`, `feeRate`, `percentAmountToLock`, etc. — so the same object can be reused
+    against either endpoint. This endpoint has one effective fee rate rather than a sweep's
+    independent buy/sell legs: a `baseConfig` that resolves to different buy/sell rates, or sets
+    a non-default `feeLeg`, is rejected with `400` rather than silently collapsed to one side.
+
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (ExecuteBacktestBody):
 
     Raises:
@@ -212,6 +258,11 @@ async def asyncio_detailed(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
+    `type` must be a source that can be executed: `ticker` or `kline`. A `kline` strategy is fed
+    bars of the cadence its `prepareJobId` was prepared at — chosen by you when preparing, not by
+    the strategy. `funding` can be prepared but not executed yet: it is rejected with `400`
+    before anything is queued.
+
     Optionally takes `params`: strategy properties for this one run, applied without
     recompiling. This is how a sweep leaderboard winner gets re-run for its `equityCurve` —
     a sweep row carries the ten ranking metrics but never a curve, whatever its size. Compile
@@ -219,22 +270,40 @@ async def asyncio_detailed(
     backtest result with the curve included.
 
     The same request (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`,
-    `params`) always returns the same `jobId` (idempotent) — a request that omits `equityCurve`
-    or `params` dedupes exactly as it did before those fields existed. Two different `params`
-    vectors over one prepare are two different jobs, and `9` and `9.0` are the same one.
+    `baseConfig`, `params`) always returns the same `jobId` (idempotent) — a request that omits
+    `equityCurve`, `baseConfig` or `params` dedupes exactly as it did before those fields
+    existed. Two different `params` vectors over one prepare are two different jobs, and `9`
+    and `9.0` are the same one.
 
     The re-run is an independent execution rather than a replay of the sweep trial — the two
     paths do not share a simulator — but they are pinned to agree: one vector run both ways
     matches on every leaderboard metric, asserted as a regression test. Treat a difference as a
     bug worth reporting, not as expected behaviour.
 
+    Optionally takes `baseConfig`, the same `SweepBaseConfig` shape `executeSweep` accepts —
+    `initialFunding`, `feeRate`, `percentAmountToLock`, etc. — so the same object can be reused
+    against either endpoint. This endpoint has one effective fee rate rather than a sweep's
+    independent buy/sell legs: a `baseConfig` that resolves to different buy/sell rates, or sets
+    a non-default `feeLeg`, is rejected with `400` rather than silently collapsed to one side.
+
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (ExecuteBacktestBody):
 
     Raises:
@@ -272,6 +341,11 @@ async def asyncio(
     Returns immediately with a `jobId`; poll `GET /backtest/{exchangeId}/{type}/execute/{jobId}`
     for the result.
 
+    `type` must be a source that can be executed: `ticker` or `kline`. A `kline` strategy is fed
+    bars of the cadence its `prepareJobId` was prepared at — chosen by you when preparing, not by
+    the strategy. `funding` can be prepared but not executed yet: it is rejected with `400`
+    before anything is queued.
+
     Optionally takes `params`: strategy properties for this one run, applied without
     recompiling. This is how a sweep leaderboard winner gets re-run for its `equityCurve` —
     a sweep row carries the ten ranking metrics but never a curve, whatever its size. Compile
@@ -279,22 +353,40 @@ async def asyncio(
     backtest result with the curve included.
 
     The same request (same `prepareJobId`, `strategyId`, `storeSignals`, `equityCurve`,
-    `params`) always returns the same `jobId` (idempotent) — a request that omits `equityCurve`
-    or `params` dedupes exactly as it did before those fields existed. Two different `params`
-    vectors over one prepare are two different jobs, and `9` and `9.0` are the same one.
+    `baseConfig`, `params`) always returns the same `jobId` (idempotent) — a request that omits
+    `equityCurve`, `baseConfig` or `params` dedupes exactly as it did before those fields
+    existed. Two different `params` vectors over one prepare are two different jobs, and `9`
+    and `9.0` are the same one.
 
     The re-run is an independent execution rather than a replay of the sweep trial — the two
     paths do not share a simulator — but they are pinned to agree: one vector run both ways
     matches on every leaderboard metric, asserted as a regression test. Treat a difference as a
     bug worth reporting, not as expected behaviour.
 
+    Optionally takes `baseConfig`, the same `SweepBaseConfig` shape `executeSweep` accepts —
+    `initialFunding`, `feeRate`, `percentAmountToLock`, etc. — so the same object can be reused
+    against either endpoint. This endpoint has one effective fee rate rather than a sweep's
+    independent buy/sell legs: a `baseConfig` that resolves to different buy/sell rates, or sets
+    a non-default `feeLeg`, is rejected with `400` rather than silently collapsed to one side.
+
     Works unchanged for a dataset-backed prepare (`exchangeId: user`) — the request body is
     identical either way, since the instrument and range are recovered from `prepareJobId`.
 
     Args:
         exchange_id (str):  Example: binance.
-        type_ (DataSourceType): Managed exchange data sources available for backtesting. Example:
-            ticker.
+        type_ (DataSourceType): Managed exchange data sources available for backtesting.
+
+            * `ticker` — trades. Can be prepared, executed and swept.
+            * `kline` — aggregated bars (candlesticks). Can be prepared, executed and swept. A run
+            reads
+              bars of the `cadence` the data was prepared at: you choose the bar width when you
+            prepare,
+              and the strategy does not fix it. See `PrepareRequest.cadence` for the accepted values.
+            * `funding` — funding rates. Can be **prepared but not executed or swept yet**: a
+            `funding`
+              request to `execute` or `executeSweep` is rejected with `400` before anything is queued,
+              and the message names the sources that can be run.
+             Example: ticker.
         body (ExecuteBacktestBody):
 
     Raises:

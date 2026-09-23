@@ -90,16 +90,21 @@ def sync_detailed(
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative
     forms (e.g. `BTC/USDT:USDT`) are rejected.
 
-    **Upload format.** A CSV with a header row, or a parquet file with the same columns by
-    name. Required: `timestamp` (ISO-8601, or numeric epoch seconds/millis/micros — detected
-    from the first row, then enforced for every later row), `close`. Optional: `open`, `high`,
-    `low`, `volume`, `quoteVolume`, `bid`, `bidSize`, `ask`, `askSize`. Cadence and timestamp
-    unit are discovered from the data, not declared.
+    **Upload format.** A CSV with a header row, a parquet file with the same columns by
+    name, or a lastra file — our own native columnar format, the same one a dataset's
+    `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
+    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
+    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
+    only needs a timestamp series and a close series present. Cadence and timestamp unit are
+    discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
-    one `dataUrl` actually is, rather than assuming from how you uploaded it.
+    one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
+    and an uploaded lastra file both report `dataFormat: \"lastra\"`).
 
     The bytes PUT to `upload.url` may be that file directly, gzipped (`.gz`), or zipped
     (`.zip`, exactly one file inside — a dataset is one file regardless of how it travels).
@@ -149,16 +154,21 @@ def sync(
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative
     forms (e.g. `BTC/USDT:USDT`) are rejected.
 
-    **Upload format.** A CSV with a header row, or a parquet file with the same columns by
-    name. Required: `timestamp` (ISO-8601, or numeric epoch seconds/millis/micros — detected
-    from the first row, then enforced for every later row), `close`. Optional: `open`, `high`,
-    `low`, `volume`, `quoteVolume`, `bid`, `bidSize`, `ask`, `askSize`. Cadence and timestamp
-    unit are discovered from the data, not declared.
+    **Upload format.** A CSV with a header row, a parquet file with the same columns by
+    name, or a lastra file — our own native columnar format, the same one a dataset's
+    `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
+    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
+    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
+    only needs a timestamp series and a close series present. Cadence and timestamp unit are
+    discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
-    one `dataUrl` actually is, rather than assuming from how you uploaded it.
+    one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
+    and an uploaded lastra file both report `dataFormat: \"lastra\"`).
 
     The bytes PUT to `upload.url` may be that file directly, gzipped (`.gz`), or zipped
     (`.zip`, exactly one file inside — a dataset is one file regardless of how it travels).
@@ -203,16 +213,21 @@ async def asyncio_detailed(
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative
     forms (e.g. `BTC/USDT:USDT`) are rejected.
 
-    **Upload format.** A CSV with a header row, or a parquet file with the same columns by
-    name. Required: `timestamp` (ISO-8601, or numeric epoch seconds/millis/micros — detected
-    from the first row, then enforced for every later row), `close`. Optional: `open`, `high`,
-    `low`, `volume`, `quoteVolume`, `bid`, `bidSize`, `ask`, `askSize`. Cadence and timestamp
-    unit are discovered from the data, not declared.
+    **Upload format.** A CSV with a header row, a parquet file with the same columns by
+    name, or a lastra file — our own native columnar format, the same one a dataset's
+    `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
+    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
+    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
+    only needs a timestamp series and a close series present. Cadence and timestamp unit are
+    discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
-    one `dataUrl` actually is, rather than assuming from how you uploaded it.
+    one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
+    and an uploaded lastra file both report `dataFormat: \"lastra\"`).
 
     The bytes PUT to `upload.url` may be that file directly, gzipped (`.gz`), or zipped
     (`.zip`, exactly one file inside — a dataset is one file regardless of how it travels).
@@ -260,16 +275,21 @@ async def asyncio(
     response. `instrument` must be a plain spot pair (`BASE/QUOTE`, exactly one `/`); derivative
     forms (e.g. `BTC/USDT:USDT`) are rejected.
 
-    **Upload format.** A CSV with a header row, or a parquet file with the same columns by
-    name. Required: `timestamp` (ISO-8601, or numeric epoch seconds/millis/micros — detected
-    from the first row, then enforced for every later row), `close`. Optional: `open`, `high`,
-    `low`, `volume`, `quoteVolume`, `bid`, `bidSize`, `ask`, `askSize`. Cadence and timestamp
-    unit are discovered from the data, not declared.
+    **Upload format.** A CSV with a header row, a parquet file with the same columns by
+    name, or a lastra file — our own native columnar format, the same one a dataset's
+    `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
+    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
+    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
+    only needs a timestamp series and a close series present. Cadence and timestamp unit are
+    discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
-    one `dataUrl` actually is, rather than assuming from how you uploaded it.
+    one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
+    and an uploaded lastra file both report `dataFormat: \"lastra\"`).
 
     The bytes PUT to `upload.url` may be that file directly, gzipped (`.gz`), or zipped
     (`.zip`, exactly one file inside — a dataset is one file regardless of how it travels).
