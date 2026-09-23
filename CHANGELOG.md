@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.126.2] — 2026-09-23
+
+- Add the generated `list_live` endpoint for the caller's own live runs.
+
 ## [0.126.1] — 2026-09-23
 
 - Represent nullable live-signal fields correctly.

@@ -134,14 +134,15 @@ Each generated endpoint module exposes four entrypoints:
 | `api.dataset` | `get_dataset_import` | `GET /datasets/{datasetId}/imports/{importId}` |
 | `api.live_execution` | `start_live` | `POST /strategy/{strategyId}/live` |
 | `api.live_execution` | `get_live` | `GET /strategy/{strategyId}/live` |
-| `api.live_execution` | `stop_live` | `DELETE /live/{runId}` |
+| `api.live_execution` | `stop_live` | `DELETE /strategy/{strategyId}/live` |
+| `api.live_execution` | `list_live` | `GET /live` — page the caller's own runs |
 | `api.live_execution` | `list_public_live` | `GET /live/public` |
 | `api.live_execution` | `update_live` | `PATCH /live/{runId}` |
 | `api.live_execution` | `update_live_params` | `PUT /live/{runId}/params` |
 | `api.live_execution` | `get_live_run_signals` | `GET /live/{runId}/signals` |
-| `api.live_execution` | `mint_live_connection_token` | `POST /live/{runId}/connection-token` |
+| `api.live_execution` | `mint_live_connection_token` | `POST /live/token` |
 
-Forty of the spec's forty-one operations, all reachable through `qtsurfer.api.client.api`
+Forty-one of the spec's forty-two operations, all reachable through `qtsurfer.api.client.api`
 as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
 openapi-python-client does not support, so no module is generated for it — call it through the
 underlying `httpx` client.
