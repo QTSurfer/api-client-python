@@ -189,9 +189,14 @@ def test_list_strategies_request_and_response(client: AuthenticatedClient) -> No
 
 @respx.mock
 def test_list_strategies_can_include_deleted(client: AuthenticatedClient) -> None:
-    route = respx.get(f"{BASE_URL}/strategies").mock(return_value=httpx.Response(200, json={
-        "strategies": [{"strategyId": "deleted-1", "deletedAt": "2026-09-01T12:00:00Z"}],
-    }))
+    route = respx.get(f"{BASE_URL}/strategies").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "strategies": [{"strategyId": "deleted-1", "deletedAt": "2026-09-01T12:00:00Z"}],
+            },
+        )
+    )
 
     response = list_strategies.sync(client=client, include_deleted=True)
 
@@ -204,9 +209,7 @@ def test_list_strategies_can_include_deleted(client: AuthenticatedClient) -> Non
 
 @respx.mock
 def test_list_datasets_can_include_deleted(client: AuthenticatedClient) -> None:
-    route = respx.get(f"{BASE_URL}/datasets").mock(
-        return_value=httpx.Response(200, json={"datasets": []})
-    )
+    route = respx.get(f"{BASE_URL}/datasets").mock(return_value=httpx.Response(200, json={"datasets": []}))
 
     response = list_datasets.sync(client=client, include_deleted=True)
 
@@ -219,9 +222,16 @@ def test_list_datasets_can_include_deleted(client: AuthenticatedClient) -> None:
 def test_send_live_command_posts_properties_and_parses_accepted_response(
     client: AuthenticatedClient,
 ) -> None:
-    route = respx.post(f"{BASE_URL}/live/run-1/commands").mock(return_value=httpx.Response(202, json={
-        "runId": "run-1", "commandId": "cmd-1", "effectiveAtMs": 1_758_330_015_000,
-    }))
+    route = respx.post(f"{BASE_URL}/live/run-1/commands").mock(
+        return_value=httpx.Response(
+            202,
+            json={
+                "runId": "run-1",
+                "commandId": "cmd-1",
+                "effectiveAtMs": 1_758_330_015_000,
+            },
+        )
+    )
     properties = SendLiveCommandRequestProperties()
     properties["targetWeight"] = 0.25
 
