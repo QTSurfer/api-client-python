@@ -46,7 +46,7 @@ from qtsurfer.api.client import AuthenticatedClient
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 
 client = AuthenticatedClient(
-    base_url="https://api.qtsurfer.com/v1",
+    base_url="https://api.qtsurfer.net/v1",  # Staging beta server
     token=os.environ["QTSURFER_TOKEN"],
 )
 
@@ -72,7 +72,7 @@ from qtsurfer.api.client.api.auth import authenticate
 # AuthenticatedClient also drives the apikey header — set prefix="" so it
 # sends `X-API-Key: <key>` instead of `Authorization: Bearer <key>`.
 apikey_client = AuthenticatedClient(
-    base_url="https://api.qtsurfer.com/v1",
+    base_url="https://api.qtsurfer.net/v1",
     token=os.environ["QTSURFER_APIKEY"],
     prefix="",
     auth_header_name="X-API-Key",
@@ -109,7 +109,7 @@ Each generated endpoint module exposes four entrypoints:
 | `api.exchange` | `download_tickers` | `GET /exchange/{exchangeId}/tickers/{base}/{quote}` |
 | `api.exchange` | `download_klines` | `GET /exchange/{exchangeId}/klines/{base}/{quote}` |
 | `api.strategy` | `get_strategy` | `GET /strategy/{strategyId}` |
-| `api.strategy` | `list_strategies` | `GET /strategies` |
+| `api.strategy` | `list_strategies` | `GET /strategies` — optional `include_deleted` returns deleted entries with `deleted_at` |
 | `api.strategy` | `delete_strategy` | `DELETE /strategy/{strategyId}` |
 | `api.strategy` | `get_strategy_code` | `GET /strategy/{strategyId}/code` |
 | `api.strategy` | `validate_strategy` | `POST /strategy/{strategyId}/validate` |
@@ -124,7 +124,7 @@ Each generated endpoint module exposes four entrypoints:
 | `api.backtesting` | `get_sweep_sensitivity` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/sensitivity` |
 | `api.backtesting` | `get_sweep_run_equity_curve` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/runs/{runIx}/equityCurve` |
 | `api.dataset` | `create_dataset` | `POST /datasets` — create a dataset and get a presigned upload URL |
-| `api.dataset` | `list_datasets` | `GET /datasets` |
+| `api.dataset` | `list_datasets` | `GET /datasets` — optional `include_deleted` returns deleted entries with `deleted_at` |
 | `api.dataset` | `get_dataset` | `GET /datasets/{datasetId}` |
 | `api.dataset` | `delete_dataset` | `DELETE /datasets/{datasetId}` |
 | `api.dataset` | `open_dataset_upload` | `POST /datasets/{datasetId}/uploads` — open the next upload session |
@@ -139,10 +139,13 @@ Each generated endpoint module exposes four entrypoints:
 | `api.live_execution` | `list_public_live` | `GET /live/public` |
 | `api.live_execution` | `update_live` | `PATCH /live/{runId}` |
 | `api.live_execution` | `update_live_params` | `PUT /live/{runId}/params` |
+| `api.live_execution` | `send_live_command` | `POST /live/{runId}/commands` — deliver a transient command to a running strategy |
 | `api.live_execution` | `get_live_run_signals` | `GET /live/{runId}/signals` |
+| `api.live_execution` | `get_live_run_paper` | `GET /live/{runId}/paper` — read simulated account snapshots |
+| `api.live_execution` | `get_live_run_paper_equity` | `GET /live/{runId}/paper/equity` — page simulated equity history |
 | `api.live_execution` | `mint_live_connection_token` | `POST /live/token` |
 
-Forty-one of the spec's forty-two operations, all reachable through `qtsurfer.api.client.api`
+Forty-four of the spec's forty-five operations, all reachable through `qtsurfer.api.client.api`
 as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
 openapi-python-client does not support, so no module is generated for it — call it through the
 underlying `httpx` client.
@@ -159,6 +162,10 @@ gzip/zip containing exactly one file), then
 `user`. `list_datasets`/`get_dataset` never `404` for "none yet", same convention as
 `list_strategies`; `delete_dataset` is a soft delete that doesn't disrupt a backtest already
 running against one of the dataset's versions.
+
+Pass `include_deleted=True` to `list_datasets` or `list_strategies` when reconciling a local
+catalogue; deleted entries carry `deleted_at`, which distinguishes them from resources that never
+existed. The default remains active entries only.
 
 `DatasetCreated` contains only the metadata known immediately after creation (`dataset_id`, `name`,
 `type_`, `instrument`) and its first upload session. Query `get_dataset` for version-derived range,
@@ -189,6 +196,19 @@ recorded signals regardless of WebSocket relay: a `410` response means the suppl
 expired, so restart from its `availableSinceMs` value. `mint_live_connection_token` creates a
 short-lived WebSocket connection token for a run.
 
+Paper trading is opt-in through `StartLiveRequest.paper`; it simulates balances and fills without
+sending orders. Read current simulated accounts with `get_live_run_paper`, and page their equity
+history oldest-first with `get_live_run_paper_equity`.
+
+`send_live_command` requires the run owner and a strategy that implements
+`CommandRequestHandler`. Commands are transient, are not persisted or replayed to replicas started
+later, and should not replace `update_live_params` for state that must survive restarts. A `202`
+means accepted, not processed; `503` guarantees it was not sent. The operation has no idempotency
+key, so avoid blind retries after an ambiguous network failure.
+
+`Account.max_sweep_cartesian` reports the account's maximum Cartesian sweep grid size. Live-run
+responses also expose optional `reason` text when a run stops or fails.
+
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
 All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, `Dataset`, `DatasetWithLinks`, `DatasetCreated`, `DatasetVersion`, `DatasetUploadState`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. Against a dataset-backed prepare (`exchangeId: user`), `PrepareJobState` reports coverage on the dataset's own cadence grid instead — `cadence`/`gaps`/`largest_gap_steps` — with `total_hours`/`hours_with_data`/`hours_without_data` absent in that case. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
@@ -216,7 +236,7 @@ These endpoints return raw [Lastra](https://github.com/QTSurfer/lastra-java) byt
 from qtsurfer.api.client import AuthenticatedClient
 from qtsurfer.api.client.api.exchange import download_tickers
 
-client = AuthenticatedClient(base_url="https://api.qtsurfer.com/v1", token=token)
+client = AuthenticatedClient(base_url="https://api.qtsurfer.net/v1", token=token)
 
 response = download_tickers.sync_detailed(
     client=client,
@@ -251,7 +271,7 @@ Both `Client` and `AuthenticatedClient` accept the standard hooks of the upstrea
 from qtsurfer.api.client import AuthenticatedClient
 
 client = AuthenticatedClient(
-    base_url="https://api.qtsurfer.com/v1",
+    base_url="https://api.qtsurfer.net/v1",
     token=token,
     timeout=httpx.Timeout(30.0),
     verify_ssl=True,

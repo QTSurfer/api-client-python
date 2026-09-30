@@ -71,8 +71,9 @@ def sync_detailed(
 ) -> Response[PublicLiveListResponse | ResponseError]:
     """Browse public live runs
 
-     Every run whose owner marked it `public` and is currently live and running — anyone's,
-    yours included, and listed without revealing who owns it. Most recently started first.
+     Every run whose owner marked it `public`, that has been promoted to `live` and is running —
+    anyone's, yours included, and listed without revealing who owns it. A `public` run still in
+    its `sandbox` trial is not listed. Most recently started first.
 
     This is the only `Live Execution` endpoint that needs no `Authorization` header.
 
@@ -108,8 +109,9 @@ def sync(
 ) -> PublicLiveListResponse | ResponseError | None:
     """Browse public live runs
 
-     Every run whose owner marked it `public` and is currently live and running — anyone's,
-    yours included, and listed without revealing who owns it. Most recently started first.
+     Every run whose owner marked it `public`, that has been promoted to `live` and is running —
+    anyone's, yours included, and listed without revealing who owns it. A `public` run still in
+    its `sandbox` trial is not listed. Most recently started first.
 
     This is the only `Live Execution` endpoint that needs no `Authorization` header.
 
@@ -140,8 +142,9 @@ async def asyncio_detailed(
 ) -> Response[PublicLiveListResponse | ResponseError]:
     """Browse public live runs
 
-     Every run whose owner marked it `public` and is currently live and running — anyone's,
-    yours included, and listed without revealing who owns it. Most recently started first.
+     Every run whose owner marked it `public`, that has been promoted to `live` and is running —
+    anyone's, yours included, and listed without revealing who owns it. A `public` run still in
+    its `sandbox` trial is not listed. Most recently started first.
 
     This is the only `Live Execution` endpoint that needs no `Authorization` header.
 
@@ -175,8 +178,9 @@ async def asyncio(
 ) -> PublicLiveListResponse | ResponseError | None:
     """Browse public live runs
 
-     Every run whose owner marked it `public` and is currently live and running — anyone's,
-    yours included, and listed without revealing who owns it. Most recently started first.
+     Every run whose owner marked it `public`, that has been promoted to `live` and is running —
+    anyone's, yours included, and listed without revealing who owns it. A `public` run still in
+    its `sandbox` trial is not listed. Most recently started first.
 
     This is the only `Live Execution` endpoint that needs no `Authorization` header.
 

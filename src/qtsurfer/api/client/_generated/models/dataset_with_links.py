@@ -45,6 +45,9 @@ class DatasetWithLinks:
             until at
             least one upload has finished ingesting.
              Example: dsv_8e2b4f19c6a03d7e.
+        deleted_at (datetime.datetime | Unset): When you deleted this dataset. Only ever present in `GET
+            /datasets?includeDeleted=true`,
+            and only on datasets you have deleted.
         updated_at (datetime.datetime | Unset): When `currentVersionId` last changed. Absent until it has a value.
             Example: 2026-08-20T09:04:12Z.
         from_ (datetime.datetime | Unset): Start of `currentVersionId`'s own data range, as discovered at ingest time.
@@ -98,6 +101,7 @@ class DatasetWithLinks:
     created_at: datetime.datetime
     status: DatasetStatus
     current_version_id: str | Unset = UNSET
+    deleted_at: datetime.datetime | Unset = UNSET
     updated_at: datetime.datetime | Unset = UNSET
     from_: datetime.datetime | Unset = UNSET
     to: datetime.datetime | Unset = UNSET
@@ -127,6 +131,10 @@ class DatasetWithLinks:
         status = self.status.value
 
         current_version_id = self.current_version_id
+
+        deleted_at: str | Unset = UNSET
+        if not isinstance(self.deleted_at, Unset):
+            deleted_at = self.deleted_at.isoformat()
 
         updated_at: str | Unset = UNSET
         if not isinstance(self.updated_at, Unset):
@@ -180,6 +188,8 @@ class DatasetWithLinks:
         )
         if current_version_id is not UNSET:
             field_dict["currentVersionId"] = current_version_id
+        if deleted_at is not UNSET:
+            field_dict["deletedAt"] = deleted_at
         if updated_at is not UNSET:
             field_dict["updatedAt"] = updated_at
         if from_ is not UNSET:
@@ -227,6 +237,13 @@ class DatasetWithLinks:
         status = DatasetStatus(d.pop("status"))
 
         current_version_id = d.pop("currentVersionId", UNSET)
+
+        _deleted_at = d.pop("deletedAt", UNSET)
+        deleted_at: datetime.datetime | Unset
+        if isinstance(_deleted_at, Unset):
+            deleted_at = UNSET
+        else:
+            deleted_at = isoparse(_deleted_at)
 
         _updated_at = d.pop("updatedAt", UNSET)
         updated_at: datetime.datetime | Unset
@@ -292,6 +309,7 @@ class DatasetWithLinks:
             created_at=created_at,
             status=status,
             current_version_id=current_version_id,
+            deleted_at=deleted_at,
             updated_at=updated_at,
             from_=from_,
             to=to,

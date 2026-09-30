@@ -6,33 +6,43 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="LiveRunGate")
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="LivePaperEquityPageLinksNext")
 
 
 @_attrs_define
-class LiveRunGate:
-    """The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and present once it ends, so an absent
-    `gate` means the trial has not finished. `passed` is the verdict; the rest is diagnostic detail whose shape is not
-    yet stabilized as public API: treat it as opaque.
-
+class LivePaperEquityPageLinksNext:
+    """
+    Attributes:
+        href (str | Unset):
     """
 
+    href: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        href = self.href
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
+        field_dict.update({})
+        if href is not UNSET:
+            field_dict["href"] = href
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        live_run_gate = cls()
+        href = d.pop("href", UNSET)
 
-        live_run_gate.additional_properties = d
-        return live_run_gate
+        live_paper_equity_page_links_next = cls(
+            href=href,
+        )
+
+        live_paper_equity_page_links_next.additional_properties = d
+        return live_paper_equity_page_links_next
 
     @property
     def additional_keys(self) -> list[str]:

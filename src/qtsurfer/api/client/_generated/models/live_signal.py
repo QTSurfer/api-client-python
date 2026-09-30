@@ -28,15 +28,21 @@ class LiveSignal:
         signal_id (str): Stable id for this exact signal — dedupe on it across reconnects or overlapping reads.
         run_id (str):
         stage (LiveSignalStage): The stage the run was in when this signal was produced.
-        type_ (LiveSignalType):
+        type_ (LiveSignalType): `paper` items appear only for a run whose `paper.output` is `mix`; they are not relayed
+            over the WebSocket channel.
         event_ts_ms (int): Market time the signal was produced.
         emitted_at_ms (int): Time it was published — always at or after `eventTsMs`.
-        instrument (LiveSignalInstrument):
+        instrument (LiveSignalInstrument | None): The instrument the signal is about. `null` only for a `paper` item
+            about a whole account (`equity`, `mark`, `kpi`), whose `data.currency` names the account.
         digest (str): Content hash, for checking that two independent deliveries of the same signal agree.
         params_version (int | Unset): The parameter set in force when this signal was produced.
-        kind (None | str | Unset): `BUY`/`SELL` for a `hint`, the command name for a `command`, absent otherwise.
+        kind (None | str | Unset): `BUY`/`SELL` for a `hint`, the command name for a `command`; for `paper`, what the
+            item is: `fill`, `trade`, `equity`, `mark`, `kpi` or `gap`. Absent otherwise.
         order (LiveSignalOrderType0 | None | Unset): Present only for a `hint`.
-        data (LiveSignalData | Unset): The signal's own free-form payload.
+        data (LiveSignalData | Unset): The signal's own free-form payload, what the strategy put there with
+            `signal.set(...)`. Whoever may read the run may read it, so on a `public` run it is public. A signal whose
+            `data` is over 8 KiB (8,192 bytes of its JSON) is not pushed on the WebSocket channel, and `GET
+            /live/{runId}/signals` returns it whole.
         regenerated (bool | Unset): `true` only for a signal republished to fill a gap in the record.
     """
 
@@ -47,7 +53,7 @@ class LiveSignal:
     type_: LiveSignalType
     event_ts_ms: int
     emitted_at_ms: int
-    instrument: LiveSignalInstrument
+    instrument: LiveSignalInstrument | None
     digest: str
     params_version: int | Unset = UNSET
     kind: None | str | Unset = UNSET
@@ -57,6 +63,7 @@ class LiveSignal:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.live_signal_instrument import LiveSignalInstrument
         from ..models.live_signal_order_type_0 import LiveSignalOrderType0
 
         v = self.v
@@ -73,7 +80,11 @@ class LiveSignal:
 
         emitted_at_ms = self.emitted_at_ms
 
-        instrument = self.instrument.to_dict()
+        instrument: dict[str, Any] | None
+        if isinstance(self.instrument, LiveSignalInstrument):
+            instrument = self.instrument.to_dict()
+        else:
+            instrument = self.instrument
 
         digest = self.digest
 
@@ -148,7 +159,20 @@ class LiveSignal:
 
         emitted_at_ms = d.pop("emittedAtMs")
 
-        instrument = LiveSignalInstrument.from_dict(d.pop("instrument"))
+        def _parse_instrument(data: object) -> LiveSignalInstrument | None:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                instrument_type_0 = LiveSignalInstrument.from_dict(data)
+
+                return instrument_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(LiveSignalInstrument | None, data)
+
+        instrument = _parse_instrument(d.pop("instrument"))
 
         digest = d.pop("digest")
 

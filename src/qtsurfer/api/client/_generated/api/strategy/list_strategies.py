@@ -6,14 +6,24 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.list_strategies_response_200 import ListStrategiesResponse200
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 
-def _get_kwargs() -> dict[str, Any]:
+def _get_kwargs(
+    *,
+    include_deleted: bool | Unset = False,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
+
+    params["includeDeleted"] = include_deleted
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/strategies",
+        "params": params,
     }
 
     return _kwargs
@@ -47,6 +57,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
+    include_deleted: bool | Unset = False,
 ) -> Response[ListStrategiesResponse200]:
     """List your registered strategies
 
@@ -57,6 +68,13 @@ def sync_detailed(
     many strategies you have. Check a specific strategy's validation with `GET
     /strategy/{strategyId}`.
 
+    With `includeDeleted=true`, strategies you have deleted are listed too, each with the
+    `deletedAt` it was deleted at — useful to keep a copy of your list in sync, telling a
+    deleted strategy apart from one that never existed.
+
+    Args:
+        include_deleted (bool | Unset):  Default: False.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -65,7 +83,9 @@ def sync_detailed(
         Response[ListStrategiesResponse200]
     """
 
-    kwargs = _get_kwargs()
+    kwargs = _get_kwargs(
+        include_deleted=include_deleted,
+    )
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -77,6 +97,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
+    include_deleted: bool | Unset = False,
 ) -> ListStrategiesResponse200 | None:
     """List your registered strategies
 
@@ -86,6 +107,13 @@ def sync(
     `requiredSources` — but not its validation state, so listing stays cheap regardless of how
     many strategies you have. Check a specific strategy's validation with `GET
     /strategy/{strategyId}`.
+
+    With `includeDeleted=true`, strategies you have deleted are listed too, each with the
+    `deletedAt` it was deleted at — useful to keep a copy of your list in sync, telling a
+    deleted strategy apart from one that never existed.
+
+    Args:
+        include_deleted (bool | Unset):  Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -97,12 +125,14 @@ def sync(
 
     return sync_detailed(
         client=client,
+        include_deleted=include_deleted,
     ).parsed
 
 
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
+    include_deleted: bool | Unset = False,
 ) -> Response[ListStrategiesResponse200]:
     """List your registered strategies
 
@@ -113,6 +143,13 @@ async def asyncio_detailed(
     many strategies you have. Check a specific strategy's validation with `GET
     /strategy/{strategyId}`.
 
+    With `includeDeleted=true`, strategies you have deleted are listed too, each with the
+    `deletedAt` it was deleted at — useful to keep a copy of your list in sync, telling a
+    deleted strategy apart from one that never existed.
+
+    Args:
+        include_deleted (bool | Unset):  Default: False.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -121,7 +158,9 @@ async def asyncio_detailed(
         Response[ListStrategiesResponse200]
     """
 
-    kwargs = _get_kwargs()
+    kwargs = _get_kwargs(
+        include_deleted=include_deleted,
+    )
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -131,6 +170,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
+    include_deleted: bool | Unset = False,
 ) -> ListStrategiesResponse200 | None:
     """List your registered strategies
 
@@ -140,6 +180,13 @@ async def asyncio(
     `requiredSources` — but not its validation state, so listing stays cheap regardless of how
     many strategies you have. Check a specific strategy's validation with `GET
     /strategy/{strategyId}`.
+
+    With `includeDeleted=true`, strategies you have deleted are listed too, each with the
+    `deletedAt` it was deleted at — useful to keep a copy of your list in sync, telling a
+    deleted strategy apart from one that never existed.
+
+    Args:
+        include_deleted (bool | Unset):  Default: False.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -152,5 +199,6 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
+            include_deleted=include_deleted,
         )
     ).parsed

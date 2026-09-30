@@ -10,6 +10,7 @@ from ..models.start_live_request_visibility import StartLiveRequestVisibility
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.live_paper_config import LivePaperConfig
     from ..models.live_source import LiveSource
     from ..models.start_live_request_params import StartLiveRequestParams
 
@@ -25,12 +26,21 @@ class StartLiveRequest:
         params (StartLiveRequestParams | Unset): Strategy parameters to start with. Opaque key/value pairs — see this
             strategy's own `declaredProperties` (from `POST /strategy`) for the keys it accepts.
         visibility (StartLiveRequestVisibility | Unset): A `public` run appears in `GET /live/public` and its signal
-            channel accepts subscriptions from anyone, not only you. Default: StartLiveRequestVisibility.PRIVATE.
-        relay (bool | Unset): Request that this run's signals be relayed over its WebSocket channel once it reaches the
-            `live` stage — see the "Live execution" guide. Has no effect while the run is still in the `sandbox` stage,
-            regardless of this value. Default: False.
+            channel accepts subscriptions from anyone, not only you — from the moment it is promoted to `live`. While it is
+            a `sandbox` trial, `public` is only what you asked for, and only you can read it. Default:
+            StartLiveRequestVisibility.PRIVATE.
+        relay (bool | Unset): Request that this run's signals be relayed over its WebSocket channel, from its first
+            signal — in the `sandbox` stage too, where only you can subscribe to it. See the "Live execution" guide.
+            Default: False.
         name (str | Unset):
         description (str | Unset):
+        paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
+            (same fields,
+            defaults and limits), plus `output`. An empty object takes every default. Each quote
+            currency the run trades gets its own simulated account, opened with `initialFunding` in
+            that currency; accounts are never added together. As returned on a run, the block is
+            normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
+            in.
     """
 
     sources: list[LiveSource]
@@ -39,6 +49,7 @@ class StartLiveRequest:
     relay: bool | Unset = False
     name: str | Unset = UNSET
     description: str | Unset = UNSET
+    paper: LivePaperConfig | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -61,6 +72,10 @@ class StartLiveRequest:
 
         description = self.description
 
+        paper: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.paper, Unset):
+            paper = self.paper.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -78,11 +93,14 @@ class StartLiveRequest:
             field_dict["name"] = name
         if description is not UNSET:
             field_dict["description"] = description
+        if paper is not UNSET:
+            field_dict["paper"] = paper
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.live_paper_config import LivePaperConfig
         from ..models.live_source import LiveSource
         from ..models.start_live_request_params import StartLiveRequestParams
 
@@ -114,6 +132,13 @@ class StartLiveRequest:
 
         description = d.pop("description", UNSET)
 
+        _paper = d.pop("paper", UNSET)
+        paper: LivePaperConfig | Unset
+        if isinstance(_paper, Unset):
+            paper = UNSET
+        else:
+            paper = LivePaperConfig.from_dict(_paper)
+
         start_live_request = cls(
             sources=sources,
             params=params,
@@ -121,6 +146,7 @@ class StartLiveRequest:
             relay=relay,
             name=name,
             description=description,
+            paper=paper,
         )
 
         start_live_request.additional_properties = d

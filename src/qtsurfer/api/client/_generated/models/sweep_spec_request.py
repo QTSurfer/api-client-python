@@ -26,7 +26,9 @@ class SweepSpecRequest:
 
     Attributes:
         params (SweepSpecRequestParams):
-        sampler (SweepSpecRequestSampler | Unset):  Default: SweepSpecRequestSampler.GRID.
+        sampler (SweepSpecRequestSampler | Unset): `grid` runs every combination of the axes and is held to your plan's
+            `maxSweepCartesian` (`GET /account`); `random` and `lhs` run `samples` combinations and are not.
+             Default: SweepSpecRequestSampler.GRID.
         seed (int | Unset): Reproducibility seed. If omitted, the server generates one with Java's
             `L64X128MixRandom` generator and returns the effective value. The range
             is limited to JavaScript-safe integers so generated clients can replay it exactly.

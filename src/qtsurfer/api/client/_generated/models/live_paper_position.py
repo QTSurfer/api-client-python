@@ -6,33 +6,59 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="LiveRunGate")
+T = TypeVar("T", bound="LivePaperPosition")
 
 
 @_attrs_define
-class LiveRunGate:
-    """The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and present once it ends, so an absent
-    `gate` means the trial has not finished. `passed` is the verdict; the rest is diagnostic detail whose shape is not
-    yet stabilized as public API: treat it as opaque.
-
+class LivePaperPosition:
+    """
+    Attributes:
+        instrument (str):  Example: BTC/USDT.
+        base (float): Amount held, in the base asset.
+        cost (float): What it cost, in the account's currency.
     """
 
+    instrument: str
+    base: float
+    cost: float
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        instrument = self.instrument
+
+        base = self.base
+
+        cost = self.cost
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "instrument": instrument,
+                "base": base,
+                "cost": cost,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        live_run_gate = cls()
+        instrument = d.pop("instrument")
 
-        live_run_gate.additional_properties = d
-        return live_run_gate
+        base = d.pop("base")
+
+        cost = d.pop("cost")
+
+        live_paper_position = cls(
+            instrument=instrument,
+            base=base,
+            cost=cost,
+        )
+
+        live_paper_position.additional_properties = d
+        return live_paper_position
 
     @property
     def additional_keys(self) -> list[str]:

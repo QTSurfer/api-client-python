@@ -112,6 +112,14 @@ def sync_detailed(
     the \"Live execution\" guide linked from this tag's description for the full flow (minting a
     connection token, the channel and RPC method).
 
+    **Paper trading.** Pass a `paper` block to have the run's hints executed in simulation from
+    its first tick, as a backtest would execute them: fills, closed trades, equity and KPIs,
+    with one simulated account per quote currency. Omitted, the run has no paper trading. It
+    takes the same economics as a backtest's `baseConfig` plus where its output goes; read it
+    back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
+    (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
+    without a `paper` block.
+
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
             itself: the same code
@@ -174,6 +182,14 @@ def sync(
     the \"Live execution\" guide linked from this tag's description for the full flow (minting a
     connection token, the channel and RPC method).
 
+    **Paper trading.** Pass a `paper` block to have the run's hints executed in simulation from
+    its first tick, as a backtest would execute them: fills, closed trades, equity and KPIs,
+    with one simulated account per quote currency. Omitted, the run has no paper trading. It
+    takes the same economics as a backtest's `baseConfig` plus where its output goes; read it
+    back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
+    (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
+    without a `paper` block.
+
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
             itself: the same code
@@ -230,6 +246,14 @@ async def asyncio_detailed(
     connection instead of polling — is a WebSocket protocol on top of these REST endpoints; see
     the \"Live execution\" guide linked from this tag's description for the full flow (minting a
     connection token, the channel and RPC method).
+
+    **Paper trading.** Pass a `paper` block to have the run's hints executed in simulation from
+    its first tick, as a backtest would execute them: fills, closed trades, equity and KPIs,
+    with one simulated account per quote currency. Omitted, the run has no paper trading. It
+    takes the same economics as a backtest's `baseConfig` plus where its output goes; read it
+    back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
+    (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
+    without a `paper` block.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -290,6 +314,14 @@ async def asyncio(
     connection instead of polling — is a WebSocket protocol on top of these REST endpoints; see
     the \"Live execution\" guide linked from this tag's description for the full flow (minting a
     connection token, the channel and RPC method).
+
+    **Paper trading.** Pass a `paper` block to have the run's hints executed in simulation from
+    its first tick, as a backtest would execute them: fills, closed trades, equity and KPIs,
+    with one simulated account per quote currency. Omitted, the run has no paper trading. It
+    takes the same economics as a backtest's `baseConfig` plus where its output goes; read it
+    back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
+    (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
+    without a `paper` block.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source

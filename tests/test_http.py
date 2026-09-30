@@ -12,9 +12,9 @@ import respx
 
 from qtsurfer.api.client import AuthenticatedClient, types
 from qtsurfer.api.client.api.backtesting import get_backtest_result, get_sweep_run_equity_curve
-from qtsurfer.api.client.api.dataset import finalize_dataset_upload, open_dataset_upload
+from qtsurfer.api.client.api.dataset import finalize_dataset_upload, list_datasets, open_dataset_upload
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
-from qtsurfer.api.client.api.live_execution import get_live_run_signals
+from qtsurfer.api.client.api.live_execution import get_live_run_signals, send_live_command
 from qtsurfer.api.client.api.strategy import (
     delete_strategy,
     get_strategy,
@@ -36,7 +36,10 @@ from qtsurfer.api.client.models import (
     InstrumentDetail,
     InstrumentListResponse,
     ListStrategiesResponse200,
+    LiveCommandResult,
     ResponseError,
+    SendLiveCommandRequest,
+    SendLiveCommandRequestProperties,
     StrategyLinks,
     StrategyState,
     StrategySummary,
@@ -182,6 +185,59 @@ def test_list_strategies_request_and_response(client: AuthenticatedClient) -> No
     # list_strategies never 404s and deliberately omits validation state — the
     # item model carries no such field at all, unlike get_strategy's StrategyState.
     assert not hasattr(first, "validation")
+
+
+@respx.mock
+def test_list_strategies_can_include_deleted(client: AuthenticatedClient) -> None:
+    route = respx.get(f"{BASE_URL}/strategies").mock(return_value=httpx.Response(200, json={
+        "strategies": [{"strategyId": "deleted-1", "deletedAt": "2026-09-01T12:00:00Z"}],
+    }))
+
+    response = list_strategies.sync(client=client, include_deleted=True)
+
+    assert route.called
+    assert route.calls.last.request.url.params["includeDeleted"] == "true"
+    assert isinstance(response, ListStrategiesResponse200)
+    assert not isinstance(response.strategies[0].deleted_at, types.Unset)
+    assert response.strategies[0].deleted_at.isoformat() == "2026-09-01T12:00:00+00:00"
+
+
+@respx.mock
+def test_list_datasets_can_include_deleted(client: AuthenticatedClient) -> None:
+    route = respx.get(f"{BASE_URL}/datasets").mock(
+        return_value=httpx.Response(200, json={"datasets": []})
+    )
+
+    response = list_datasets.sync(client=client, include_deleted=True)
+
+    assert route.called
+    assert route.calls.last.request.url.params["includeDeleted"] == "true"
+    assert response is not None
+
+
+@respx.mock
+def test_send_live_command_posts_properties_and_parses_accepted_response(
+    client: AuthenticatedClient,
+) -> None:
+    route = respx.post(f"{BASE_URL}/live/run-1/commands").mock(return_value=httpx.Response(202, json={
+        "runId": "run-1", "commandId": "cmd-1", "effectiveAtMs": 1_758_330_015_000,
+    }))
+    properties = SendLiveCommandRequestProperties()
+    properties["targetWeight"] = 0.25
+
+    response = send_live_command.sync_detailed(
+        run_id="run-1",
+        body=SendLiveCommandRequest(command="rebalance", properties=properties),
+        client=client,
+    )
+
+    assert route.called
+    sent = route.calls.last.request
+    assert sent.headers["Authorization"] == "Bearer test-token"
+    assert sent.read() == b'{"command":"rebalance","properties":{"targetWeight":0.25}}'
+    assert response.status_code == 202
+    assert isinstance(response.parsed, LiveCommandResult)
+    assert response.parsed.command_id == "cmd-1"
 
 
 @respx.mock

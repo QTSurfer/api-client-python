@@ -11,7 +11,11 @@ T = TypeVar("T", bound="LiveSignalData")
 
 @_attrs_define
 class LiveSignalData:
-    """The signal's own free-form payload."""
+    """The signal's own free-form payload, what the strategy put there with `signal.set(...)`. Whoever may read the run may
+    read it, so on a `public` run it is public. A signal whose `data` is over 8 KiB (8,192 bytes of its JSON) is not
+    pushed on the WebSocket channel, and `GET /live/{runId}/signals` returns it whole.
+
+    """
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 

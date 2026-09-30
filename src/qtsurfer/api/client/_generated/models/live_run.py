@@ -12,6 +12,7 @@ from ..models.live_run_visibility import LiveRunVisibility
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.live_paper_config import LivePaperConfig
     from ..models.live_run_gate import LiveRunGate
     from ..models.live_run_params import LiveRunParams
     from ..models.live_source import LiveSource
@@ -33,24 +34,46 @@ class LiveRun:
         run_id (str): This run's own id — its canonical identity for `PATCH`/`PUT .../params` and for `GET
             /live/public`.
         visibility (LiveRunVisibility):
-        stage (LiveRunStage): A new run always starts `SANDBOX` — a trial run compared against a second execution for
-            agreement — and moves to `LIVE` once it passes.
-        state (str): `STARTING` until first observed running; otherwise the runner's own reported state (e.g.
-            `RUNNING`).
+        stage (LiveRunStage): A new run always starts `SANDBOX`, a 24-hour trial in which it is compared against a
+            second execution and checked for resource use and stability. A run that passes moves to `LIVE` automatically
+            when the 24 hours are up.
+        state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `RUNNING`, `LAGGING`
+            (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
+            for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
+            signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or `STOPPED`.
+            `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown value as a
+            running run with something to look at. See the Live execution guide.
         desired (LiveRunDesired): What you last asked for. `state` can lag this briefly after `DELETE`.
         sources (list[LiveSource]):
         params (LiveRunParams):
         params_version (int): Increments on every accepted `PUT .../params` call, including one that resends the current
             values.
-        relay (bool): Whether this run's signals are being relayed over the WebSocket channel described in the "Live
-            execution" guide, right now. This is the effective value — `false` on a `sandbox` run regardless of what was
-            requested at start; matches the requested value once `stage` reaches `live`.
+        relay (bool): Whether this run's signals are relayed over the WebSocket channel described in the "Live
+            execution" guide. It is the value requested at start, in either stage.
         started_at_ms (int): Epoch milliseconds.
         name (str | Unset):
         description (str | Unset):
-        reason (str | Unset): Present only when the run stopped because it exceeded its resource allowance.
-        gate (LiveRunGate | Unset): The sandbox trial's promotion verdict, once one exists. Shape is not yet stabilized
-            as public API — treat as opaque diagnostics.
+        reason (str | Unset): Why the run stopped or failed, when there is something to say; absent otherwise. It is
+            never a
+            stack trace or an internal message. Either `resource: ...` (the platform stopped the run for
+            exceeding its resource allowance; the text says which limit) or one of a fixed set of sentences for
+            a `FAILED` run: the strategy cannot consume the source type the run was started with, the run's
+            definition was refused, the run could not start after several attempts, the strategy failed while
+            processing data, the run lost its data feed, or the generic `The run failed.`. The set may grow:
+            read an unrecognised sentence as a failure and do not parse it. A `FAILED` run usually stays
+            `desired: RUNNING` until you stop it, and counts as active (`409` on a new start, and toward your
+            live-run limit) until then; one that can never run because its strategy cannot consume its source
+            type is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
+        gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and
+            present once it ends, so an absent `gate` means the trial has not finished. `passed` is the verdict; the rest is
+            diagnostic detail whose shape is not yet stabilized as public API: treat it as opaque.
+        paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
+            (same fields,
+            defaults and limits), plus `output`. An empty object takes every default. Each quote
+            currency the run trades gets its own simulated account, opened with `initialFunding` in
+            that currency; accounts are never added together. As returned on a run, the block is
+            normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
+            in.
     """
 
     strategy_id: str
@@ -68,6 +91,7 @@ class LiveRun:
     description: str | Unset = UNSET
     reason: str | Unset = UNSET
     gate: LiveRunGate | Unset = UNSET
+    paper: LivePaperConfig | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -106,6 +130,10 @@ class LiveRun:
         if not isinstance(self.gate, Unset):
             gate = self.gate.to_dict()
 
+        paper: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.paper, Unset):
+            paper = self.paper.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -131,11 +159,14 @@ class LiveRun:
             field_dict["reason"] = reason
         if gate is not UNSET:
             field_dict["gate"] = gate
+        if paper is not UNSET:
+            field_dict["paper"] = paper
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.live_paper_config import LivePaperConfig
         from ..models.live_run_gate import LiveRunGate
         from ..models.live_run_params import LiveRunParams
         from ..models.live_source import LiveSource
@@ -181,6 +212,13 @@ class LiveRun:
         else:
             gate = LiveRunGate.from_dict(_gate)
 
+        _paper = d.pop("paper", UNSET)
+        paper: LivePaperConfig | Unset
+        if isinstance(_paper, Unset):
+            paper = UNSET
+        else:
+            paper = LivePaperConfig.from_dict(_paper)
+
         live_run = cls(
             strategy_id=strategy_id,
             run_id=run_id,
@@ -197,6 +235,7 @@ class LiveRun:
             description=description,
             reason=reason,
             gate=gate,
+            paper=paper,
         )
 
         live_run.additional_properties = d

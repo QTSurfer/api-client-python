@@ -298,5 +298,6 @@ def test_live_signal_page_roundtrip() -> None:
     assert payload["availableSinceMs"] == 1_699_999_000_000
 
     parsed = LiveSignalPage.from_dict(payload)
+    assert parsed.signals[0].instrument is not None
     assert parsed.signals[0].instrument.symbol == "BTC/USDT"
     assert parsed.available_since_ms == 1_699_999_000_000

@@ -16,6 +16,7 @@ def _get_kwargs(
     *,
     since_ms: int | Unset = UNSET,
     instrument: str | Unset = UNSET,
+    type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
 ) -> dict[str, Any]:
@@ -25,6 +26,8 @@ def _get_kwargs(
     params["sinceMs"] = since_ms
 
     params["instrument"] = instrument
+
+    params["type"] = type_
 
     params["cursor"] = cursor
 
@@ -89,6 +92,7 @@ def sync_detailed(
     client: AuthenticatedClient,
     since_ms: int | Unset = UNSET,
     instrument: str | Unset = UNSET,
+    type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
 ) -> Response[LiveSignalPage | ResponseError]:
@@ -115,13 +119,15 @@ def sync_detailed(
     serving a shortened page that looks complete. Treat that as a normal outcome: read
     `availableSinceMs` from the error and start again from there.
 
-    Readable by the run's owner, and by anyone if the run is `public` — the same rule the
-    signal channel applies to a subscription.
+    Readable by the run's owner, and by anyone if the run is `public` and has reached the `live`
+    stage — the same rule the signal channel applies to a subscription. A `sandbox` run is read
+    by its owner only, whatever visibility it asked for.
 
     Args:
         run_id (str):
         since_ms (int | Unset):
         instrument (str | Unset):
+        type_ (str | Unset):
         cursor (str | Unset):
         limit (int | Unset):  Default: 20.
 
@@ -137,6 +143,7 @@ def sync_detailed(
         run_id=run_id,
         since_ms=since_ms,
         instrument=instrument,
+        type_=type_,
         cursor=cursor,
         limit=limit,
     )
@@ -154,6 +161,7 @@ def sync(
     client: AuthenticatedClient,
     since_ms: int | Unset = UNSET,
     instrument: str | Unset = UNSET,
+    type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
 ) -> LiveSignalPage | ResponseError | None:
@@ -180,13 +188,15 @@ def sync(
     serving a shortened page that looks complete. Treat that as a normal outcome: read
     `availableSinceMs` from the error and start again from there.
 
-    Readable by the run's owner, and by anyone if the run is `public` — the same rule the
-    signal channel applies to a subscription.
+    Readable by the run's owner, and by anyone if the run is `public` and has reached the `live`
+    stage — the same rule the signal channel applies to a subscription. A `sandbox` run is read
+    by its owner only, whatever visibility it asked for.
 
     Args:
         run_id (str):
         since_ms (int | Unset):
         instrument (str | Unset):
+        type_ (str | Unset):
         cursor (str | Unset):
         limit (int | Unset):  Default: 20.
 
@@ -203,6 +213,7 @@ def sync(
         client=client,
         since_ms=since_ms,
         instrument=instrument,
+        type_=type_,
         cursor=cursor,
         limit=limit,
     ).parsed
@@ -214,6 +225,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     since_ms: int | Unset = UNSET,
     instrument: str | Unset = UNSET,
+    type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
 ) -> Response[LiveSignalPage | ResponseError]:
@@ -240,13 +252,15 @@ async def asyncio_detailed(
     serving a shortened page that looks complete. Treat that as a normal outcome: read
     `availableSinceMs` from the error and start again from there.
 
-    Readable by the run's owner, and by anyone if the run is `public` — the same rule the
-    signal channel applies to a subscription.
+    Readable by the run's owner, and by anyone if the run is `public` and has reached the `live`
+    stage — the same rule the signal channel applies to a subscription. A `sandbox` run is read
+    by its owner only, whatever visibility it asked for.
 
     Args:
         run_id (str):
         since_ms (int | Unset):
         instrument (str | Unset):
+        type_ (str | Unset):
         cursor (str | Unset):
         limit (int | Unset):  Default: 20.
 
@@ -262,6 +276,7 @@ async def asyncio_detailed(
         run_id=run_id,
         since_ms=since_ms,
         instrument=instrument,
+        type_=type_,
         cursor=cursor,
         limit=limit,
     )
@@ -277,6 +292,7 @@ async def asyncio(
     client: AuthenticatedClient,
     since_ms: int | Unset = UNSET,
     instrument: str | Unset = UNSET,
+    type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
 ) -> LiveSignalPage | ResponseError | None:
@@ -303,13 +319,15 @@ async def asyncio(
     serving a shortened page that looks complete. Treat that as a normal outcome: read
     `availableSinceMs` from the error and start again from there.
 
-    Readable by the run's owner, and by anyone if the run is `public` — the same rule the
-    signal channel applies to a subscription.
+    Readable by the run's owner, and by anyone if the run is `public` and has reached the `live`
+    stage — the same rule the signal channel applies to a subscription. A `sandbox` run is read
+    by its owner only, whatever visibility it asked for.
 
     Args:
         run_id (str):
         since_ms (int | Unset):
         instrument (str | Unset):
+        type_ (str | Unset):
         cursor (str | Unset):
         limit (int | Unset):  Default: 20.
 
@@ -327,6 +345,7 @@ async def asyncio(
             client=client,
             since_ms=since_ms,
             instrument=instrument,
+            type_=type_,
             cursor=cursor,
             limit=limit,
         )

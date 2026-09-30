@@ -6,14 +6,14 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="LiveRunGate")
+T = TypeVar("T", bound="SendLiveCommandRequestProperties")
 
 
 @_attrs_define
-class LiveRunGate:
-    """The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and present once it ends, so an absent
-    `gate` means the trial has not finished. `passed` is the verdict; the rest is diagnostic detail whose shape is not
-    yet stabilized as public API: treat it as opaque.
+class SendLiveCommandRequestProperties:
+    """An optional map of your own choosing, alongside command. Absent means none; when given, it must be a JSON object,
+    and `command` and `properties` are the only keys the body may carry. Each entry lands as a top-level entry on the
+    strategy's `CommandRequest` — no key is off limits, since the command's own text is kept separately.
 
     """
 
@@ -29,10 +29,10 @@ class LiveRunGate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        live_run_gate = cls()
+        send_live_command_request_properties = cls()
 
-        live_run_gate.additional_properties = d
-        return live_run_gate
+        send_live_command_request_properties.additional_properties = d
+        return send_live_command_request_properties
 
     @property
     def additional_keys(self) -> list[str]:

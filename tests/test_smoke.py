@@ -22,7 +22,7 @@ PUBLIC_API = "qtsurfer.api.client.api"
 #: Operations declared by the OpenAPI spec this package is generated from.
 #: Every one of them must be accounted for below, either as a generated module
 #: or as a documented exception.
-SPEC_OPERATION_COUNT = 42
+SPEC_OPERATION_COUNT = 45
 
 #: Each spec ``operationId`` the generator turns into an endpoint module, mapped
 #: to the ``(tag package, module name)`` it lands under.
@@ -77,12 +77,15 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "importDataset": ("dataset", "import_dataset"),
     "getDatasetImport": ("dataset", "get_dataset_import"),
     "startLive": ("live_execution", "start_live"),
+    "getLiveRunPaper": ("live_execution", "get_live_run_paper"),
+    "getLiveRunPaperEquity": ("live_execution", "get_live_run_paper_equity"),
     "getLive": ("live_execution", "get_live"),
     "stopLive": ("live_execution", "stop_live"),
     "listLive": ("live_execution", "list_live"),
     "listPublicLive": ("live_execution", "list_public_live"),
     "updateLive": ("live_execution", "update_live"),
     "updateLiveParams": ("live_execution", "update_live_params"),
+    "sendLiveCommand": ("live_execution", "send_live_command"),
     "getLiveRunSignals": ("live_execution", "get_live_run_signals"),
     "mintLiveConnectionToken": ("live_execution", "mint_live_connection_token"),
 }
@@ -148,14 +151,14 @@ def test_public_classes_exist() -> None:
 
 
 def test_authenticated_client_instantiates() -> None:
-    client = AuthenticatedClient(base_url="https://api.qtsurfer.com/v1", token="fake-token")
+    client = AuthenticatedClient(base_url="https://api.qtsurfer.net/v1", token="fake-token")
     assert client.token == "fake-token"
-    assert client._base_url == "https://api.qtsurfer.com/v1"
+    assert client._base_url == "https://api.qtsurfer.net/v1"
 
 
 def test_unauthenticated_client_instantiates() -> None:
-    client = Client(base_url="https://api.qtsurfer.com/v1")
-    assert client._base_url == "https://api.qtsurfer.com/v1"
+    client = Client(base_url="https://api.qtsurfer.net/v1")
+    assert client._base_url == "https://api.qtsurfer.net/v1"
 
 
 def test_known_endpoints_are_present() -> None:

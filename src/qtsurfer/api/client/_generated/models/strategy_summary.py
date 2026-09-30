@@ -29,11 +29,15 @@ class StrategySummary:
             compiled_at (datetime.datetime | Unset): When the live compilation was produced.
             required_sources (list[str] | Unset): The market data this strategy needs. Absent, not empty, when it could
                 not be established without constructing the strategy.
+            deleted_at (datetime.datetime | Unset): When you deleted this strategy. Only ever present in `GET
+                /strategies?includeDeleted=true`,
+                and only on strategies you have deleted.
     """
 
     strategy_id: str
     compiled_at: datetime.datetime | Unset = UNSET
     required_sources: list[str] | Unset = UNSET
+    deleted_at: datetime.datetime | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -47,6 +51,10 @@ class StrategySummary:
         if not isinstance(self.required_sources, Unset):
             required_sources = self.required_sources
 
+        deleted_at: str | Unset = UNSET
+        if not isinstance(self.deleted_at, Unset):
+            deleted_at = self.deleted_at.isoformat()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -58,6 +66,8 @@ class StrategySummary:
             field_dict["compiledAt"] = compiled_at
         if required_sources is not UNSET:
             field_dict["requiredSources"] = required_sources
+        if deleted_at is not UNSET:
+            field_dict["deletedAt"] = deleted_at
 
         return field_dict
 
@@ -75,10 +85,18 @@ class StrategySummary:
 
         required_sources = cast(list[str], d.pop("requiredSources", UNSET))
 
+        _deleted_at = d.pop("deletedAt", UNSET)
+        deleted_at: datetime.datetime | Unset
+        if isinstance(_deleted_at, Unset):
+            deleted_at = UNSET
+        else:
+            deleted_at = isoparse(_deleted_at)
+
         strategy_summary = cls(
             strategy_id=strategy_id,
             compiled_at=compiled_at,
             required_sources=required_sources,
+            deleted_at=deleted_at,
         )
 
         strategy_summary.additional_properties = d

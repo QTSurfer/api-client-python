@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.14] — 2026-09-30
+
+### Added ✨
+
+- `send_live_command` delivers an owner-only transient command to a running strategy and returns its command ID and effective market position. `202` means accepted; `503` guarantees it was not sent. Retries after an ambiguous network failure can create a second command because the endpoint has no idempotency key.
+- Paper-trading configuration, account snapshots, and paginated equity history are available on live runs.
+- Strategy and dataset listings can include deleted entries with `deleted_at`; account limits include `max_sweep_cartesian`, and live runs expose an optional stop/failure `reason`.
+
 ## [0.126.2] — 2026-09-23
 
 - Add the generated `list_live` endpoint for the caller's own live runs.

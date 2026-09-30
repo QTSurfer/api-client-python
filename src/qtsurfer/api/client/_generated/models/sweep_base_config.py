@@ -21,7 +21,8 @@ class SweepBaseConfig:
         buy_fee_rate (float | Unset):
         sell_fee_rate (float | Unset):
         fee_leg (SweepBaseConfigFeeLeg | Unset):  Default: SweepBaseConfigFeeLeg.RECEIVED.
-        percent_amount_to_lock (float | Unset):
+        percent_amount_to_lock (float | Unset): Share of the free balance each entry locks, in percent (0-100]. Omitted,
+            a backtest sizes every entry with everything available.
     """
 
     initial_funding: float | Unset = 100.0

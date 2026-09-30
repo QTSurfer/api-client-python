@@ -88,8 +88,23 @@ from .job_state_status import JobStateStatus
 from .list_datasets_response_200 import ListDatasetsResponse200
 from .list_segment_instruments_segment import ListSegmentInstrumentsSegment
 from .list_strategies_response_200 import ListStrategiesResponse200
+from .live_command_result import LiveCommandResult
 from .live_connection_token import LiveConnectionToken
 from .live_list_response import LiveListResponse
+from .live_paper import LivePaper
+from .live_paper_account import LivePaperAccount
+from .live_paper_account_equity_kind import LivePaperAccountEquityKind
+from .live_paper_config import LivePaperConfig
+from .live_paper_config_fee_leg import LivePaperConfigFeeLeg
+from .live_paper_config_output import LivePaperConfigOutput
+from .live_paper_equity_page import LivePaperEquityPage
+from .live_paper_equity_page_links import LivePaperEquityPageLinks
+from .live_paper_equity_page_links_next import LivePaperEquityPageLinksNext
+from .live_paper_equity_point import LivePaperEquityPoint
+from .live_paper_equity_point_kind import LivePaperEquityPointKind
+from .live_paper_kpi import LivePaperKpi
+from .live_paper_position import LivePaperPosition
+from .live_paper_stage import LivePaperStage
 from .live_params_update_result import LiveParamsUpdateResult
 from .live_run import LiveRun
 from .live_run_compact import LiveRunCompact
@@ -127,6 +142,8 @@ from .response_error import ResponseError
 from .result_map import ResultMap
 from .result_map_params import ResultMapParams
 from .result_map_signals_upload import ResultMapSignalsUpload
+from .send_live_command_request import SendLiveCommandRequest
+from .send_live_command_request_properties import SendLiveCommandRequestProperties
 from .start_live_request import StartLiveRequest
 from .start_live_request_params import StartLiveRequestParams
 from .start_live_request_visibility import StartLiveRequestVisibility
@@ -252,8 +269,23 @@ __all__ = (
     "ListDatasetsResponse200",
     "ListSegmentInstrumentsSegment",
     "ListStrategiesResponse200",
+    "LiveCommandResult",
     "LiveConnectionToken",
     "LiveListResponse",
+    "LivePaper",
+    "LivePaperAccount",
+    "LivePaperAccountEquityKind",
+    "LivePaperConfig",
+    "LivePaperConfigFeeLeg",
+    "LivePaperConfigOutput",
+    "LivePaperEquityPage",
+    "LivePaperEquityPageLinks",
+    "LivePaperEquityPageLinksNext",
+    "LivePaperEquityPoint",
+    "LivePaperEquityPointKind",
+    "LivePaperKpi",
+    "LivePaperPosition",
+    "LivePaperStage",
     "LiveParamsUpdateResult",
     "LiveRun",
     "LiveRunCompact",
@@ -291,6 +323,8 @@ __all__ = (
     "ResultMap",
     "ResultMapParams",
     "ResultMapSignalsUpload",
+    "SendLiveCommandRequest",
+    "SendLiveCommandRequestProperties",
     "StartLiveRequest",
     "StartLiveRequestParams",
     "StartLiveRequestVisibility",
