@@ -6,7 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.live_run import LiveRun
+from ...models.live_run_with_stream import LiveRunWithStream
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -27,9 +27,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> LiveRun | ResponseError | None:
+) -> LiveRunWithStream | ResponseError | None:
     if response.status_code == 200:
-        response_200 = LiveRun.from_dict(response.json())
+        response_200 = LiveRunWithStream.from_dict(response.json())
 
         return response_200
 
@@ -46,7 +46,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[LiveRun | ResponseError]:
+) -> Response[LiveRunWithStream | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -59,12 +59,18 @@ def sync_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[LiveRun | ResponseError]:
+) -> Response[LiveRunWithStream | ResponseError]:
     """Get this strategy's current (or most recent) live run
 
      The run you last started for this strategy — its most complete state, including `params`
     and the promotion `gate` once the sandbox trial has one to report. Returns the run's last
-    known state even after it has stopped; this endpoint never disappears history.
+    known state even after it has stopped; this endpoint never disappears history. When the run was
+    started
+    with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
+
+    While the run is being executed it also carries `stats`, the run's latest counters (updates
+    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    does not return them; read them here.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -79,7 +85,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveRun | ResponseError]
+        Response[LiveRunWithStream | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -97,12 +103,18 @@ def sync(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> LiveRun | ResponseError | None:
+) -> LiveRunWithStream | ResponseError | None:
     """Get this strategy's current (or most recent) live run
 
      The run you last started for this strategy — its most complete state, including `params`
     and the promotion `gate` once the sandbox trial has one to report. Returns the run's last
-    known state even after it has stopped; this endpoint never disappears history.
+    known state even after it has stopped; this endpoint never disappears history. When the run was
+    started
+    with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
+
+    While the run is being executed it also carries `stats`, the run's latest counters (updates
+    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    does not return them; read them here.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -117,7 +129,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveRun | ResponseError
+        LiveRunWithStream | ResponseError
     """
 
     return sync_detailed(
@@ -130,12 +142,18 @@ async def asyncio_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[LiveRun | ResponseError]:
+) -> Response[LiveRunWithStream | ResponseError]:
     """Get this strategy's current (or most recent) live run
 
      The run you last started for this strategy — its most complete state, including `params`
     and the promotion `gate` once the sandbox trial has one to report. Returns the run's last
-    known state even after it has stopped; this endpoint never disappears history.
+    known state even after it has stopped; this endpoint never disappears history. When the run was
+    started
+    with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
+
+    While the run is being executed it also carries `stats`, the run's latest counters (updates
+    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    does not return them; read them here.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -150,7 +168,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveRun | ResponseError]
+        Response[LiveRunWithStream | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -166,12 +184,18 @@ async def asyncio(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> LiveRun | ResponseError | None:
+) -> LiveRunWithStream | ResponseError | None:
     """Get this strategy's current (or most recent) live run
 
      The run you last started for this strategy — its most complete state, including `params`
     and the promotion `gate` once the sandbox trial has one to report. Returns the run's last
-    known state even after it has stopped; this endpoint never disappears history.
+    known state even after it has stopped; this endpoint never disappears history. When the run was
+    started
+    with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
+
+    While the run is being executed it also carries `stats`, the run's latest counters (updates
+    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    does not return them; read them here.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -186,7 +210,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveRun | ResponseError
+        LiveRunWithStream | ResponseError
     """
 
     return (

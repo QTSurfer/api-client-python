@@ -65,7 +65,9 @@ def sync_detailed(
      Requests a stop. The run winds down at its own next check-in rather than instantly —
     poll `GET`/`PATCH` `.../live` and expect `state` to remain `RUNNING` for a short window
     after `desired` flips to `STOPPED`. Calling this again on an already-stopped run is not an
-    error; it returns the same (unchanged) state.
+    error; it returns the same (unchanged) state. A stopped run has no stream: its `streamUrl`, if it
+    had one,
+    stops working and is not in this response.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -104,7 +106,9 @@ def sync(
      Requests a stop. The run winds down at its own next check-in rather than instantly —
     poll `GET`/`PATCH` `.../live` and expect `state` to remain `RUNNING` for a short window
     after `desired` flips to `STOPPED`. Calling this again on an already-stopped run is not an
-    error; it returns the same (unchanged) state.
+    error; it returns the same (unchanged) state. A stopped run has no stream: its `streamUrl`, if it
+    had one,
+    stops working and is not in this response.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -138,7 +142,9 @@ async def asyncio_detailed(
      Requests a stop. The run winds down at its own next check-in rather than instantly —
     poll `GET`/`PATCH` `.../live` and expect `state` to remain `RUNNING` for a short window
     after `desired` flips to `STOPPED`. Calling this again on an already-stopped run is not an
-    error; it returns the same (unchanged) state.
+    error; it returns the same (unchanged) state. A stopped run has no stream: its `streamUrl`, if it
+    had one,
+    stops working and is not in this response.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
@@ -175,7 +181,9 @@ async def asyncio(
      Requests a stop. The run winds down at its own next check-in rather than instantly —
     poll `GET`/`PATCH` `.../live` and expect `state` to remain `RUNNING` for a short window
     after `desired` flips to `STOPPED`. Calling this again on an already-stopped run is not an
-    error; it returns the same (unchanged) state.
+    error; it returns the same (unchanged) state. A stopped run has no stream: its `streamUrl`, if it
+    had one,
+    stops working and is not in this response.
 
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source

@@ -22,7 +22,7 @@ PUBLIC_API = "qtsurfer.api.client.api"
 #: Operations declared by the OpenAPI spec this package is generated from.
 #: Every one of them must be accounted for below, either as a generated module
 #: or as a documented exception.
-SPEC_OPERATION_COUNT = 45
+SPEC_OPERATION_COUNT = 48
 
 #: Each spec ``operationId`` the generator turns into an endpoint module, mapped
 #: to the ``(tag package, module name)`` it lands under.
@@ -77,6 +77,7 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "importDataset": ("dataset", "import_dataset"),
     "getDatasetImport": ("dataset", "get_dataset_import"),
     "startLive": ("live_execution", "start_live"),
+    "getLiveRun": ("live_execution", "get_live_run"),
     "getLiveRunPaper": ("live_execution", "get_live_run_paper"),
     "getLiveRunPaperEquity": ("live_execution", "get_live_run_paper_equity"),
     "getLive": ("live_execution", "get_live"),
@@ -86,6 +87,8 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "updateLive": ("live_execution", "update_live"),
     "updateLiveParams": ("live_execution", "update_live_params"),
     "sendLiveCommand": ("live_execution", "send_live_command"),
+    "rotateLiveStream": ("live_execution", "rotate_live_stream"),
+    "revokeLiveStream": ("live_execution", "revoke_live_stream"),
     "getLiveRunSignals": ("live_execution", "get_live_run_signals"),
     "mintLiveConnectionToken": ("live_execution", "mint_live_connection_token"),
 }

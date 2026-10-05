@@ -111,14 +111,17 @@ from .live_run_compact import LiveRunCompact
 from .live_run_compact_stage import LiveRunCompactStage
 from .live_run_compact_visibility import LiveRunCompactVisibility
 from .live_run_desired import LiveRunDesired
+from .live_run_detail import LiveRunDetail
 from .live_run_gate import LiveRunGate
 from .live_run_params import LiveRunParams
 from .live_run_stage import LiveRunStage
+from .live_run_stats import LiveRunStats
 from .live_run_summary import LiveRunSummary
 from .live_run_summary_desired import LiveRunSummaryDesired
 from .live_run_summary_stage import LiveRunSummaryStage
 from .live_run_summary_visibility import LiveRunSummaryVisibility
 from .live_run_visibility import LiveRunVisibility
+from .live_run_with_stream import LiveRunWithStream
 from .live_signal import LiveSignal
 from .live_signal_data import LiveSignalData
 from .live_signal_instrument import LiveSignalInstrument
@@ -128,6 +131,8 @@ from .live_signal_stage import LiveSignalStage
 from .live_signal_type import LiveSignalType
 from .live_source import LiveSource
 from .live_source_type import LiveSourceType
+from .live_stream_revoked import LiveStreamRevoked
+from .live_stream_url import LiveStreamUrl
 from .notice import Notice
 from .notice_provenance import NoticeProvenance
 from .prepare_job_state import PrepareJobState
@@ -292,14 +297,17 @@ __all__ = (
     "LiveRunCompactStage",
     "LiveRunCompactVisibility",
     "LiveRunDesired",
+    "LiveRunDetail",
     "LiveRunGate",
     "LiveRunParams",
     "LiveRunStage",
+    "LiveRunStats",
     "LiveRunSummary",
     "LiveRunSummaryDesired",
     "LiveRunSummaryStage",
     "LiveRunSummaryVisibility",
     "LiveRunVisibility",
+    "LiveRunWithStream",
     "LiveSignal",
     "LiveSignalData",
     "LiveSignalInstrument",
@@ -309,6 +317,8 @@ __all__ = (
     "LiveSignalType",
     "LiveSource",
     "LiveSourceType",
+    "LiveStreamRevoked",
+    "LiveStreamUrl",
     "Notice",
     "NoticeProvenance",
     "PrepareJobState",

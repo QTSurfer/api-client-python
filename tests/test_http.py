@@ -14,7 +14,14 @@ from qtsurfer.api.client import AuthenticatedClient, types
 from qtsurfer.api.client.api.backtesting import get_backtest_result, get_sweep_run_equity_curve
 from qtsurfer.api.client.api.dataset import finalize_dataset_upload, list_datasets, open_dataset_upload
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
-from qtsurfer.api.client.api.live_execution import get_live_run_signals, send_live_command
+from qtsurfer.api.client.api.live_execution import (
+    get_live_run,
+    get_live_run_signals,
+    revoke_live_stream,
+    rotate_live_stream,
+    send_live_command,
+    start_live,
+)
 from qtsurfer.api.client.api.strategy import (
     delete_strategy,
     get_strategy,
@@ -37,9 +44,16 @@ from qtsurfer.api.client.models import (
     InstrumentListResponse,
     ListStrategiesResponse200,
     LiveCommandResult,
+    LiveRunDetail,
+    LiveRunWithStream,
+    LiveSource,
+    LiveSourceType,
+    LiveStreamRevoked,
+    LiveStreamUrl,
     ResponseError,
     SendLiveCommandRequest,
     SendLiveCommandRequestProperties,
+    StartLiveRequest,
     StrategyLinks,
     StrategyState,
     StrategySummary,
@@ -248,6 +262,107 @@ def test_send_live_command_posts_properties_and_parses_accepted_response(
     assert response.status_code == 202
     assert isinstance(response.parsed, LiveCommandResult)
     assert response.parsed.command_id == "cmd-1"
+
+
+@respx.mock
+def test_get_live_run_reads_detail_with_optional_stats(client: AuthenticatedClient) -> None:
+    route = respx.get(f"{BASE_URL}/live/run-1").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "strategyId": "strategy-1",
+                "runId": "run-1",
+                "visibility": "private",
+                "stage": "SANDBOX",
+                "state": "RUNNING",
+                "desired": "RUNNING",
+                "sources": [],
+                "params": {},
+                "paramsVersion": 0,
+                "relay": False,
+                "startedAtMs": 1_759_777_200_000,
+                "updatedAtMs": 1_759_777_260_000,
+                "stats": {
+                    "processed": 12,
+                    "opsPerSecond": 0.2,
+                    "instrumentsSeen": 2,
+                    "asOfMs": 1_759_777_260_000,
+                    "stale": False,
+                },
+            },
+        )
+    )
+
+    response = get_live_run.sync(run_id="run-1", client=client)
+
+    assert route.called
+    assert isinstance(response, LiveRunDetail)
+    assert response.updated_at_ms == 1_759_777_260_000
+    assert not isinstance(response.stats, types.Unset)
+    assert response.stats.processed == 12
+
+
+@respx.mock
+def test_start_live_stream_returns_secret_stream_url(client: AuthenticatedClient) -> None:
+    route = respx.post(f"{BASE_URL}/strategy/strategy-1/live").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "strategyId": "strategy-1",
+                "runId": "run-1",
+                "visibility": "private",
+                "stage": "SANDBOX",
+                "state": "STARTING",
+                "desired": "RUNNING",
+                "sources": [],
+                "params": {},
+                "paramsVersion": 0,
+                "relay": True,
+                "startedAtMs": 1_759_777_200_000,
+                "streamUrl": "wss://stream.example/run-1/secret",
+            },
+        )
+    )
+    body = StartLiveRequest(
+        sources=[
+            LiveSource(
+                venue_type="cx",
+                exchange="binance",
+                segment="spot",
+                type_=LiveSourceType.TICKER,
+                instruments=["BTC/USDT"],
+            )
+        ],
+        stream=True,
+    )
+
+    response = start_live.sync(strategy_id="strategy-1", body=body, client=client)
+
+    assert route.called
+    assert route.calls.last.request.read().endswith(b'"stream":true}')
+    assert isinstance(response, LiveRunWithStream)
+    assert response.stream_url == "wss://stream.example/run-1/secret"
+
+
+@respx.mock
+def test_rotate_and_revoke_live_stream(client: AuthenticatedClient) -> None:
+    rotate = respx.post(f"{BASE_URL}/live/run-1/stream").mock(
+        return_value=httpx.Response(200, json={"streamUrl": "wss://stream.example/run-1/new-secret"})
+    )
+    revoke = respx.delete(f"{BASE_URL}/live/run-1/stream").mock(
+        return_value=httpx.Response(200, json={"runId": "run-1", "revoked": True})
+    )
+
+    rotated = rotate_live_stream.sync(run_id="run-1", client=client)
+    revoked = revoke_live_stream.sync(run_id="run-1", client=client)
+
+    assert rotate.called
+    assert revoke.called
+    assert isinstance(rotated, LiveStreamUrl)
+    assert rotated.stream_url == "wss://stream.example/run-1/new-secret"
+    assert isinstance(revoked, LiveStreamRevoked)
+    assert revoked.run_id == "run-1"
+    assert revoked.revoked is True
 
 
 @respx.mock

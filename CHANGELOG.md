@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.17] — 2026-10-05
+
+### Added ✨
+
+- `get_live_run` reads an owned live run by `run_id` as `LiveRunDetail`, including monotonic
+  `updated_at_ms` and an optional `LiveRunStats` snapshot.
+- `StartLiveRequest.stream` requests the secret `stream_url` returned by `start_live` and
+  `get_live`; `rotate_live_stream` and `revoke_live_stream` manage that URL.
+
 ## [0.128.14] — 2026-09-30
 
 ### Added ✨

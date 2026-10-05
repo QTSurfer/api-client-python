@@ -136,16 +136,19 @@ Each generated endpoint module exposes four entrypoints:
 | `api.live_execution` | `get_live` | `GET /strategy/{strategyId}/live` |
 | `api.live_execution` | `stop_live` | `DELETE /strategy/{strategyId}/live` |
 | `api.live_execution` | `list_live` | `GET /live` — page the caller's own runs |
+| `api.live_execution` | `get_live_run` | `GET /live/{runId}` — read one of the caller's runs |
 | `api.live_execution` | `list_public_live` | `GET /live/public` |
 | `api.live_execution` | `update_live` | `PATCH /live/{runId}` |
 | `api.live_execution` | `update_live_params` | `PUT /live/{runId}/params` |
 | `api.live_execution` | `send_live_command` | `POST /live/{runId}/commands` — deliver a transient command to a running strategy |
+| `api.live_execution` | `rotate_live_stream` | `POST /live/{runId}/stream` — rotate a leaked stream URL |
+| `api.live_execution` | `revoke_live_stream` | `DELETE /live/{runId}/stream` — permanently revoke a stream URL |
 | `api.live_execution` | `get_live_run_signals` | `GET /live/{runId}/signals` |
 | `api.live_execution` | `get_live_run_paper` | `GET /live/{runId}/paper` — read simulated account snapshots |
 | `api.live_execution` | `get_live_run_paper_equity` | `GET /live/{runId}/paper/equity` — page simulated equity history |
 | `api.live_execution` | `mint_live_connection_token` | `POST /live/token` |
 
-Forty-four of the spec's forty-five operations, all reachable through `qtsurfer.api.client.api`
+Forty-seven of the spec's forty-eight operations, all reachable through `qtsurfer.api.client.api`
 as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
 openapi-python-client does not support, so no module is generated for it — call it through the
 underlying `httpx` client.
@@ -190,7 +193,8 @@ data.
 ### Live execution
 
 `start_live` starts a compiled strategy against one live source. Use `get_live` to inspect its
-latest state, `update_live` and `update_live_params` to change it, and `stop_live` to stop it.
+latest state, `get_live_run` to read a specific run (including its monotonic `updated_at_ms`),
+`update_live` and `update_live_params` to change it, and `stop_live` to stop it.
 `list_public_live` is the unauthenticated listing for public runs. `get_live_run_signals` pages
 recorded signals regardless of WebSocket relay: a `410` response means the supplied cursor has
 expired, so restart from its `availableSinceMs` value. `mint_live_connection_token` creates a
@@ -205,6 +209,11 @@ history oldest-first with `get_live_run_paper_equity`.
 later, and should not replace `update_live_params` for state that must survive restarts. A `202`
 means accepted, not processed; `503` guarantees it was not sent. The operation has no idempotency
 key, so avoid blind retries after an ambiguous network failure.
+
+Set `StartLiveRequest.stream=True` to request a secret plain-WebSocket `stream_url`; treat it
+like a password. `rotate_live_stream` replaces a possibly leaked URL, while `revoke_live_stream`
+disables it permanently for that run. `LiveRunDetail.stats` is an optional periodic snapshot, so
+its absence means no snapshot exists yet rather than zero activity.
 
 `Account.max_sweep_cartesian` reports the account's maximum Cartesian sweep grid size. Live-run
 responses also expose optional `reason` text when a run stops or fails.

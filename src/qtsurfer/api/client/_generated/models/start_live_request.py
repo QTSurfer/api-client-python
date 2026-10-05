@@ -32,6 +32,14 @@ class StartLiveRequest:
         relay (bool | Unset): Request that this run's signals be relayed over its WebSocket channel, from its first
             signal — in the `sandbox` stage too, where only you can subscribe to it. See the "Live execution" guide.
             Default: False.
+        stream (bool | Unset): Ask for a **stream URL**: a secret address that a simple client, or a service that passes
+            your signals
+            on to others, can open as a plain WebSocket to receive this run's signals as they are produced, one JSON
+            text frame per signal, with none of the live-execution protocol around it. The URL comes back as
+            `streamUrl` in the response to this call. Available from the `sandbox` stage on, on the plans that may
+            broadcast; any other plan gets `429`. It can be asked for **only when the run is started** (not added
+            later), and it also turns `relay` on. See the "Live execution" guide, "A plain WebSocket stream of a run".
+             Default: False.
         name (str | Unset):
         description (str | Unset):
         paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
@@ -47,6 +55,7 @@ class StartLiveRequest:
     params: StartLiveRequestParams | Unset = UNSET
     visibility: StartLiveRequestVisibility | Unset = StartLiveRequestVisibility.PRIVATE
     relay: bool | Unset = False
+    stream: bool | Unset = False
     name: str | Unset = UNSET
     description: str | Unset = UNSET
     paper: LivePaperConfig | Unset = UNSET
@@ -67,6 +76,8 @@ class StartLiveRequest:
             visibility = self.visibility.value
 
         relay = self.relay
+
+        stream = self.stream
 
         name = self.name
 
@@ -89,6 +100,8 @@ class StartLiveRequest:
             field_dict["visibility"] = visibility
         if relay is not UNSET:
             field_dict["relay"] = relay
+        if stream is not UNSET:
+            field_dict["stream"] = stream
         if name is not UNSET:
             field_dict["name"] = name
         if description is not UNSET:
@@ -128,6 +141,8 @@ class StartLiveRequest:
 
         relay = d.pop("relay", UNSET)
 
+        stream = d.pop("stream", UNSET)
+
         name = d.pop("name", UNSET)
 
         description = d.pop("description", UNSET)
@@ -144,6 +159,7 @@ class StartLiveRequest:
             params=params,
             visibility=visibility,
             relay=relay,
+            stream=stream,
             name=name,
             description=description,
             paper=paper,

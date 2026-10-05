@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from ..models.live_paper_config import LivePaperConfig
     from ..models.live_run_gate import LiveRunGate
     from ..models.live_run_params import LiveRunParams
+    from ..models.live_run_stats import LiveRunStats
     from ..models.live_source import LiveSource
 
 
@@ -74,6 +75,10 @@ class LiveRun:
             that currency; accounts are never added together. As returned on a run, the block is
             normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
             in.
+        stats (LiveRunStats | Unset): What a run has been doing, as of its last snapshot. The platform refreshes it
+            about once a minute
+            while the run is being executed, so `opsPerSecond` is an average over that interval, not an
+            instantaneous rate.
     """
 
     strategy_id: str
@@ -92,6 +97,7 @@ class LiveRun:
     reason: str | Unset = UNSET
     gate: LiveRunGate | Unset = UNSET
     paper: LivePaperConfig | Unset = UNSET
+    stats: LiveRunStats | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -134,6 +140,10 @@ class LiveRun:
         if not isinstance(self.paper, Unset):
             paper = self.paper.to_dict()
 
+        stats: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.stats, Unset):
+            stats = self.stats.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -161,6 +171,8 @@ class LiveRun:
             field_dict["gate"] = gate
         if paper is not UNSET:
             field_dict["paper"] = paper
+        if stats is not UNSET:
+            field_dict["stats"] = stats
 
         return field_dict
 
@@ -169,6 +181,7 @@ class LiveRun:
         from ..models.live_paper_config import LivePaperConfig
         from ..models.live_run_gate import LiveRunGate
         from ..models.live_run_params import LiveRunParams
+        from ..models.live_run_stats import LiveRunStats
         from ..models.live_source import LiveSource
 
         d = dict(src_dict)
@@ -219,6 +232,13 @@ class LiveRun:
         else:
             paper = LivePaperConfig.from_dict(_paper)
 
+        _stats = d.pop("stats", UNSET)
+        stats: LiveRunStats | Unset
+        if isinstance(_stats, Unset):
+            stats = UNSET
+        else:
+            stats = LiveRunStats.from_dict(_stats)
+
         live_run = cls(
             strategy_id=strategy_id,
             run_id=run_id,
@@ -236,6 +256,7 @@ class LiveRun:
             reason=reason,
             gate=gate,
             paper=paper,
+            stats=stats,
         )
 
         live_run.additional_properties = d

@@ -6,7 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.live_run import LiveRun
+from ...models.live_run_with_stream import LiveRunWithStream
 from ...models.response_error import ResponseError
 from ...models.start_live_request import StartLiveRequest
 from ...types import Response
@@ -36,9 +36,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> LiveRun | ResponseError | None:
+) -> LiveRunWithStream | ResponseError | None:
     if response.status_code == 201:
-        response_201 = LiveRun.from_dict(response.json())
+        response_201 = LiveRunWithStream.from_dict(response.json())
 
         return response_201
 
@@ -70,7 +70,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[LiveRun | ResponseError]:
+) -> Response[LiveRunWithStream | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -84,7 +84,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> Response[LiveRun | ResponseError]:
+) -> Response[LiveRunWithStream | ResponseError]:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run always begins in the **sandbox**
@@ -120,6 +120,14 @@ def sync_detailed(
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
 
+    **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
+    simple
+    client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
+    sandbox stage
+    on. The URL is in the response (`streamUrl`) and in `GET /strategy/{strategyId}/live`; treat it like
+    a
+    password. See the \"Live execution\" guide.
+
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
             itself: the same code
@@ -134,7 +142,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveRun | ResponseError]
+        Response[LiveRunWithStream | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -154,7 +162,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> LiveRun | ResponseError | None:
+) -> LiveRunWithStream | ResponseError | None:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run always begins in the **sandbox**
@@ -190,6 +198,14 @@ def sync(
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
 
+    **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
+    simple
+    client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
+    sandbox stage
+    on. The URL is in the response (`streamUrl`) and in `GET /strategy/{strategyId}/live`; treat it like
+    a
+    password. See the \"Live execution\" guide.
+
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
             itself: the same code
@@ -204,7 +220,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveRun | ResponseError
+        LiveRunWithStream | ResponseError
     """
 
     return sync_detailed(
@@ -219,7 +235,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> Response[LiveRun | ResponseError]:
+) -> Response[LiveRunWithStream | ResponseError]:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run always begins in the **sandbox**
@@ -255,6 +271,14 @@ async def asyncio_detailed(
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
 
+    **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
+    simple
+    client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
+    sandbox stage
+    on. The URL is in the response (`streamUrl`) and in `GET /strategy/{strategyId}/live`; treat it like
+    a
+    password. See the \"Live execution\" guide.
+
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
             itself: the same code
@@ -269,7 +293,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveRun | ResponseError]
+        Response[LiveRunWithStream | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -287,7 +311,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> LiveRun | ResponseError | None:
+) -> LiveRunWithStream | ResponseError | None:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run always begins in the **sandbox**
@@ -323,6 +347,14 @@ async def asyncio(
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
 
+    **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
+    simple
+    client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
+    sandbox stage
+    on. The URL is in the response (`streamUrl`) and in `GET /strategy/{strategyId}/live`; treat it like
+    a
+    password. See the \"Live execution\" guide.
+
     Args:
         strategy_id (str): Unique identifier for a compiled strategy, derived from the source
             itself: the same code
@@ -337,7 +369,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveRun | ResponseError
+        LiveRunWithStream | ResponseError
     """
 
     return (
