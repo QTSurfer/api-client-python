@@ -81,6 +81,10 @@ class LiveRunDetail:
             about once a minute
             while the run is being executed, so `opsPerSecond` is an average over that interval, not an
             instantaneous rate.
+        warm_from (int | Unset): The `warmFrom` in effect for this run, in seconds: the one requested when the run was
+            started or, when none was, the one the platform chose (the distance from the run's start back to the start of
+            the current 15-minute block, 0 to 900). It is never `null`. It is present on every run started since the field
+            exists and absent from a run started before it existed. It never changes while the run exists.
     """
 
     strategy_id: str
@@ -101,6 +105,7 @@ class LiveRunDetail:
     gate: LiveRunGate | Unset = UNSET
     paper: LivePaperConfig | Unset = UNSET
     stats: LiveRunStats | Unset = UNSET
+    warm_from: int | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -149,6 +154,8 @@ class LiveRunDetail:
         if not isinstance(self.stats, Unset):
             stats = self.stats.to_dict()
 
+        warm_from = self.warm_from
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -179,6 +186,8 @@ class LiveRunDetail:
             field_dict["paper"] = paper
         if stats is not UNSET:
             field_dict["stats"] = stats
+        if warm_from is not UNSET:
+            field_dict["warmFrom"] = warm_from
 
         return field_dict
 
@@ -247,6 +256,8 @@ class LiveRunDetail:
         else:
             stats = LiveRunStats.from_dict(_stats)
 
+        warm_from = d.pop("warmFrom", UNSET)
+
         live_run_detail = cls(
             strategy_id=strategy_id,
             run_id=run_id,
@@ -266,6 +277,7 @@ class LiveRunDetail:
             gate=gate,
             paper=paper,
             stats=stats,
+            warm_from=warm_from,
         )
 
         live_run_detail.additional_properties = d

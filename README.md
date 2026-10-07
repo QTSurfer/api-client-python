@@ -215,6 +215,21 @@ like a password. `rotate_live_stream` replaces a possibly leaked URL, while `rev
 disables it permanently for that run. `LiveRunDetail.stats` is an optional periodic snapshot, so
 its absence means no snapshot exists yet rather than zero activity.
 
+`StartLiveRequest.warm_from` is a start-only replay window in seconds (`0` through `3600`) for
+initialising strategy indicators. `0` disables replay; when omitted, the platform retains its
+automatic current-quarter-hour warm-up. The effective integer is returned as `warm_from` by
+`start_live`, `get_live`, and `get_live_run`; it is absent, never `None`, only for runs created
+before this field existed. Changing it requires stopping and starting a new run — it is not a
+`update_live_params` setting.
+
+Each live-start source uses `LiveSourceRequest`; its `instruments` field is optional. Omit it to
+let the platform use the strategy's declared instruments when available, or to read every
+instrument on that exchange and segment otherwise. You can also send `["*"]` for that automatic
+selection. An explicit list supports one-sided wildcards such as `*/USDT` and `BTC/*`. Symbols are
+case-insensitive and spaces around them are ignored (`btc/usdt` is the same as `BTC/USDT`); invalid
+pair syntax is rejected when the run starts. The returned `LiveSource.instruments` tells you what
+the run actually reads.
+
 `Account.max_sweep_cartesian` reports the account's maximum Cartesian sweep grid size. Live-run
 responses also expose optional `reason` text when a run stops or fails.
 

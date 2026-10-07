@@ -24,9 +24,11 @@ T = TypeVar("T", bound="LiveRunWithStream")
 
 @_attrs_define
 class LiveRunWithStream:
-    """A run as `LiveRun` describes it, plus its `streamUrl` when it has one. It is what **starting a run** and
+    """A run as `LiveRun` describes it, plus its `warmFrom` (absent only for a run started before the field existed) and
+    its `streamUrl` when it has one. It is what **starting a run** and
     `GET /strategy/{strategyId}/live` return: your own run, read with your own credentials. Stopping a run
-    and `GET /live/{runId}` return `LiveRun`, which never carries the URL.
+    returns `LiveRun`, which carries neither `warmFrom` nor the URL, and `GET /live/{runId}` returns `LiveRunDetail`,
+    which carries `warmFrom` and never the URL.
 
         Attributes:
             strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
@@ -81,6 +83,10 @@ class LiveRunWithStream:
                 about once a minute
                 while the run is being executed, so `opsPerSecond` is an average over that interval, not an
                 instantaneous rate.
+            warm_from (int | Unset): The `warmFrom` in effect for this run, in seconds: the one requested when the run was
+                started or, when none was, the one the platform chose (the distance from the run's start back to the start of
+                the current 15-minute block, 0 to 900). It is never `null`. It is present on every run started since the field
+                exists and absent from a run started before it existed. It never changes while the run exists.
             stream_url (str | Unset): The run's secret stream URL (`wss://…`). **Treat it like a password**: anyone who
                 holds it can read
                 this run's signals, from the sandbox stage on. Present only when the run was started with
@@ -106,6 +112,7 @@ class LiveRunWithStream:
     gate: LiveRunGate | Unset = UNSET
     paper: LivePaperConfig | Unset = UNSET
     stats: LiveRunStats | Unset = UNSET
+    warm_from: int | Unset = UNSET
     stream_url: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -153,6 +160,8 @@ class LiveRunWithStream:
         if not isinstance(self.stats, Unset):
             stats = self.stats.to_dict()
 
+        warm_from = self.warm_from
+
         stream_url = self.stream_url
 
         field_dict: dict[str, Any] = {}
@@ -184,6 +193,8 @@ class LiveRunWithStream:
             field_dict["paper"] = paper
         if stats is not UNSET:
             field_dict["stats"] = stats
+        if warm_from is not UNSET:
+            field_dict["warmFrom"] = warm_from
         if stream_url is not UNSET:
             field_dict["streamUrl"] = stream_url
 
@@ -252,6 +263,8 @@ class LiveRunWithStream:
         else:
             stats = LiveRunStats.from_dict(_stats)
 
+        warm_from = d.pop("warmFrom", UNSET)
+
         stream_url = d.pop("streamUrl", UNSET)
 
         live_run_with_stream = cls(
@@ -272,6 +285,7 @@ class LiveRunWithStream:
             gate=gate,
             paper=paper,
             stats=stats,
+            warm_from=warm_from,
             stream_url=stream_url,
         )
 

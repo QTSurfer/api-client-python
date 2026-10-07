@@ -130,6 +130,8 @@ from .live_signal_page import LiveSignalPage
 from .live_signal_stage import LiveSignalStage
 from .live_signal_type import LiveSignalType
 from .live_source import LiveSource
+from .live_source_request import LiveSourceRequest
+from .live_source_request_type import LiveSourceRequestType
 from .live_source_type import LiveSourceType
 from .live_stream_revoked import LiveStreamRevoked
 from .live_stream_url import LiveStreamUrl
@@ -316,6 +318,8 @@ __all__ = (
     "LiveSignalStage",
     "LiveSignalType",
     "LiveSource",
+    "LiveSourceRequest",
+    "LiveSourceRequestType",
     "LiveSourceType",
     "LiveStreamRevoked",
     "LiveStreamUrl",

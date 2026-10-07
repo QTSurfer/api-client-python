@@ -15,6 +15,7 @@ from qtsurfer.api.client.api.backtesting import get_backtest_result, get_sweep_r
 from qtsurfer.api.client.api.dataset import finalize_dataset_upload, list_datasets, open_dataset_upload
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 from qtsurfer.api.client.api.live_execution import (
+    get_live,
     get_live_run,
     get_live_run_signals,
     revoke_live_stream,
@@ -46,8 +47,8 @@ from qtsurfer.api.client.models import (
     LiveCommandResult,
     LiveRunDetail,
     LiveRunWithStream,
-    LiveSource,
-    LiveSourceType,
+    LiveSourceRequest,
+    LiveSourceRequestType,
     LiveStreamRevoked,
     LiveStreamUrl,
     ResponseError,
@@ -300,6 +301,8 @@ def test_get_live_run_reads_detail_with_optional_stats(client: AuthenticatedClie
     assert response.updated_at_ms == 1_759_777_260_000
     assert not isinstance(response.stats, types.Unset)
     assert response.stats.processed == 12
+    # Runs predating the field legitimately omit it; omission is distinct from null.
+    assert isinstance(response.warm_from, types.Unset)
 
 
 @respx.mock
@@ -319,29 +322,93 @@ def test_start_live_stream_returns_secret_stream_url(client: AuthenticatedClient
                 "paramsVersion": 0,
                 "relay": True,
                 "startedAtMs": 1_759_777_200_000,
+                "warmFrom": 0,
                 "streamUrl": "wss://stream.example/run-1/secret",
             },
         )
     )
     body = StartLiveRequest(
         sources=[
-            LiveSource(
+            LiveSourceRequest(
                 venue_type="cx",
                 exchange="binance",
                 segment="spot",
-                type_=LiveSourceType.TICKER,
-                instruments=["BTC/USDT"],
+                type_=LiveSourceRequestType.TICKER,
             )
         ],
         stream=True,
+        warm_from=0,
     )
 
     response = start_live.sync(strategy_id="strategy-1", body=body, client=client)
 
     assert route.called
-    assert route.calls.last.request.read().endswith(b'"stream":true}')
+    request_body = route.calls.last.request.read()
+    assert b'"stream":true' in request_body
+    assert b'"warmFrom":0' in request_body
+    assert b'"instruments"' not in request_body
     assert isinstance(response, LiveRunWithStream)
     assert response.stream_url == "wss://stream.example/run-1/secret"
+    assert response.warm_from == 0
+
+
+@respx.mock
+def test_get_live_returns_effective_warm_from(client: AuthenticatedClient) -> None:
+    route = respx.get(f"{BASE_URL}/strategy/strategy-1/live").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "strategyId": "strategy-1",
+                "runId": "run-1",
+                "visibility": "private",
+                "stage": "SANDBOX",
+                "state": "RUNNING",
+                "desired": "RUNNING",
+                "sources": [],
+                "params": {},
+                "paramsVersion": 0,
+                "relay": False,
+                "startedAtMs": 1_759_777_200_000,
+                "warmFrom": 900,
+            },
+        )
+    )
+
+    response = get_live.sync(strategy_id="strategy-1", client=client)
+
+    assert route.called
+    assert isinstance(response, LiveRunWithStream)
+    assert response.warm_from == 900
+
+
+@respx.mock
+def test_get_live_run_returns_effective_warm_from(client: AuthenticatedClient) -> None:
+    route = respx.get(f"{BASE_URL}/live/run-2").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "strategyId": "strategy-1",
+                "runId": "run-2",
+                "visibility": "private",
+                "stage": "SANDBOX",
+                "state": "RUNNING",
+                "desired": "RUNNING",
+                "sources": [],
+                "params": {},
+                "paramsVersion": 0,
+                "relay": False,
+                "startedAtMs": 1_759_777_200_000,
+                "updatedAtMs": 1_759_777_260_000,
+                "warmFrom": 300,
+            },
+        )
+    )
+
+    response = get_live_run.sync(run_id="run-2", client=client)
+
+    assert route.called
+    assert isinstance(response, LiveRunDetail)
+    assert response.warm_from == 300
 
 
 @respx.mock

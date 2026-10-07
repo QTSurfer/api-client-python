@@ -102,6 +102,17 @@ def sync_detailed(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
+    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
+    `instruments`
+    line in its source; when the compilation of the strategy records that selection as a list of pairs,
+    a
+    start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run
+    reads every
+    instrument the exchange/segment offers. A list you send is taken as sent. Either side of an entry
+    can be `*`
+    (any base paired with USDT). The instruments the run reads come back in `sources`. See the \"Live
+    execution\" guide, \"Sources\".
+
     `params` is passed straight through to the strategy at start — the same free-form object
     `POST /strategy/{strategyId}/validate` and the backtest endpoints already accept. To change
     a parameter **while the run is live**, use `PUT /live/{runId}/params` instead; this endpoint
@@ -119,6 +130,20 @@ def sync_detailed(
     back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
+
+    **Warming up.** Pass `warmFrom` to choose how many seconds before its start the run replays the
+    market
+    feed from, so that its indicators and windows have history when the first live tick arrives. `0`
+    replays
+    nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
+    and the
+    first bar of a window can be partial. Omitted, the platform replays from the start of the current
+    15-minute
+    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
+    window is
+    complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
+    here,
+    when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple
@@ -180,6 +205,17 @@ def sync(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
+    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
+    `instruments`
+    line in its source; when the compilation of the strategy records that selection as a list of pairs,
+    a
+    start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run
+    reads every
+    instrument the exchange/segment offers. A list you send is taken as sent. Either side of an entry
+    can be `*`
+    (any base paired with USDT). The instruments the run reads come back in `sources`. See the \"Live
+    execution\" guide, \"Sources\".
+
     `params` is passed straight through to the strategy at start — the same free-form object
     `POST /strategy/{strategyId}/validate` and the backtest endpoints already accept. To change
     a parameter **while the run is live**, use `PUT /live/{runId}/params` instead; this endpoint
@@ -197,6 +233,20 @@ def sync(
     back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
+
+    **Warming up.** Pass `warmFrom` to choose how many seconds before its start the run replays the
+    market
+    feed from, so that its indicators and windows have history when the first live tick arrives. `0`
+    replays
+    nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
+    and the
+    first bar of a window can be partial. Omitted, the platform replays from the start of the current
+    15-minute
+    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
+    window is
+    complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
+    here,
+    when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple
@@ -253,6 +303,17 @@ async def asyncio_detailed(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
+    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
+    `instruments`
+    line in its source; when the compilation of the strategy records that selection as a list of pairs,
+    a
+    start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run
+    reads every
+    instrument the exchange/segment offers. A list you send is taken as sent. Either side of an entry
+    can be `*`
+    (any base paired with USDT). The instruments the run reads come back in `sources`. See the \"Live
+    execution\" guide, \"Sources\".
+
     `params` is passed straight through to the strategy at start — the same free-form object
     `POST /strategy/{strategyId}/validate` and the backtest endpoints already accept. To change
     a parameter **while the run is live**, use `PUT /live/{runId}/params` instead; this endpoint
@@ -270,6 +331,20 @@ async def asyncio_detailed(
     back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
+
+    **Warming up.** Pass `warmFrom` to choose how many seconds before its start the run replays the
+    market
+    feed from, so that its indicators and windows have history when the first live tick arrives. `0`
+    replays
+    nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
+    and the
+    first bar of a window can be partial. Omitted, the platform replays from the start of the current
+    15-minute
+    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
+    window is
+    complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
+    here,
+    when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple
@@ -329,6 +404,17 @@ async def asyncio(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
+    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
+    `instruments`
+    line in its source; when the compilation of the strategy records that selection as a list of pairs,
+    a
+    start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run
+    reads every
+    instrument the exchange/segment offers. A list you send is taken as sent. Either side of an entry
+    can be `*`
+    (any base paired with USDT). The instruments the run reads come back in `sources`. See the \"Live
+    execution\" guide, \"Sources\".
+
     `params` is passed straight through to the strategy at start — the same free-form object
     `POST /strategy/{strategyId}/validate` and the backtest endpoints already accept. To change
     a parameter **while the run is live**, use `PUT /live/{runId}/params` instead; this endpoint
@@ -346,6 +432,20 @@ async def asyncio(
     back with `GET /live/{runId}/paper`. A strategy that listens to its own execution events
     (it overrides `getExecutionCallback()`) has no other execution venue, so it cannot start
     without a `paper` block.
+
+    **Warming up.** Pass `warmFrom` to choose how many seconds before its start the run replays the
+    market
+    feed from, so that its indicators and windows have history when the first live tick arrives. `0`
+    replays
+    nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
+    and the
+    first bar of a window can be partial. Omitted, the platform replays from the start of the current
+    15-minute
+    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
+    window is
+    complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
+    here,
+    when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple

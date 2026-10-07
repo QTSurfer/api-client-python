@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.22] — 2026-10-06
+
+### Added ✨
+
+- Live-start sources use the new `LiveSourceRequest` model, where `instruments` is optional. When
+  omitted (or set to `["*"]`), the server can use the strategy's declared instruments; otherwise
+  the run reads every instrument available on the exchange and segment. Wildcards can select one
+  side of a pair, such as `*/USDT`.
+
+### Changed 🔧
+
+- Instrument symbols are case-insensitive and ignore surrounding spaces; malformed pairs are
+  rejected when a run starts. The run's `LiveSource.instruments` still reports what it actually
+  reads.
+
+## [0.128.21] — 2026-10-06
+
+### Changed 🔧
+
+- Clarify in generated descriptions that source instrument symbols are case-insensitive and
+  surrounding spaces are ignored.
+
+## [0.128.20] — 2026-10-06
+
+### Added ✨
+
+- `StartLiveRequest.warm_from` configures a start-only 0–3600-second replay window. The effective
+  value is exposed by `LiveRunWithStream` and `LiveRunDetail`; it remains absent, rather than
+  `None`, on runs that predate the field.
+
 ## [0.128.17] — 2026-10-05
 
 ### Added ✨

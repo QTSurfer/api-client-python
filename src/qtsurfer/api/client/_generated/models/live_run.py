@@ -24,61 +24,63 @@ T = TypeVar("T", bound="LiveRun")
 
 @_attrs_define
 class LiveRun:
-    """A live run's full state, as returned by starting, reading, or stopping it through its strategy.
+    """A live run's full state, as returned by stopping it through its strategy, and the base of the representations
+    returned by starting and by reading it. `warmFrom` is declared by those two (`LiveRunWithStream` and
+    `LiveRunDetail`) and not here, because the response to stopping a run does not carry it.
 
-    Attributes:
-        strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
-            always yields the same id, for every caller. How much formatting the id ignores depends on
-            the language — see `POST /strategy` for exactly which rewrites preserve it and which do
-            not.
-             Example: 6bsh31ikwkuivhtgcoa6s4.
-        run_id (str): This run's own id — its canonical identity for `PATCH`/`PUT .../params` and for `GET
-            /live/public`.
-        visibility (LiveRunVisibility):
-        stage (LiveRunStage): A new run always starts `SANDBOX`, a 24-hour trial in which it is compared against a
-            second execution and checked for resource use and stability. A run that passes moves to `LIVE` automatically
-            when the 24 hours are up.
-        state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `RUNNING`, `LAGGING`
-            (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
-            for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
-            signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or `STOPPED`.
-            `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown value as a
-            running run with something to look at. See the Live execution guide.
-        desired (LiveRunDesired): What you last asked for. `state` can lag this briefly after `DELETE`.
-        sources (list[LiveSource]):
-        params (LiveRunParams):
-        params_version (int): Increments on every accepted `PUT .../params` call, including one that resends the current
-            values.
-        relay (bool): Whether this run's signals are relayed over the WebSocket channel described in the "Live
-            execution" guide. It is the value requested at start, in either stage.
-        started_at_ms (int): Epoch milliseconds.
-        name (str | Unset):
-        description (str | Unset):
-        reason (str | Unset): Why the run stopped or failed, when there is something to say; absent otherwise. It is
-            never a
-            stack trace or an internal message. Either `resource: ...` (the platform stopped the run for
-            exceeding its resource allowance; the text says which limit) or one of a fixed set of sentences for
-            a `FAILED` run: the strategy cannot consume the source type the run was started with, the run's
-            definition was refused, the run could not start after several attempts, the strategy failed while
-            processing data, the run lost its data feed, or the generic `The run failed.`. The set may grow:
-            read an unrecognised sentence as a failure and do not parse it. A `FAILED` run usually stays
-            `desired: RUNNING` until you stop it, and counts as active (`409` on a new start, and toward your
-            live-run limit) until then; one that can never run because its strategy cannot consume its source
-            type is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
-        gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and
-            present once it ends, so an absent `gate` means the trial has not finished. `passed` is the verdict; the rest is
-            diagnostic detail whose shape is not yet stabilized as public API: treat it as opaque.
-        paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
-            (same fields,
-            defaults and limits), plus `output`. An empty object takes every default. Each quote
-            currency the run trades gets its own simulated account, opened with `initialFunding` in
-            that currency; accounts are never added together. As returned on a run, the block is
-            normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
-            in.
-        stats (LiveRunStats | Unset): What a run has been doing, as of its last snapshot. The platform refreshes it
-            about once a minute
-            while the run is being executed, so `opsPerSecond` is an average over that interval, not an
-            instantaneous rate.
+        Attributes:
+            strategy_id (str): Unique identifier for a compiled strategy, derived from the source itself: the same code
+                always yields the same id, for every caller. How much formatting the id ignores depends on
+                the language — see `POST /strategy` for exactly which rewrites preserve it and which do
+                not.
+                 Example: 6bsh31ikwkuivhtgcoa6s4.
+            run_id (str): This run's own id — its canonical identity for `PATCH`/`PUT .../params` and for `GET
+                /live/public`.
+            visibility (LiveRunVisibility):
+            stage (LiveRunStage): A new run always starts `SANDBOX`, a 24-hour trial in which it is compared against a
+                second execution and checked for resource use and stability. A run that passes moves to `LIVE` automatically
+                when the 24 hours are up.
+            state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `RUNNING`, `LAGGING`
+                (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
+                for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
+                signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or `STOPPED`.
+                `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown value as a
+                running run with something to look at. See the Live execution guide.
+            desired (LiveRunDesired): What you last asked for. `state` can lag this briefly after `DELETE`.
+            sources (list[LiveSource]):
+            params (LiveRunParams):
+            params_version (int): Increments on every accepted `PUT .../params` call, including one that resends the current
+                values.
+            relay (bool): Whether this run's signals are relayed over the WebSocket channel described in the "Live
+                execution" guide. It is the value requested at start, in either stage.
+            started_at_ms (int): Epoch milliseconds.
+            name (str | Unset):
+            description (str | Unset):
+            reason (str | Unset): Why the run stopped or failed, when there is something to say; absent otherwise. It is
+                never a
+                stack trace or an internal message. Either `resource: ...` (the platform stopped the run for
+                exceeding its resource allowance; the text says which limit) or one of a fixed set of sentences for
+                a `FAILED` run: the strategy cannot consume the source type the run was started with, the run's
+                definition was refused, the run could not start after several attempts, the strategy failed while
+                processing data, the run lost its data feed, or the generic `The run failed.`. The set may grow:
+                read an unrecognised sentence as a failure and do not parse it. A `FAILED` run usually stays
+                `desired: RUNNING` until you stop it, and counts as active (`409` on a new start, and toward your
+                live-run limit) until then; one that can never run because its strategy cannot consume its source
+                type is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
+            gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and
+                present once it ends, so an absent `gate` means the trial has not finished. `passed` is the verdict; the rest is
+                diagnostic detail whose shape is not yet stabilized as public API: treat it as opaque.
+            paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
+                (same fields,
+                defaults and limits), plus `output`. An empty object takes every default. Each quote
+                currency the run trades gets its own simulated account, opened with `initialFunding` in
+                that currency; accounts are never added together. As returned on a run, the block is
+                normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
+                in.
+            stats (LiveRunStats | Unset): What a run has been doing, as of its last snapshot. The platform refreshes it
+                about once a minute
+                while the run is being executed, so `opsPerSecond` is an average over that interval, not an
+                instantaneous rate.
     """
 
     strategy_id: str

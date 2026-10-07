@@ -11,7 +11,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.live_paper_config import LivePaperConfig
-    from ..models.live_source import LiveSource
+    from ..models.live_source_request import LiveSourceRequest
     from ..models.start_live_request_params import StartLiveRequestParams
 
 
@@ -22,7 +22,7 @@ T = TypeVar("T", bound="StartLiveRequest")
 class StartLiveRequest:
     """
     Attributes:
-        sources (list[LiveSource]):
+        sources (list[LiveSourceRequest]):
         params (StartLiveRequestParams | Unset): Strategy parameters to start with. Opaque key/value pairs — see this
             strategy's own `declaredProperties` (from `POST /strategy`) for the keys it accepts.
         visibility (StartLiveRequestVisibility | Unset): A `public` run appears in `GET /live/public` and its signal
@@ -40,6 +40,18 @@ class StartLiveRequest:
             broadcast; any other plan gets `429`. It can be asked for **only when the run is started** (not added
             later), and it also turns `relay` on. See the "Live execution" guide, "A plain WebSocket stream of a run".
              Default: False.
+        warm_from (int | Unset): How many seconds before the run's start to replay the market feed from, so the
+            strategy's indicators and
+            windows have history when its first live tick arrives. `0` replays nothing: the run delivers its first
+            signal as soon as it is running, but its indicators start empty and the first bar of a window can be
+            partial. Omitted, the platform replays from the start of the current 15-minute block: between 0 and 900
+            seconds before the run's start, depending on when it starts (0 if it starts exactly on a quarter hour),
+            so the first bar of a 15-minute window is complete. The value in effect, the one you sent or the one the
+            platform chose, is reported back as `warmFrom` on the run. Signals about the replayed time
+            are not pushed on the run's channel or stream: they describe events from before the run started.
+            It can be set **only when the run is started**: it is not a parameter of `PUT /live/{runId}/params`, and
+            changing it means stopping the run and starting it again. Anything that is not an integer from 0 to 3600
+            is `400`. See the "Live execution" guide, "Warming up".
         name (str | Unset):
         description (str | Unset):
         paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
@@ -51,11 +63,12 @@ class StartLiveRequest:
             in.
     """
 
-    sources: list[LiveSource]
+    sources: list[LiveSourceRequest]
     params: StartLiveRequestParams | Unset = UNSET
     visibility: StartLiveRequestVisibility | Unset = StartLiveRequestVisibility.PRIVATE
     relay: bool | Unset = False
     stream: bool | Unset = False
+    warm_from: int | Unset = UNSET
     name: str | Unset = UNSET
     description: str | Unset = UNSET
     paper: LivePaperConfig | Unset = UNSET
@@ -78,6 +91,8 @@ class StartLiveRequest:
         relay = self.relay
 
         stream = self.stream
+
+        warm_from = self.warm_from
 
         name = self.name
 
@@ -102,6 +117,8 @@ class StartLiveRequest:
             field_dict["relay"] = relay
         if stream is not UNSET:
             field_dict["stream"] = stream
+        if warm_from is not UNSET:
+            field_dict["warmFrom"] = warm_from
         if name is not UNSET:
             field_dict["name"] = name
         if description is not UNSET:
@@ -114,14 +131,14 @@ class StartLiveRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.live_paper_config import LivePaperConfig
-        from ..models.live_source import LiveSource
+        from ..models.live_source_request import LiveSourceRequest
         from ..models.start_live_request_params import StartLiveRequestParams
 
         d = dict(src_dict)
         sources = []
         _sources = d.pop("sources")
         for sources_item_data in _sources:
-            sources_item = LiveSource.from_dict(sources_item_data)
+            sources_item = LiveSourceRequest.from_dict(sources_item_data)
 
             sources.append(sources_item)
 
@@ -143,6 +160,8 @@ class StartLiveRequest:
 
         stream = d.pop("stream", UNSET)
 
+        warm_from = d.pop("warmFrom", UNSET)
+
         name = d.pop("name", UNSET)
 
         description = d.pop("description", UNSET)
@@ -160,6 +179,7 @@ class StartLiveRequest:
             visibility=visibility,
             relay=relay,
             stream=stream,
+            warm_from=warm_from,
             name=name,
             description=description,
             paper=paper,

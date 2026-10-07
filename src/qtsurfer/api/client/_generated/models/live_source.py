@@ -22,8 +22,12 @@ class LiveSource:
         segment (str):  Example: spot.
         type_ (LiveSourceType): Both `ticker` and `kline` connect to the lightest (fastest) cadence available for the
             exchange — today, 1 tick/second on every supported exchange. Choosing a specific cadence is not offered yet.
-        instruments (list[str]): Instrument symbols, or `["*"]` for every instrument the exchange/segment offers (tier-
-            gated). Example: ['BTC/USDT'].
+        instruments (list[str]): The instruments the run reads. For a run started with a list, that list as sent; for
+            one started without `instruments`, or with `["*"]`, what the start resolved: the list of pairs the compilation
+            of the strategy records as the instruments it accepts, when it records one, or `["*"]` for every instrument the
+            exchange/segment offers (tier-gated). An entry is written `BASE/QUOTE` and either side can be `*` to mean any,
+            such as any base paired with USDT. Symbols are not case-sensitive and spaces around them are ignored, so
+            `btc/usdt` and `BTC/USDT` are the same instrument. Example: ['BTC/USDT'].
     """
 
     venue_type: str
