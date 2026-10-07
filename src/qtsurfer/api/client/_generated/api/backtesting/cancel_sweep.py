@@ -74,6 +74,14 @@ def sync_detailed(
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
 
+    Cancelling is a request, not a stop: the sweep reports `status: CANCELLED` (and
+    `state.status: Aborted`) as soon as the request is accepted, while runs that were already
+    in flight are still finishing. Until they have, `progress.pendingShards` is above `0`, and
+    `progress.done` and the leaderboard can still grow after `CANCELLED` is first seen. A client
+    that needs the final set of rows, to store them or to mark the rest as not run, keeps
+    reading until `progress.pendingShards` is `0`; the wait is bounded by how long one run
+    takes.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting.
@@ -126,6 +134,14 @@ def sync(
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
 
+    Cancelling is a request, not a stop: the sweep reports `status: CANCELLED` (and
+    `state.status: Aborted`) as soon as the request is accepted, while runs that were already
+    in flight are still finishing. Until they have, `progress.pendingShards` is above `0`, and
+    `progress.done` and the leaderboard can still grow after `CANCELLED` is first seen. A client
+    that needs the final set of rows, to store them or to mark the rest as not run, keeps
+    reading until `progress.pendingShards` is `0`; the wait is bounded by how long one run
+    takes.
+
     Args:
         exchange_id (str):  Example: binance.
         type_ (DataSourceType): Managed exchange data sources available for backtesting.
@@ -172,6 +188,14 @@ async def asyncio_detailed(
     """Cancel a running parameter sweep
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
+
+    Cancelling is a request, not a stop: the sweep reports `status: CANCELLED` (and
+    `state.status: Aborted`) as soon as the request is accepted, while runs that were already
+    in flight are still finishing. Until they have, `progress.pendingShards` is above `0`, and
+    `progress.done` and the leaderboard can still grow after `CANCELLED` is first seen. A client
+    that needs the final set of rows, to store them or to mark the rest as not run, keeps
+    reading until `progress.pendingShards` is `0`; the wait is bounded by how long one run
+    takes.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -222,6 +246,14 @@ async def asyncio(
     """Cancel a running parameter sweep
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
+
+    Cancelling is a request, not a stop: the sweep reports `status: CANCELLED` (and
+    `state.status: Aborted`) as soon as the request is accepted, while runs that were already
+    in flight are still finishing. Until they have, `progress.pendingShards` is above `0`, and
+    `progress.done` and the leaderboard can still grow after `CANCELLED` is first seen. A client
+    that needs the final set of rows, to store them or to mark the rest as not run, keeps
+    reading until `progress.pendingShards` is `0`; the wait is bounded by how long one run
+    takes.
 
     Args:
         exchange_id (str):  Example: binance.

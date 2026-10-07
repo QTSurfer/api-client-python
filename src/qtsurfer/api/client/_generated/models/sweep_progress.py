@@ -23,7 +23,8 @@ class SweepProgress:
             aborted (int): Individual runs that executed and aborted. A row-level count: a shard that fails before producing
                 any rows leaves this at 0, which is why `failedShards` exists alongside it.
             shard_count (int):
-            pending_shards (int):
+            pending_shards (int): Shards (or folds) that have not finished yet. On a cancelled sweep, `0` is what says every
+                run that was in flight has finished and the leaderboard is complete: `CANCELLED` is reported before that.
             failed_shards (int): Shards (or folds) that failed and will not be retried. Distinct from `aborted`: this counts
                 whole units that never reported, not runs that ran badly.
             retrying (int): Units whose last attempt failed on something transient — an I/O error, a worker that died mid-
