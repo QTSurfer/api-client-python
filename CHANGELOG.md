@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.24] — 2026-10-07
+
+### Changed
+
+- Sweep cancellation documentation now explains that `CANCELLED` can arrive before in-flight runs finish; keep reading until `progress.pendingShards` is `0` for the complete leaderboard.
+
 ## [0.128.22] — 2026-10-06
 
 ### Added ✨
