@@ -26,12 +26,19 @@ class StartLiveRequest:
         params (StartLiveRequestParams | Unset): Strategy parameters to start with. Opaque key/value pairs — see this
             strategy's own `declaredProperties` (from `POST /strategy`) for the keys it accepts.
         visibility (StartLiveRequestVisibility | Unset): A `public` run appears in `GET /live/public` and its signal
-            channel accepts subscriptions from anyone, not only you — from the moment it is promoted to `live`. While it is
-            a `sandbox` trial, `public` is only what you asked for, and only you can read it. Default:
-            StartLiveRequestVisibility.PRIVATE.
+            channel accepts subscriptions from anyone, not only you — from the moment it is in the `live` stage, which is
+            when it is promoted or, for a run that starts there, at once. While it is a `sandbox` trial, `public` is only
+            what you asked for, and only you can read it. Default: StartLiveRequestVisibility.PRIVATE.
         relay (bool | Unset): Request that this run's signals be relayed over its WebSocket channel, from its first
             signal — in the `sandbox` stage too, where only you can subscribe to it. See the "Live execution" guide.
             Default: False.
+        sandbox (bool | Unset): Start in the `sandbox` stage even though an earlier run of yours already took this
+            compiled strategy
+            through it. Without it, such a strategy starts in `LIVE` at once; with `true` it starts in `SANDBOX` like
+            a first run, which is how to read its signals back over the connection (`history`, kept for the
+            `sandbox` stage only) while you debug it. For a strategy that has not been through the sandbox it
+            changes nothing: it always starts there. Anything other than `true` or `false` is `400`.
+             Default: False.
         stream (bool | Unset): Ask for a **stream URL**: a secret address that a simple client, or a service that passes
             your signals
             on to others, can open as a plain WebSocket to receive this run's signals as they are produced, one JSON
@@ -67,6 +74,7 @@ class StartLiveRequest:
     params: StartLiveRequestParams | Unset = UNSET
     visibility: StartLiveRequestVisibility | Unset = StartLiveRequestVisibility.PRIVATE
     relay: bool | Unset = False
+    sandbox: bool | Unset = False
     stream: bool | Unset = False
     warm_from: int | Unset = UNSET
     name: str | Unset = UNSET
@@ -89,6 +97,8 @@ class StartLiveRequest:
             visibility = self.visibility.value
 
         relay = self.relay
+
+        sandbox = self.sandbox
 
         stream = self.stream
 
@@ -115,6 +125,8 @@ class StartLiveRequest:
             field_dict["visibility"] = visibility
         if relay is not UNSET:
             field_dict["relay"] = relay
+        if sandbox is not UNSET:
+            field_dict["sandbox"] = sandbox
         if stream is not UNSET:
             field_dict["stream"] = stream
         if warm_from is not UNSET:
@@ -158,6 +170,8 @@ class StartLiveRequest:
 
         relay = d.pop("relay", UNSET)
 
+        sandbox = d.pop("sandbox", UNSET)
+
         stream = d.pop("stream", UNSET)
 
         warm_from = d.pop("warmFrom", UNSET)
@@ -178,6 +192,7 @@ class StartLiveRequest:
             params=params,
             visibility=visibility,
             relay=relay,
+            sandbox=sandbox,
             stream=stream,
             warm_from=warm_from,
             name=name,

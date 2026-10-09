@@ -35,9 +35,10 @@ class LiveRunDetail:
         run_id (str): This run's own id — its canonical identity for `PATCH`/`PUT .../params` and for `GET
             /live/public`.
         visibility (LiveRunVisibility):
-        stage (LiveRunStage): A new run always starts `SANDBOX`, a 24-hour trial in which it is compared against a
-            second execution and checked for resource use and stability. A run that passes moves to `LIVE` automatically
-            when the 24 hours are up.
+        stage (LiveRunStage): A new run starts `SANDBOX`, a 24-hour trial in which it is compared against a second
+            execution and checked for resource use and stability. A run that passes moves to `LIVE` automatically when the
+            24 hours are up. A run of a strategy that an earlier run of yours already took through the trial starts `LIVE`,
+            unless you started it with `sandbox: true`.
         state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `RUNNING`, `LAGGING`
             (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
             for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
@@ -68,8 +69,10 @@ class LiveRunDetail:
             live-run limit) until then; one that can never run because its strategy cannot consume its source
             type is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
         gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and
-            present once it ends, so an absent `gate` means the trial has not finished. `passed` is the verdict; the rest is
-            diagnostic detail whose shape is not yet stabilized as public API: treat it as opaque.
+            present once it ends, so an absent `gate` means the trial has not finished. A run that started in `LIVE` without
+            a trial has it from the start: the verdict of the earlier run it relies on, with `inheritedFrom` naming that
+            run. `passed` is the verdict; the rest is diagnostic detail whose shape is not yet stabilized as public API:
+            treat it as opaque.
         paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
             (same fields,
             defaults and limits), plus `output`. An empty object takes every default. Each quote

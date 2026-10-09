@@ -12,8 +12,9 @@ T = TypeVar("T", bound="LiveRunGate")
 @_attrs_define
 class LiveRunGate:
     """The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and present once it ends, so an absent
-    `gate` means the trial has not finished. `passed` is the verdict; the rest is diagnostic detail whose shape is not
-    yet stabilized as public API: treat it as opaque.
+    `gate` means the trial has not finished. A run that started in `LIVE` without a trial has it from the start: the
+    verdict of the earlier run it relies on, with `inheritedFrom` naming that run. `passed` is the verdict; the rest is
+    diagnostic detail whose shape is not yet stabilized as public API: treat it as opaque.
 
     """
 

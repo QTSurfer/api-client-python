@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.25] — 2026-10-09
+
+### Added ✨
+
+- `StartLiveRequest.sandbox` lets a strategy that already passed its sandbox trial start in
+  `SANDBOX` again, for example to debug signals over the WebSocket connection. By default such a
+  strategy starts directly in `LIVE`.
+
+### Changed 🔧
+
+- Document when a live run starts in `SANDBOX` or `LIVE`, including the inherited gate verdict.
+
 ## [0.128.24] — 2026-10-07
 
 ### Changed

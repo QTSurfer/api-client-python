@@ -40,6 +40,7 @@ from qtsurfer.api.client.models import (
     ResultMap,
     ResultMapParams,
     ScalarStrategyParamValue,
+    StartLiveRequest,
     StrategyLinks,
     StrategyState,
     StrategyStateValidation,
@@ -120,6 +121,13 @@ def test_strategy_state_roundtrip_without_links() -> None:
 
     parsed = StrategyState.from_dict(payload)
     assert isinstance(parsed.field_links, type(original.field_links))
+
+
+def test_start_live_request_serializes_sandbox_override() -> None:
+    request = StartLiveRequest(sources=[], sandbox=True)
+
+    assert request.to_dict()["sandbox"] is True
+    assert StartLiveRequest.from_dict({"sources": [], "sandbox": True}).sandbox is True
 
 
 def test_list_strategies_response_roundtrip() -> None:

@@ -200,6 +200,11 @@ recorded signals regardless of WebSocket relay: a `410` response means the suppl
 expired, so restart from its `availableSinceMs` value. `mint_live_connection_token` creates a
 short-lived WebSocket connection token for a run.
 
+A strategy that has already passed its sandbox trial starts subsequent runs directly in `LIVE`.
+Set `StartLiveRequest.sandbox=True` to repeat the sandbox trial, for example while debugging its
+signals over the WebSocket connection. This field is available in client version `0.128.25` and
+later.
+
 Paper trading is opt-in through `StartLiveRequest.paper`; it simulates balances and fills without
 sending orders. Read current simulated accounts with `get_live_run_paper`, and page their equity
 history oldest-first with `get_live_run_paper_equity`.
