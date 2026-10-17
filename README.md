@@ -68,6 +68,7 @@ import os
 
 from qtsurfer.api.client import AuthenticatedClient
 from qtsurfer.api.client.api.auth import authenticate
+from qtsurfer.api.client.models import AuthTokenResponse
 
 # AuthenticatedClient also drives the apikey header — set prefix="" so it
 # sends `X-API-Key: <key>` instead of `Authorization: Bearer <key>`.
@@ -78,13 +79,35 @@ apikey_client = AuthenticatedClient(
     auth_header_name="X-API-Key",
 )
 
-token_response = authenticate.sync(client=apikey_client)
+response = authenticate.sync_detailed(client=apikey_client)
+if response.status_code != 200 or not isinstance(response.parsed, AuthTokenResponse):
+    raise RuntimeError(f"Authentication refused: {response.status_code} {response.parsed}")
+token_response = response.parsed
 jwt = token_response.access_token  # use this in subsequent calls
 ```
 
 `token_response.scopes`, when present, is a `KeyScopes` map from resource to actions,
 such as `{"backtests": ["read", "write", "execute"]}`, not an array. `get_account`
-returns the same required map. The API reports grants but does not yet enforce them.
+returns the same required map. The API reports grants but does not yet enforce individual operation scopes.
+A scope is a resource and an action: each listed resource has at least one action;
+`{}` means no scopes. A successful response looks like:
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scopes": {"backtests": ["read", "write", "execute"], "exchanges": ["read"]},
+  "tier": "free"
+}
+```
+
+Where a deployment requires scopes, a valid key with none returns `403` and a typed
+`AuthTokenError` with `code == AuthTokenErrorCode.APIKEY_WITHOUT_SCOPES` (`apikey_without_scopes`).
+No token is minted: create a key with at least one scope in the web app. Invalid,
+revoked, or expired keys still return `401`; this `403` is a key configuration issue,
+so retrying the same key does not fix it. Reporting grants does not mean that every
+operation already enforces its individual scope.
 
 Exchange discovery returns required `venue_type`, `segments`, and `live_segments`.
 Both instrument routes return `InstrumentCatalogueResponse`: either `InstrumentListResponse`

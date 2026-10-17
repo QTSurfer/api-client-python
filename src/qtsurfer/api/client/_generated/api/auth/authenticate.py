@@ -33,6 +33,11 @@ def _parse_response(
 
         return response_401
 
+    if response.status_code == 403:
+        response_403 = AuthTokenError.from_dict(response.json())
+
+        return response_403
+
     if response.status_code == 429:
         response_429 = cast(Any, None)
         return response_429
@@ -69,6 +74,10 @@ def sync_detailed(
     expires after `expires_in` seconds. Callers should refresh the token
     before expiry (or on a `401` response) by calling this endpoint again.
 
+    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
+    with at least one scope.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -101,6 +110,10 @@ def sync(
     expires after `expires_in` seconds. Callers should refresh the token
     before expiry (or on a `401` response) by calling this endpoint again.
 
+    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
+    with at least one scope.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -128,6 +141,10 @@ async def asyncio_detailed(
     The returned JWT carries the caller's subscription `tier` as a claim and
     expires after `expires_in` seconds. Callers should refresh the token
     before expiry (or on a `401` response) by calling this endpoint again.
+
+    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
+    with at least one scope.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -158,6 +175,10 @@ async def asyncio(
     The returned JWT carries the caller's subscription `tier` as a claim and
     expires after `expires_in` seconds. Callers should refresh the token
     before expiry (or on a `401` response) by calling this endpoint again.
+
+    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
+    with at least one scope.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

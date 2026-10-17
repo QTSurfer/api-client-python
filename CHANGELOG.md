@@ -6,10 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [0.128.36] — 2026-10-17
+## [0.128.37] — 2026-10-17
 
 ### Added ✨
 
+- Handle `POST /auth/token` refusing a valid API key without scopes: `403` now parses as
+  `AuthTokenError` with `AuthTokenErrorCode.APIKEY_WITHOUT_SCOPES`. No token is minted;
+  create a key with at least one scope in the web app where the deployment requires scopes.
 - Discover CEX instruments and DEX pools through both instrument routes, with typed venue,
   segment and live-segment metadata. `InstrumentCatalogueResponse` names their response union.
 - Import centralized-exchange ticker or kline history with the `cex` source block and fifteen
@@ -20,6 +23,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed 🔄
 
+- Clarify that a scope is a resource and an action: `KeyScopes` lists a resource only with
+  at least one action, and `{}` represents no scopes. Successful authentication examples
+  use the resource-to-actions map.
 - Token scopes are a `KeyScopes` resource-to-actions map, also required on account responses.
   The API reports grants but does not yet enforce them.
 - Live sources use `cex` / `dex` enums. DEX runs require one pool address and `kline` data;

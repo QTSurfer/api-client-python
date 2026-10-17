@@ -13,11 +13,12 @@ T = TypeVar("T", bound="AuthTokenError")
 
 @_attrs_define
 class AuthTokenError:
-    """Error envelope returned by `POST /auth/token` when the API key is rejected.
+    """Error envelope returned by `POST /auth/token` when the API key is rejected (`401`) or carries no scopes where scopes
+    are required (`403`).
 
-    Attributes:
-        code (AuthTokenErrorCode): Machine-readable error reason.
-        message (str): Human-readable description of the failure.
+        Attributes:
+            code (AuthTokenErrorCode): Machine-readable error reason.
+            message (str): Human-readable description of the failure.
     """
 
     code: AuthTokenErrorCode

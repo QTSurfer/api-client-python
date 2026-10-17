@@ -12,8 +12,9 @@ T = TypeVar("T", bound="KeyScopes")
 @_attrs_define
 class KeyScopes:
     """What your API key may do, as a map from a resource to the actions allowed on it. Names are
-    lower case: `{ "backtests": ["read", "write", "execute"], "exchanges": ["read"] }`. A key
-    with no scopes is `{}`. `GET /account` and `POST /auth/token` return the same map for the
+    lower case: `{ "backtests": ["read", "write", "execute"], "exchanges": ["read"] }`. A scope
+    is a resource and an action: a resource is listed only with at least one action, and a key
+    with no scope is `{}`. `GET /account` and `POST /auth/token` return the same map for the
     same key. The API reports the scopes of a key; it does not yet refuse an operation because
     a scope is missing.
 

@@ -1049,7 +1049,7 @@ wheels = [
 
 [[package]]
 name = "qtsurfer-api-client"
-version = "0.128.36"
+version = "0.128.37"
 source = { editable = "." }
 dependencies = [
     { name = "attrs" },
