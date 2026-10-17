@@ -7,6 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.instrument_list_response import InstrumentListResponse
+from ...models.pool_list_response import PoolListResponse
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -27,11 +28,32 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> InstrumentListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
     if response.status_code == 200:
-        response_200 = InstrumentListResponse.from_dict(response.json())
+
+        def _parse_response_200(data: object) -> InstrumentListResponse | PoolListResponse:
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_instrument_catalogue_response_type_0 = InstrumentListResponse.from_dict(data)
+
+                return componentsschemas_instrument_catalogue_response_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            if not isinstance(data, dict):
+                raise TypeError()
+            componentsschemas_instrument_catalogue_response_type_1 = PoolListResponse.from_dict(data)
+
+            return componentsschemas_instrument_catalogue_response_type_1
+
+        response_200 = _parse_response_200(response.json())
 
         return response_200
+
+    if response.status_code == 400:
+        response_400 = ResponseError.from_dict(response.json())
+
+        return response_400
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -46,7 +68,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[InstrumentListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -59,13 +81,17 @@ def sync_detailed(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
     in `data`, each instrument with per-data-type coverage and market info. `meta`
     confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
     `spot` / `futures` segment-discovery links.
+
+    For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
+    each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
+    `robinhood`).
 
     Args:
         exchange_id (str):  Example: binance.
@@ -75,7 +101,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | ResponseError]
+        Response[InstrumentListResponse | PoolListResponse | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -93,13 +119,17 @@ def sync(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
     in `data`, each instrument with per-data-type coverage and market info. `meta`
     confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
     `spot` / `futures` segment-discovery links.
+
+    For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
+    each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
+    `robinhood`).
 
     Args:
         exchange_id (str):  Example: binance.
@@ -109,7 +139,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | ResponseError
+        InstrumentListResponse | PoolListResponse | ResponseError
     """
 
     return sync_detailed(
@@ -122,13 +152,17 @@ async def asyncio_detailed(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
     in `data`, each instrument with per-data-type coverage and market info. `meta`
     confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
     `spot` / `futures` segment-discovery links.
+
+    For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
+    each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
+    `robinhood`).
 
     Args:
         exchange_id (str):  Example: binance.
@@ -138,7 +172,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | ResponseError]
+        Response[InstrumentListResponse | PoolListResponse | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -154,13 +188,17 @@ async def asyncio(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
     in `data`, each instrument with per-data-type coverage and market info. `meta`
     confirms the served `segment` (`spot`); HAL `_links` carry `self` plus the
     `spot` / `futures` segment-discovery links.
+
+    For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
+    each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
+    `robinhood`).
 
     Args:
         exchange_id (str):  Example: binance.
@@ -170,7 +208,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | ResponseError
+        InstrumentListResponse | PoolListResponse | ResponseError
     """
 
     return (

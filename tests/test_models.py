@@ -24,6 +24,7 @@ from qtsurfer.api.client.models import (
     EquityCurveResult,
     EquityPoint,
     Exchange,
+    ExchangeVenueType,
     ExecuteBacktestBody,
     ExecuteBacktestBodyParams,
     HalLink,
@@ -49,7 +50,9 @@ from qtsurfer.api.client.models import (
 
 
 def test_exchange_roundtrip_minimal() -> None:
-    original = Exchange(id="binance", name="Binance")
+    original = Exchange(
+        id="binance", name="Binance", venue_type=ExchangeVenueType.CEX, segments=["spot"], live_segments=["spot"]
+    )
     payload = original.to_dict()
     parsed = Exchange.from_dict(payload)
     assert parsed.id == "binance"
@@ -62,6 +65,9 @@ def test_exchange_roundtrip_full() -> None:
     original = Exchange(
         id="bybit",
         name="Bybit",
+        venue_type=ExchangeVenueType.CEX,
+        segments=["spot", "futures"],
+        live_segments=["spot"],
         description="Bybit derivatives exchange",
     )
     parsed = Exchange.from_dict(original.to_dict())
@@ -75,6 +81,7 @@ def test_instrument_detail_roundtrip_with_datetime() -> None:
     data_to = _dt.datetime(2026, 1, 15, 18, 0, 0, tzinfo=_dt.UTC)
     original = InstrumentDetail(
         id="BTC/USDT",
+        symbol="BTC/USDT",
         base="BTC",
         quote="USDT",
         coverage=InstrumentCoverage(tickers=CoverageWindow(from_=data_from, to=data_to)),

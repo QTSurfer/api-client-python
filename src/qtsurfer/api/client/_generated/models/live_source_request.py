@@ -7,6 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.live_source_request_type import LiveSourceRequestType
+from ..models.live_source_request_venue_type import LiveSourceRequestVenueType
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="LiveSourceRequest")
@@ -18,12 +19,18 @@ class LiveSourceRequest:
     only difference is that `instruments` can be left out.
 
         Attributes:
-            venue_type (str): Venue category. `cx` (centralized exchange) is the only one live runs support today. Example:
-                cx.
-            exchange (str):  Example: binance.
-            segment (str):  Example: spot.
+            venue_type (LiveSourceRequestVenueType): Venue category. `cex` is a centralized exchange and `dex` is one pool
+                on a decentralized exchange, which takes its own `exchange`, `segment`, `type` and `instruments` (see "Sources"
+                in the Live execution guide). `cx` and `dx`, the spellings used before, are still read as `cex` and `dex`; the
+                run always reports the new ones. Example: cex.
+            exchange (str): The exchange id, as `GET /exchanges` lists it. For a `dex` source, the chain the pool is on;
+                `robinhood` is the only one today. Example: binance.
+            segment (str): The segment, as `GET /exchanges` lists it for that exchange, among its `liveSegments` (a segment
+                with no live data is refused with `400`). For a `cex` source, the market segment (`spot` today); for a `dex`
+                source, the protocol of the pool, `uniswap-v3` the only one today. Example: spot.
             type_ (LiveSourceRequestType): Both `ticker` and `kline` connect to the lightest (fastest) cadence available for
                 the exchange — today, 1 tick/second on every supported exchange. Choosing a specific cadence is not offered yet.
+                A `dex` source supports only `kline`: one candle per second of the pool's trades.
             instruments (list[str] | Unset): Which instruments the run reads. A QTScript strategy can declare which
                 instruments it accepts with an `instruments` line in its source. When the compilation of the strategy records
                 that selection as a list of pairs, leaving `instruments` out, or sending `["*"]`, takes that list; otherwise the
@@ -34,10 +41,12 @@ class LiveSourceRequest:
                 `/`, an empty side, a `.` or a space inside a side, or a `*` mixed with other characters of a side) makes the
                 run fail when it starts. Plan limits: a list with an entry that has a `*` on a side counts like `["*"]` and only
                 plans that include the wildcard accept it; the other entries are counted one by one. The instruments the run
-                actually reads come back in the run's `sources`. Example: ['BTC/USDT'].
+                actually reads come back in the run's `sources`. A `dex` source needs exactly one entry, the address of its pool
+                (`0x` and 40 hexadecimal digits, not case-sensitive): it cannot be left out and `*` is not accepted. Example:
+                ['BTC/USDT'].
     """
 
-    venue_type: str
+    venue_type: LiveSourceRequestVenueType
     exchange: str
     segment: str
     type_: LiveSourceRequestType
@@ -45,7 +54,7 @@ class LiveSourceRequest:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        venue_type = self.venue_type
+        venue_type = self.venue_type.value
 
         exchange = self.exchange
 
@@ -75,7 +84,7 @@ class LiveSourceRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        venue_type = d.pop("venueType")
+        venue_type = LiveSourceRequestVenueType(d.pop("venueType"))
 
         exchange = d.pop("exchange")
 

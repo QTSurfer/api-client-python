@@ -49,11 +49,10 @@ class PrepareRequest:
                 * Managed exchange, `ticker` or `funding` — one of `1s`, `5s`, `1m`, `3m`, `5m`, `15m`,
                   `30m`, `1h`, `2h`, `4h`, `8h`, `12h`, `1d`, `1w`, `1q`; any other label returns `400`.
                   Omitted = `1s`, the publisher's native cadence.
-                * Managed exchange, `kline` — one of `1s`, `1m`, `5m`, `15m`, `30m`, `1h`, `4h`, `1d`;
-                  any other label, including `5s`, `3m` and `8h`, returns `400` and names the accepted
-                  ones. Omitted = `1s`. This is the width of the bars a run reads: it is chosen here,
-                  once, and the same strategy can be run at several cadences by preparing the range at
-                  each.
+                * Managed exchange, `kline` — the same labels as above, `1s` to `1q`; a label that is
+                  not a whole number of seconds returns `400`. Omitted = `1s`. This is the width of the
+                  bars a run reads: it is chosen here, once, and the same strategy can be run at
+                  several cadences by preparing the range at each.
                 * Dataset (`exchangeId: user`) — omitted = the dataset version's own discovered
                   `cadence` (see `DatasetVersion.cadence`), served as-is. Any cadence equal to or
                   coarser than it and an exact multiple of it is accepted, including ones outside the

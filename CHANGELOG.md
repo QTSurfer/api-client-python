@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.36] — 2026-10-17
+
+### Added ✨
+
+- Discover CEX instruments and DEX pools through both instrument routes, with typed venue,
+  segment and live-segment metadata. `InstrumentCatalogueResponse` names their response union.
+- Import centralized-exchange ticker or kline history with the `cex` source block and fifteen
+  cadence labels; retain typed `ResponseError.reason` and `next_` recovery instructions.
+- Public `api.exchange.download_tickers` and `download_klines` adapters return successful
+  binary bytes for sync and async calls, including strict-status clients. Detailed calls preserve
+  provisional-hour metadata, timestamp units, and retry delays.
+
+### Changed 🔄
+
+- Token scopes are a `KeyScopes` resource-to-actions map, also required on account responses.
+  The API reports grants but does not yet enforce them.
+- Live sources use `cex` / `dex` enums. DEX runs require one pool address and `kline` data;
+  discover valid exchange / live-segment combinations before starting a run.
+- Exchange metadata and instrument `symbol` are required. Unknown market values are absent
+  (`UNSET`), never null. Instrument segment requests accept discovered protocol strings.
+- Hourly downloads cover seven days. Lastra `ts` is microseconds with MIME type
+  `application/vnd.qtsurfer.lastra`; Parquet remains milliseconds. Handle provisional `200`,
+  `404 NOT_YET_AVAILABLE` / `NO_DATA`, `400 OUTSIDE_WINDOW` and retryable `503`.
+
+### Fixed 🐛
+
+- Public download adapters encode quote currencies without colliding with the URL encoder.
+  Use the public `api.exchange` imports rather than private generated download modules.
+
 ## [0.128.25] — 2026-10-09
 
 ### Added ✨

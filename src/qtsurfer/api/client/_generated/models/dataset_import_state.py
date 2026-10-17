@@ -33,7 +33,8 @@ class DatasetImportState:
             job_id (str | Unset): The fetch/ingest job id, while `status` is `fetching` or `ingesting`.
             error (str | Unset): A human-readable reason, present when `status` is `failed` — an unresolvable
                 pool/pair, no data in the requested range, a range older than the configured source
-                retains, the fetch exceeding your tier's time ceiling, or any of
+                retains, a `cex` `cadence` finer than the range holds (the message names the finest
+                one), the fetch exceeding your tier's time ceiling, or any of
                 `DatasetUploadState.error`'s own ingest-side reasons once fetching hands off to it.
                 Durably recorded, same as on the upload path.
                  Example: Import exceeded the tier's 12 minute ceiling.

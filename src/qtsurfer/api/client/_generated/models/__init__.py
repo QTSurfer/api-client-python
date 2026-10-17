@@ -22,6 +22,9 @@ from .data_source_type import DataSourceType
 from .dataset import Dataset
 from .dataset_created import DatasetCreated
 from .dataset_created_type import DatasetCreatedType
+from .dataset_import_cex_request import DatasetImportCexRequest
+from .dataset_import_cex_request_data_type import DatasetImportCexRequestDataType
+from .dataset_import_cex_request_segment import DatasetImportCexRequestSegment
 from .dataset_import_created import DatasetImportCreated
 from .dataset_import_created_status import DatasetImportCreatedStatus
 from .dataset_import_dex_request import DatasetImportDexRequest
@@ -59,7 +62,11 @@ from .equity_curve_request import EquityCurveRequest
 from .equity_curve_request_mode import EquityCurveRequestMode
 from .equity_curve_result import EquityCurveResult
 from .equity_point import EquityPoint
+from .error_next_call import ErrorNextCall
+from .error_next_call_body import ErrorNextCallBody
+from .error_next_call_method import ErrorNextCallMethod
 from .exchange import Exchange
+from .exchange_venue_type import ExchangeVenueType
 from .execute_backtest_body import ExecuteBacktestBody
 from .execute_backtest_body_params import ExecuteBacktestBodyParams
 from .execute_sweep_accepted import ExecuteSweepAccepted
@@ -82,11 +89,12 @@ from .instrument_detail import InstrumentDetail
 from .instrument_links import InstrumentLinks
 from .instrument_list_meta import InstrumentListMeta
 from .instrument_list_meta_segment import InstrumentListMetaSegment
+from .instrument_list_meta_venue_type import InstrumentListMetaVenueType
 from .instrument_list_response import InstrumentListResponse
 from .job_state import JobState
 from .job_state_status import JobStateStatus
+from .key_scopes import KeyScopes
 from .list_datasets_response_200 import ListDatasetsResponse200
-from .list_segment_instruments_segment import ListSegmentInstrumentsSegment
 from .list_strategies_response_200 import ListStrategiesResponse200
 from .live_command_result import LiveCommandResult
 from .live_connection_token import LiveConnectionToken
@@ -132,11 +140,18 @@ from .live_signal_type import LiveSignalType
 from .live_source import LiveSource
 from .live_source_request import LiveSourceRequest
 from .live_source_request_type import LiveSourceRequestType
+from .live_source_request_venue_type import LiveSourceRequestVenueType
 from .live_source_type import LiveSourceType
+from .live_source_venue_type import LiveSourceVenueType
 from .live_stream_revoked import LiveStreamRevoked
 from .live_stream_url import LiveStreamUrl
 from .notice import Notice
 from .notice_provenance import NoticeProvenance
+from .pool_detail import PoolDetail
+from .pool_links import PoolLinks
+from .pool_list_meta import PoolListMeta
+from .pool_list_meta_venue_type import PoolListMetaVenueType
+from .pool_list_response import PoolListResponse
 from .prepare_job_state import PrepareJobState
 from .prepare_job_state_hours_without_data_item import PrepareJobStateHoursWithoutDataItem
 from .prepare_job_state_hours_without_data_item_rationale import PrepareJobStateHoursWithoutDataItemRationale
@@ -209,6 +224,9 @@ __all__ = (
     "Dataset",
     "DatasetCreated",
     "DatasetCreatedType",
+    "DatasetImportCexRequest",
+    "DatasetImportCexRequestDataType",
+    "DatasetImportCexRequestSegment",
     "DatasetImportCreated",
     "DatasetImportCreatedStatus",
     "DatasetImportDexRequest",
@@ -247,7 +265,11 @@ __all__ = (
     "EquityCurveRequestMode",
     "EquityCurveResult",
     "EquityPoint",
+    "ErrorNextCall",
+    "ErrorNextCallBody",
+    "ErrorNextCallMethod",
     "Exchange",
+    "ExchangeVenueType",
     "ExecuteBacktestBody",
     "ExecuteBacktestBodyParams",
     "ExecuteSweepAccepted",
@@ -270,11 +292,12 @@ __all__ = (
     "InstrumentLinks",
     "InstrumentListMeta",
     "InstrumentListMetaSegment",
+    "InstrumentListMetaVenueType",
     "InstrumentListResponse",
     "JobState",
     "JobStateStatus",
+    "KeyScopes",
     "ListDatasetsResponse200",
-    "ListSegmentInstrumentsSegment",
     "ListStrategiesResponse200",
     "LiveCommandResult",
     "LiveConnectionToken",
@@ -320,11 +343,18 @@ __all__ = (
     "LiveSource",
     "LiveSourceRequest",
     "LiveSourceRequestType",
+    "LiveSourceRequestVenueType",
     "LiveSourceType",
+    "LiveSourceVenueType",
     "LiveStreamRevoked",
     "LiveStreamUrl",
     "Notice",
     "NoticeProvenance",
+    "PoolDetail",
+    "PoolLinks",
+    "PoolListMeta",
+    "PoolListMetaVenueType",
+    "PoolListResponse",
     "PrepareJobState",
     "PrepareJobStateHoursWithoutDataItem",
     "PrepareJobStateHoursWithoutDataItemRationale",

@@ -49,6 +49,7 @@ from qtsurfer.api.client.models import (
     LiveRunWithStream,
     LiveSourceRequest,
     LiveSourceRequestType,
+    LiveSourceRequestVenueType,
     LiveStreamRevoked,
     LiveStreamUrl,
     ResponseError,
@@ -74,8 +75,15 @@ def test_list_exchanges_request_and_response(client: AuthenticatedClient) -> Non
         return_value=httpx.Response(
             200,
             json=[
-                {"id": "binance", "name": "Binance", "description": "Binance"},
-                {"id": "bybit", "name": "Bybit"},
+                {
+                    "id": "binance",
+                    "name": "Binance",
+                    "description": "Binance",
+                    "venueType": "cex",
+                    "segments": ["spot"],
+                    "liveSegments": ["spot"],
+                },
+                {"id": "bybit", "name": "Bybit", "venueType": "cex", "segments": ["spot"], "liveSegments": ["spot"]},
             ],
         )
     )
@@ -103,6 +111,7 @@ def test_list_instruments_path_param_interpolated(client: AuthenticatedClient) -
         "data": [
             {
                 "id": "BTC/USDT",
+                "symbol": "BTC/USDT",
                 "base": "BTC",
                 "quote": "USDT",
                 "coverage": {
@@ -119,6 +128,7 @@ def test_list_instruments_path_param_interpolated(client: AuthenticatedClient) -
             "updatedAt": "2026-01-15T18:00:00Z",
             "exchange": "binance",
             "segment": "spot",
+            "venueType": "cex",
         },
         "_links": {"self": {"href": "/v1/exchange/binance/instruments"}},
     }
@@ -330,7 +340,7 @@ def test_start_live_stream_returns_secret_stream_url(client: AuthenticatedClient
     body = StartLiveRequest(
         sources=[
             LiveSourceRequest(
-                venue_type="cx",
+                venue_type=LiveSourceRequestVenueType.CEX,
                 exchange="binance",
                 segment="spot",
                 type_=LiveSourceRequestType.TICKER,

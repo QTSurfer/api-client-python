@@ -7,6 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.live_source_type import LiveSourceType
+from ..models.live_source_venue_type import LiveSourceVenueType
 
 T = TypeVar("T", bound="LiveSource")
 
@@ -16,21 +17,28 @@ class LiveSource:
     """One market feed a live run consumes. Exactly one entry per run today.
 
     Attributes:
-        venue_type (str): Venue category. `cx` (centralized exchange) is the only one live runs support today. Example:
-            cx.
-        exchange (str):  Example: binance.
-        segment (str):  Example: spot.
+        venue_type (LiveSourceVenueType): Venue category. `cex` is a centralized exchange and `dex` is one pool on a
+            decentralized exchange, which takes its own `exchange`, `segment`, `type` and `instruments` (see "Sources" in
+            the Live execution guide). `cx` and `dx`, the spellings used before, are still read as `cex` and `dex`; the run
+            always reports the new ones. Example: cex.
+        exchange (str): The exchange id, as `GET /exchanges` lists it. For a `dex` source, the chain the pool is on;
+            `robinhood` is the only one today. Example: binance.
+        segment (str): The segment, as `GET /exchanges` lists it for that exchange, among its `liveSegments` (a segment
+            with no live data is refused with `400`). For a `cex` source, the market segment (`spot` today); for a `dex`
+            source, the protocol of the pool, `uniswap-v3` the only one today. Example: spot.
         type_ (LiveSourceType): Both `ticker` and `kline` connect to the lightest (fastest) cadence available for the
-            exchange — today, 1 tick/second on every supported exchange. Choosing a specific cadence is not offered yet.
+            exchange — today, 1 tick/second on every supported exchange. Choosing a specific cadence is not offered yet. A
+            `dex` source supports only `kline`: one candle per second of the pool's trades.
         instruments (list[str]): The instruments the run reads. For a run started with a list, that list as sent; for
             one started without `instruments`, or with `["*"]`, what the start resolved: the list of pairs the compilation
             of the strategy records as the instruments it accepts, when it records one, or `["*"]` for every instrument the
             exchange/segment offers (tier-gated). An entry is written `BASE/QUOTE` and either side can be `*` to mean any,
             such as any base paired with USDT. Symbols are not case-sensitive and spaces around them are ignored, so
-            `btc/usdt` and `BTC/USDT` are the same instrument. Example: ['BTC/USDT'].
+            `btc/usdt` and `BTC/USDT` are the same instrument. A `dex` source holds exactly one entry, the address of its
+            pool. Example: ['BTC/USDT'].
     """
 
-    venue_type: str
+    venue_type: LiveSourceVenueType
     exchange: str
     segment: str
     type_: LiveSourceType
@@ -38,7 +46,7 @@ class LiveSource:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        venue_type = self.venue_type
+        venue_type = self.venue_type.value
 
         exchange = self.exchange
 
@@ -65,7 +73,7 @@ class LiveSource:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        venue_type = d.pop("venueType")
+        venue_type = LiveSourceVenueType(d.pop("venueType"))
 
         exchange = d.pop("exchange")
 

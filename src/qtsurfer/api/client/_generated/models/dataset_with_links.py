@@ -28,9 +28,11 @@ class DatasetWithLinks:
     Attributes:
         dataset_id (str): Opaque id, returned by `POST /datasets`. Example: ds_3f9a1c2e7b0d4a5f.
         name (str): Unique among your datasets. Example: My BTC ticks.
-        type_ (DatasetType): `ticker` for an upload or a `dex` import with no `cadence` requested (native per-trade
-            data). `klines` for a `dex` import that requested a candle `cadence` — pre-aggregated
-            bars rather than raw ticks. Purely informational; both shapes are read the same way.
+        type_ (DatasetType): `ticker` for an upload, a `dex` import with no `cadence` requested (native per-trade
+            data) or a `cex` import with `dataType: ticker`. `klines` for a `dex` import that
+            requested a candle `cadence` — pre-aggregated bars rather than raw ticks — or a `cex`
+            import with `dataType: klines`. Purely informational; both shapes are read the same
+            way.
              Example: ticker.
         instrument (str): Exchange instrument identifier (e.g. a currency pair) Example: BTC/USDT.
         created_at (datetime.datetime): When the dataset was created. Example: 2026-08-20T09:00:00Z.

@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
 from ..models.instrument_list_meta_segment import InstrumentListMetaSegment
+from ..models.instrument_list_meta_venue_type import InstrumentListMetaVenueType
 
 T = TypeVar("T", bound="InstrumentListMeta")
 
@@ -21,11 +22,14 @@ class InstrumentListMeta:
         updated_at (datetime.datetime): When this listing was last refreshed Example: 2026-07-09T19:09:07Z.
         exchange (str): The exchange the instruments belong to Example: binance.
         segment (InstrumentListMetaSegment): The market segment served in `data` Example: spot.
+        venue_type (InstrumentListMetaVenueType): The venue type of the exchange, as `GET /exchanges` lists it. Always
+            `cex` here; a listing of pools says `dex`. Example: cex.
     """
 
     updated_at: datetime.datetime
     exchange: str
     segment: InstrumentListMetaSegment
+    venue_type: InstrumentListMetaVenueType
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -35,6 +39,8 @@ class InstrumentListMeta:
 
         segment = self.segment.value
 
+        venue_type = self.venue_type.value
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -42,6 +48,7 @@ class InstrumentListMeta:
                 "updatedAt": updated_at,
                 "exchange": exchange,
                 "segment": segment,
+                "venueType": venue_type,
             }
         )
 
@@ -56,10 +63,13 @@ class InstrumentListMeta:
 
         segment = InstrumentListMetaSegment(d.pop("segment"))
 
+        venue_type = InstrumentListMetaVenueType(d.pop("venueType"))
+
         instrument_list_meta = cls(
             updated_at=updated_at,
             exchange=exchange,
             segment=segment,
+            venue_type=venue_type,
         )
 
         instrument_list_meta.additional_properties = d

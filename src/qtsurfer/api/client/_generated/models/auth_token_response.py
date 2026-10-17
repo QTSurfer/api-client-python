@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -9,6 +9,10 @@ from attrs import field as _attrs_field
 from ..models.auth_token_response_tier import AuthTokenResponseTier
 from ..models.auth_token_response_token_type import AuthTokenResponseTokenType
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.key_scopes import KeyScopes
+
 
 T = TypeVar("T", bound="AuthTokenResponse")
 
@@ -22,14 +26,20 @@ class AuthTokenResponse:
         expires_in (int): Seconds until the JWT expires (typically 3600). Example: 3600.
         tier (AuthTokenResponseTier): Subscription tier this token was issued for. Drives rate limits and feature flags
             on downstream endpoints. Example: free.
-        scopes (list[str] | Unset): Scopes granted to this token. Reserved for future use; currently always empty.
+        scopes (KeyScopes | Unset): What your API key may do, as a map from a resource to the actions allowed on it.
+            Names are
+            lower case: `{ "backtests": ["read", "write", "execute"], "exchanges": ["read"] }`. A key
+            with no scopes is `{}`. `GET /account` and `POST /auth/token` return the same map for the
+            same key. The API reports the scopes of a key; it does not yet refuse an operation because
+            a scope is missing.
+             Example: {'backtests': ['read', 'write', 'execute'], 'exchanges': ['read']}.
     """
 
     access_token: str
     token_type: AuthTokenResponseTokenType
     expires_in: int
     tier: AuthTokenResponseTier
-    scopes: list[str] | Unset = UNSET
+    scopes: KeyScopes | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -41,9 +51,9 @@ class AuthTokenResponse:
 
         tier = self.tier.value
 
-        scopes: list[str] | Unset = UNSET
+        scopes: dict[str, Any] | Unset = UNSET
         if not isinstance(self.scopes, Unset):
-            scopes = self.scopes
+            scopes = self.scopes.to_dict()
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -62,6 +72,8 @@ class AuthTokenResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.key_scopes import KeyScopes
+
         d = dict(src_dict)
         access_token = d.pop("access_token")
 
@@ -71,7 +83,12 @@ class AuthTokenResponse:
 
         tier = AuthTokenResponseTier(d.pop("tier"))
 
-        scopes = cast(list[str], d.pop("scopes", UNSET))
+        _scopes = d.pop("scopes", UNSET)
+        scopes: KeyScopes | Unset
+        if isinstance(_scopes, Unset):
+            scopes = UNSET
+        else:
+            scopes = KeyScopes.from_dict(_scopes)
 
         auth_token_response = cls(
             access_token=access_token,

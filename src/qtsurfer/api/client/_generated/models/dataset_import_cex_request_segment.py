@@ -1,8 +1,7 @@
 from enum import Enum
 
 
-class ListSegmentInstrumentsSegment(str, Enum):
-    FUTURES = "futures"
+class DatasetImportCexRequestSegment(str, Enum):
     SPOT = "spot"
 
     def __str__(self) -> str:

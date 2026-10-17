@@ -62,12 +62,15 @@ class LiveRunDetail:
             stack trace or an internal message. Either `resource: ...` (the platform stopped the run for
             exceeding its resource allowance; the text says which limit) or one of a fixed set of sentences for
             a `FAILED` run: the strategy cannot consume the source type the run was started with, the run's
-            definition was refused, the run could not start after several attempts, the strategy failed while
-            processing data, the run lost its data feed, or the generic `The run failed.`. The set may grow:
+            definition was refused, the pool address of a `dex` run is not a pool of its protocol on its chain,
+            the platform has no room to follow the pool of a `dex` run, the run could not start after several
+            attempts, the strategy failed while processing data, the run lost its data feed, or the generic
+            `The run failed.`. The set may grow:
             read an unrecognised sentence as a failure and do not parse it. A `FAILED` run usually stays
             `desired: RUNNING` until you stop it, and counts as active (`409` on a new start, and toward your
-            live-run limit) until then; one that can never run because its strategy cannot consume its source
-            type is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
+            live-run limit) until then; one that cannot run, and will not by waiting, because its strategy cannot
+            consume its source type or because the pool of a `dex` run is not a pool or has no room to be followed,
+            is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
         gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and
             present once it ends, so an absent `gate` means the trial has not finished. A run that started in `LIVE` without
             a trial has it from the start: the verdict of the earlier run it relies on, with `inheritedFrom` naming that

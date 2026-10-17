@@ -21,16 +21,22 @@ class InstrumentDetail:
 
     Attributes:
         id (str): Instrument identifier (e.g. currency pair) Example: BTC/USDT.
+        symbol (str): The instrument's name, the same as `id`. A pool of a decentralized exchange has the same field
+            (`PoolDetail`), so both listings are read alike. Example: BTC/USDT.
         base (str): Base currency Example: BTC.
         quote (str): Quote currency Example: USDT.
+        settle (str | Unset): Settlement currency. Present on a futures instrument only. Example: USDT.
         coverage (InstrumentCoverage | Unset): Time coverage of available data for this instrument, per data type
-        last_price (float | Unset): Last traded price Example: 84250.5.
-        volume24h (float | Unset): Trading volume in the last 24 hours (in quote currency) Example: 1234567.89.
+        last_price (float | Unset): Last traded price. Absent for an instrument with no recent price. Example: 84250.5.
+        volume24h (float | Unset): Trading volume in the last 24 hours (in quote currency). Absent for an instrument
+            with no recent volume. Example: 1234567.89.
     """
 
     id: str
+    symbol: str
     base: str
     quote: str
+    settle: str | Unset = UNSET
     coverage: InstrumentCoverage | Unset = UNSET
     last_price: float | Unset = UNSET
     volume24h: float | Unset = UNSET
@@ -39,9 +45,13 @@ class InstrumentDetail:
     def to_dict(self) -> dict[str, Any]:
         id = self.id
 
+        symbol = self.symbol
+
         base = self.base
 
         quote = self.quote
+
+        settle = self.settle
 
         coverage: dict[str, Any] | Unset = UNSET
         if not isinstance(self.coverage, Unset):
@@ -56,10 +66,13 @@ class InstrumentDetail:
         field_dict.update(
             {
                 "id": id,
+                "symbol": symbol,
                 "base": base,
                 "quote": quote,
             }
         )
+        if settle is not UNSET:
+            field_dict["settle"] = settle
         if coverage is not UNSET:
             field_dict["coverage"] = coverage
         if last_price is not UNSET:
@@ -76,9 +89,13 @@ class InstrumentDetail:
         d = dict(src_dict)
         id = d.pop("id")
 
+        symbol = d.pop("symbol")
+
         base = d.pop("base")
 
         quote = d.pop("quote")
+
+        settle = d.pop("settle", UNSET)
 
         _coverage = d.pop("coverage", UNSET)
         coverage: InstrumentCoverage | Unset
@@ -93,8 +110,10 @@ class InstrumentDetail:
 
         instrument_detail = cls(
             id=id,
+            symbol=symbol,
             base=base,
             quote=quote,
+            settle=settle,
             coverage=coverage,
             last_price=last_price,
             volume24h=volume24h,

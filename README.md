@@ -55,7 +55,7 @@ for ex in exchanges or []:
     print(ex.id, ex.name)
 
 instruments = list_instruments.sync(client=client, exchange_id="binance")
-print(f"{len(instruments.data)} instruments on binance ({instruments.meta.segment.value})")
+print(f"{len(instruments.data)} instruments on binance ({instruments.meta.segment})")
 ```
 
 ### API key → JWT
@@ -81,6 +81,18 @@ apikey_client = AuthenticatedClient(
 token_response = authenticate.sync(client=apikey_client)
 jwt = token_response.access_token  # use this in subsequent calls
 ```
+
+`token_response.scopes`, when present, is a `KeyScopes` map from resource to actions,
+such as `{"backtests": ["read", "write", "execute"]}`, not an array. `get_account`
+returns the same required map. The API reports grants but does not yet enforce them.
+
+Exchange discovery returns required `venue_type`, `segments`, and `live_segments`.
+Both instrument routes return `InstrumentCatalogueResponse`: either `InstrumentListResponse`
+(`meta.venue_type == "cex"`) or `PoolListResponse` (`"dex"`). Pool ids are live-run
+addresses; symbols name signals. Missing market values are `UNSET`, never null.
+Live sources use `LiveSourceRequestVenueType.CEX` / `.DEX`; DEX needs exactly one
+pool address, `kline`, and a discovered live protocol. CEX imports use
+`DatasetImportRequestType.CEX` with a `DatasetImportCexRequest` block.
 
 For production use, prefer the [`qtsurfer-sdk`](https://github.com/QTSurfer/sdk-python)
 `auth(apikey)` helper — it handles token refresh, env-var pickup
@@ -240,7 +252,7 @@ responses also expose optional `reason` text when a run stops or fails.
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
-All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, `Dataset`, `DatasetWithLinks`, `DatasetCreated`, `DatasetVersion`, `DatasetUploadState`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return an `InstrumentListResponse` (HAL envelope: `data` + `meta` + `_links`), not a bare list — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. Against a dataset-backed prepare (`exchangeId: user`), `PrepareJobState` reports coverage on the dataset's own cadence grid instead — `cadence`/`gaps`/`largest_gap_steps` — with `total_hours`/`hours_with_data`/`hours_without_data` absent in that case. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
+All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, `Dataset`, `DatasetWithLinks`, `DatasetCreated`, `DatasetVersion`, `DatasetUploadState`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return `InstrumentCatalogueResponse`, either `InstrumentListResponse` for CEX or `PoolListResponse` for DEX (HAL envelope: `data` + `meta` + `_links`) — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. Against a dataset-backed prepare (`exchangeId: user`), `PrepareJobState` reports coverage on the dataset's own cadence grid instead — `cadence`/`gaps`/`largest_gap_steps` — with `total_hours`/`hours_with_data`/`hours_without_data` absent in that case. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
 
 A full `StrategyState` (from `get_strategy`, and from `validate_strategy`'s already-validated `200`) carries an optional `field_links` (`_links` on the wire) — a `StrategyLinks` with a `code: HalLink` pointing at `get_strategy_code`. `validate_strategy`'s `202` omits it, since a check that just started has nothing to link to yet. `list_strategies` returns every strategy you've registered and not deleted, most recently compiled first, but deliberately without each one's `validation` state — check that per strategy with `get_strategy`. `delete_strategy` removes a strategy from both `get_strategy` and `list_strategies`; it doesn't touch backtests already run against it, and re-submitting the same source afterwards registers a new strategy under a new id. `get_strategy_code`'s `404` covers two indistinguishable cases: an id never registered by you, or one that resolves only through a shared/marketplace reference with no source of its own.
 
@@ -259,10 +271,14 @@ server-applied size guard, so treat it as authoritative over requested defaults.
 
 ### Binary downloads (`/exchange/{ex}/tickers|klines/{base}/{quote}`)
 
-These endpoints return raw [Lastra](https://github.com/QTSurfer/lastra-java) bytes (default) or Parquet (`format=parquet`). The generated `sync()` helpers parse the response body as JSON and will raise on binary payloads; use `sync_detailed()` and read `response.content` directly:
+These endpoints return raw [Lastra](https://github.com/QTSurfer/lastra-java) bytes (default) or
+Parquet (`format=parquet`). Import the public `api.exchange` adapters: generated binary
+success responses are omitted by the generator. Public `sync()` / `asyncio()` return bytes
+or `ResponseError`; detailed variants retain headers, status, parsed value, and content.
 
 ```python
 from qtsurfer.api.client import AuthenticatedClient
+from datetime import UTC, datetime, timedelta
 from qtsurfer.api.client.api.exchange import download_tickers
 
 client = AuthenticatedClient(base_url="https://api.qtsurfer.net/v1", token=token)
@@ -272,11 +288,23 @@ response = download_tickers.sync_detailed(
     exchange_id="binance",
     base="BTC",
     quote="USDT",
-    hour="2026-01-15T10",
+    hour=(datetime.now(UTC) - timedelta(hours=2)).strftime("%Y-%m-%dT%H"),
 )
-with open("BTC_USDT_2026-01-15_h10.lastra", "wb") as f:
-    f.write(response.content)
+if response.status_code == 200:
+    with open("BTC_USDT.lastra", "wb") as f:
+        f.write(response.content)
+else:
+    print(response.parsed.reason, response.headers.get("Retry-After"))
 ```
+
+Hourly downloads cover seven days. Lastra MIME is `application/vnd.qtsurfer.lastra`,
+and `ts` uses microseconds (`X-Ts-Unit: micros` and column metadata `ts_unit: micros`);
+Parquet timestamps remain milliseconds. Recent hours may be provisional (`X-Data-Status`
+and ISO-8601 `X-Data-Through`) or unavailable (`404 NOT_YET_AVAILABLE` with `Retry-After`).
+Do not archive provisional data as a complete hour. `404 NO_DATA` is a stored empty hour;
+`503 TEMPORARILY_UNAVAILABLE` is retryable after `Retry-After`. `400 OUTSIDE_WINDOW`
+includes `ResponseError.next_`, a CEX import request for the hour; add a dataset name.
+Unknown reasons should be handled like absent reasons, using status and message.
 
 For very large segments, drop down to the underlying `httpx.Client` (`client.get_httpx_client()`) and stream:
 
@@ -284,7 +312,7 @@ For very large segments, drop down to the underlying `httpx.Client` (`client.get
 with client.get_httpx_client().stream(
     "GET",
     "/exchange/binance/klines/BTC/USDT",
-    params={"hour": "2026-01-15T10", "format": "parquet"},
+    params={"hour": "2026-10-15T10", "format": "parquet"},
 ) as r:
     r.raise_for_status()
     with open("out.parquet", "wb") as f:

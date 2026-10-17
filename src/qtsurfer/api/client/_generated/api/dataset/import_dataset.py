@@ -83,8 +83,18 @@ def sync_detailed(
     as a dataset version indistinguishable from an uploaded one once it's ready. Poll
     `GET /datasets/{datasetId}/imports/{importId}` for progress.
 
-    `type` selects the source. `dex` — history over a pool/pair's own on-chain market — is the
-    only value today; other source types join this same endpoint later.
+    `type` selects the kind of venue the history comes from, with the same two values as the
+    `venueType` of `GET /exchanges`: `dex` — history over a pool/pair's own on-chain market —
+    and `cex` — the history of a centralized exchange's market, kept by the platform. Each
+    has its own block (`dex`, `cex`). The exchange id of a `cex` import has to be a centralized
+    exchange of `GET /exchanges`; a decentralized one (`robinhood`, say) is `400`, and is imported
+    with `type: dex`.
+
+    A `cex` import covers one instrument over a range: the API reads that range of the
+    exchange's history, builds the bars of the requested `cadence` from the finest data it has
+    for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
+    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
+    your tier like any import (`maxImportRangeHours` of `GET /account`).
 
     A `dex` import has two data shapes, chosen by the top-level `cadence`:
 
@@ -100,7 +110,8 @@ def sync_detailed(
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
             one type-specific block,
-            selected by `type` — `dex` is the only value today.
+            selected by `type`: `dex` (block `dex`) or `cex` (block `cex`), the two `venueType`s of
+            `GET /exchanges`.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -134,8 +145,18 @@ def sync(
     as a dataset version indistinguishable from an uploaded one once it's ready. Poll
     `GET /datasets/{datasetId}/imports/{importId}` for progress.
 
-    `type` selects the source. `dex` — history over a pool/pair's own on-chain market — is the
-    only value today; other source types join this same endpoint later.
+    `type` selects the kind of venue the history comes from, with the same two values as the
+    `venueType` of `GET /exchanges`: `dex` — history over a pool/pair's own on-chain market —
+    and `cex` — the history of a centralized exchange's market, kept by the platform. Each
+    has its own block (`dex`, `cex`). The exchange id of a `cex` import has to be a centralized
+    exchange of `GET /exchanges`; a decentralized one (`robinhood`, say) is `400`, and is imported
+    with `type: dex`.
+
+    A `cex` import covers one instrument over a range: the API reads that range of the
+    exchange's history, builds the bars of the requested `cadence` from the finest data it has
+    for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
+    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
+    your tier like any import (`maxImportRangeHours` of `GET /account`).
 
     A `dex` import has two data shapes, chosen by the top-level `cadence`:
 
@@ -151,7 +172,8 @@ def sync(
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
             one type-specific block,
-            selected by `type` — `dex` is the only value today.
+            selected by `type`: `dex` (block `dex`) or `cex` (block `cex`), the two `venueType`s of
+            `GET /exchanges`.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -180,8 +202,18 @@ async def asyncio_detailed(
     as a dataset version indistinguishable from an uploaded one once it's ready. Poll
     `GET /datasets/{datasetId}/imports/{importId}` for progress.
 
-    `type` selects the source. `dex` — history over a pool/pair's own on-chain market — is the
-    only value today; other source types join this same endpoint later.
+    `type` selects the kind of venue the history comes from, with the same two values as the
+    `venueType` of `GET /exchanges`: `dex` — history over a pool/pair's own on-chain market —
+    and `cex` — the history of a centralized exchange's market, kept by the platform. Each
+    has its own block (`dex`, `cex`). The exchange id of a `cex` import has to be a centralized
+    exchange of `GET /exchanges`; a decentralized one (`robinhood`, say) is `400`, and is imported
+    with `type: dex`.
+
+    A `cex` import covers one instrument over a range: the API reads that range of the
+    exchange's history, builds the bars of the requested `cadence` from the finest data it has
+    for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
+    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
+    your tier like any import (`maxImportRangeHours` of `GET /account`).
 
     A `dex` import has two data shapes, chosen by the top-level `cadence`:
 
@@ -197,7 +229,8 @@ async def asyncio_detailed(
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
             one type-specific block,
-            selected by `type` — `dex` is the only value today.
+            selected by `type`: `dex` (block `dex`) or `cex` (block `cex`), the two `venueType`s of
+            `GET /exchanges`.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -229,8 +262,18 @@ async def asyncio(
     as a dataset version indistinguishable from an uploaded one once it's ready. Poll
     `GET /datasets/{datasetId}/imports/{importId}` for progress.
 
-    `type` selects the source. `dex` — history over a pool/pair's own on-chain market — is the
-    only value today; other source types join this same endpoint later.
+    `type` selects the kind of venue the history comes from, with the same two values as the
+    `venueType` of `GET /exchanges`: `dex` — history over a pool/pair's own on-chain market —
+    and `cex` — the history of a centralized exchange's market, kept by the platform. Each
+    has its own block (`dex`, `cex`). The exchange id of a `cex` import has to be a centralized
+    exchange of `GET /exchanges`; a decentralized one (`robinhood`, say) is `400`, and is imported
+    with `type: dex`.
+
+    A `cex` import covers one instrument over a range: the API reads that range of the
+    exchange's history, builds the bars of the requested `cadence` from the finest data it has
+    for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
+    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
+    your tier like any import (`maxImportRangeHours` of `GET /account`).
 
     A `dex` import has two data shapes, chosen by the top-level `cadence`:
 
@@ -246,7 +289,8 @@ async def asyncio(
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
             one type-specific block,
-            selected by `type` — `dex` is the only value today.
+            selected by `type`: `dex` (block `dex`) or `cex` (block `cex`), the two `venueType`s of
+            `GET /exchanges`.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

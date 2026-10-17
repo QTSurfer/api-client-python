@@ -241,7 +241,12 @@ def test_public_api_package_reexports_generated_endpoints() -> None:
             "update the shim and shrink SHIM_NOT_REEXPORTED accordingly"
         )
         for module in exported:
-            assert getattr(shim, module) is importlib.import_module(f"{GENERATED_API}.{tag}.{module}")
+            target = (
+                f"{PUBLIC_API}.{module}"
+                if module in {"download_tickers", "download_klines"}
+                else f"{GENERATED_API}.{tag}.{module}"
+            )
+            assert getattr(shim, module) is importlib.import_module(target)
 
 
 def test_spec_operation_ids_match_the_tables() -> None:

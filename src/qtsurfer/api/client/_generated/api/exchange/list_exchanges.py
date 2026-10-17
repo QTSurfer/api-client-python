@@ -51,6 +51,23 @@ def sync_detailed(
 ) -> Response[list[Exchange]]:
     """List the available exchanges
 
+     The exchanges the platform knows, centralized and decentralized, each with its `venueType` and the
+    `segments` it offers. Ids, venue types and segments are lower-case, and are written the same way
+    wherever the API takes them: `/exchange/binance/spot/instruments`, and the `exchange`, `venueType`
+    and `segment` of a live run's source.
+
+    `venueType` is `cex` for a centralized exchange and `dex` for a decentralized one. The `segments` of
+    a
+    `cex` exchange are the market segments its instrument catalogues are served under (`spot`,
+    `futures`);
+    its `liveSegments`, among them, are those a live run can read, because live data is published for
+    them.
+    A `dex` exchange has no market data to prepare or backtest, so its id is `400` in the routes that
+    take an
+    `exchangeId`, except the two instruments routes: its `segments` are the protocols whose pools a run
+    can
+    read, and those routes list the pools, since the instrument of a run on it is a pool's address.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -74,6 +91,23 @@ def sync(
 ) -> list[Exchange] | None:
     """List the available exchanges
 
+     The exchanges the platform knows, centralized and decentralized, each with its `venueType` and the
+    `segments` it offers. Ids, venue types and segments are lower-case, and are written the same way
+    wherever the API takes them: `/exchange/binance/spot/instruments`, and the `exchange`, `venueType`
+    and `segment` of a live run's source.
+
+    `venueType` is `cex` for a centralized exchange and `dex` for a decentralized one. The `segments` of
+    a
+    `cex` exchange are the market segments its instrument catalogues are served under (`spot`,
+    `futures`);
+    its `liveSegments`, among them, are those a live run can read, because live data is published for
+    them.
+    A `dex` exchange has no market data to prepare or backtest, so its id is `400` in the routes that
+    take an
+    `exchangeId`, except the two instruments routes: its `segments` are the protocols whose pools a run
+    can
+    read, and those routes list the pools, since the instrument of a run on it is a pool's address.
+
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
@@ -92,6 +126,23 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
 ) -> Response[list[Exchange]]:
     """List the available exchanges
+
+     The exchanges the platform knows, centralized and decentralized, each with its `venueType` and the
+    `segments` it offers. Ids, venue types and segments are lower-case, and are written the same way
+    wherever the API takes them: `/exchange/binance/spot/instruments`, and the `exchange`, `venueType`
+    and `segment` of a live run's source.
+
+    `venueType` is `cex` for a centralized exchange and `dex` for a decentralized one. The `segments` of
+    a
+    `cex` exchange are the market segments its instrument catalogues are served under (`spot`,
+    `futures`);
+    its `liveSegments`, among them, are those a live run can read, because live data is published for
+    them.
+    A `dex` exchange has no market data to prepare or backtest, so its id is `400` in the routes that
+    take an
+    `exchangeId`, except the two instruments routes: its `segments` are the protocols whose pools a run
+    can
+    read, and those routes list the pools, since the instrument of a run on it is a pool's address.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -113,6 +164,23 @@ async def asyncio(
     client: AuthenticatedClient | Client,
 ) -> list[Exchange] | None:
     """List the available exchanges
+
+     The exchanges the platform knows, centralized and decentralized, each with its `venueType` and the
+    `segments` it offers. Ids, venue types and segments are lower-case, and are written the same way
+    wherever the API takes them: `/exchange/binance/spot/instruments`, and the `exchange`, `venueType`
+    and `segment` of a live run's source.
+
+    `venueType` is `cex` for a centralized exchange and `dex` for a decentralized one. The `segments` of
+    a
+    `cex` exchange are the market segments its instrument catalogues are served under (`spot`,
+    `futures`);
+    its `liveSegments`, among them, are those a live run can read, because live data is published for
+    them.
+    A `dex` exchange has no market data to prepare or backtest, so its id is `400` in the routes that
+    take an
+    `exchangeId`, except the two instruments routes: its `segments` are the protocols whose pools a run
+    can
+    read, and those routes list the pools, since the instrument of a run on it is a pool's address.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

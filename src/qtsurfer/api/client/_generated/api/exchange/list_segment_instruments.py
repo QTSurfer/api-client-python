@@ -7,14 +7,14 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.instrument_list_response import InstrumentListResponse
-from ...models.list_segment_instruments_segment import ListSegmentInstrumentsSegment
+from ...models.pool_list_response import PoolListResponse
 from ...models.response_error import ResponseError
 from ...types import Response
 
 
 def _get_kwargs(
     exchange_id: str,
-    segment: ListSegmentInstrumentsSegment,
+    segment: str,
 ) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
@@ -30,11 +30,32 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> InstrumentListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
     if response.status_code == 200:
-        response_200 = InstrumentListResponse.from_dict(response.json())
+
+        def _parse_response_200(data: object) -> InstrumentListResponse | PoolListResponse:
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                componentsschemas_instrument_catalogue_response_type_0 = InstrumentListResponse.from_dict(data)
+
+                return componentsschemas_instrument_catalogue_response_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            if not isinstance(data, dict):
+                raise TypeError()
+            componentsschemas_instrument_catalogue_response_type_1 = PoolListResponse.from_dict(data)
+
+            return componentsschemas_instrument_catalogue_response_type_1
+
+        response_200 = _parse_response_200(response.json())
 
         return response_200
+
+    if response.status_code == 400:
+        response_400 = ResponseError.from_dict(response.json())
+
+        return response_400
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -49,7 +70,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[InstrumentListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -60,10 +81,10 @@ def _build_response(
 
 def sync_detailed(
     exchange_id: str,
-    segment: ListSegmentInstrumentsSegment,
+    segment: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
     """List an exchange segment's instruments
 
      Returns the instruments for one market segment of the exchange, each with
@@ -71,16 +92,21 @@ def sync_detailed(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
+    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
+    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
+    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+
     Args:
         exchange_id (str):  Example: binance.
-        segment (ListSegmentInstrumentsSegment):  Example: spot.
+        segment (str):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | ResponseError]
+        Response[InstrumentListResponse | PoolListResponse | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -97,10 +123,10 @@ def sync_detailed(
 
 def sync(
     exchange_id: str,
-    segment: ListSegmentInstrumentsSegment,
+    segment: str,
     *,
     client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
     """List an exchange segment's instruments
 
      Returns the instruments for one market segment of the exchange, each with
@@ -108,16 +134,21 @@ def sync(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
+    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
+    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
+    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+
     Args:
         exchange_id (str):  Example: binance.
-        segment (ListSegmentInstrumentsSegment):  Example: spot.
+        segment (str):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | ResponseError
+        InstrumentListResponse | PoolListResponse | ResponseError
     """
 
     return sync_detailed(
@@ -129,10 +160,10 @@ def sync(
 
 async def asyncio_detailed(
     exchange_id: str,
-    segment: ListSegmentInstrumentsSegment,
+    segment: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
     """List an exchange segment's instruments
 
      Returns the instruments for one market segment of the exchange, each with
@@ -140,16 +171,21 @@ async def asyncio_detailed(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
+    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
+    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
+    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+
     Args:
         exchange_id (str):  Example: binance.
-        segment (ListSegmentInstrumentsSegment):  Example: spot.
+        segment (str):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | ResponseError]
+        Response[InstrumentListResponse | PoolListResponse | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -164,10 +200,10 @@ async def asyncio_detailed(
 
 async def asyncio(
     exchange_id: str,
-    segment: ListSegmentInstrumentsSegment,
+    segment: str,
     *,
     client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
     """List an exchange segment's instruments
 
      Returns the instruments for one market segment of the exchange, each with
@@ -175,16 +211,21 @@ async def asyncio(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
+    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
+    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
+    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+
     Args:
         exchange_id (str):  Example: binance.
-        segment (ListSegmentInstrumentsSegment):  Example: spot.
+        segment (str):  Example: spot.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | ResponseError
+        InstrumentListResponse | PoolListResponse | ResponseError
     """
 
     return (

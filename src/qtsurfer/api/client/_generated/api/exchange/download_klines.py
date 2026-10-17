@@ -60,6 +60,11 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_500
 
+    if response.status_code == 503:
+        response_503 = ResponseError.from_dict(response.json())
+
+        return response_503
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -95,11 +100,15 @@ def sync_detailed(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
+    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
+    timestamps
+    (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
+
     Args:
         exchange_id (str):  Example: binance.
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
-        hour (str):  Example: 2026-01-15T10.
+        hour (str):  Example: 2026-10-15T10.
         format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
             lastra.
 
@@ -146,11 +155,15 @@ def sync(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
+    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
+    timestamps
+    (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
+
     Args:
         exchange_id (str):  Example: binance.
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
-        hour (str):  Example: 2026-01-15T10.
+        hour (str):  Example: 2026-10-15T10.
         format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
             lastra.
 
@@ -192,11 +205,15 @@ async def asyncio_detailed(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
+    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
+    timestamps
+    (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
+
     Args:
         exchange_id (str):  Example: binance.
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
-        hour (str):  Example: 2026-01-15T10.
+        hour (str):  Example: 2026-10-15T10.
         format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
             lastra.
 
@@ -241,11 +258,15 @@ async def asyncio(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
+    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
+    timestamps
+    (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
+
     Args:
         exchange_id (str):  Example: binance.
         base (str):  Example: BTC.
         quote (str):  Example: USDT.
-        hour (str):  Example: 2026-01-15T10.
+        hour (str):  Example: 2026-10-15T10.
         format_ (DownloadKlinesFormat | Unset):  Default: DownloadKlinesFormat.LASTRA. Example:
             lastra.
 

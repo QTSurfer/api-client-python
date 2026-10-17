@@ -8,6 +8,7 @@ from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
     from ..models.account_links import AccountLinks
+    from ..models.key_scopes import KeyScopes
 
 
 T = TypeVar("T", bound="Account")
@@ -23,6 +24,12 @@ class Account:
         Attributes:
             user_id (str): Your account id — the JWT `sub` claim. Example: 00000000-0000-0000-0000-000000000000.
             tier (str): Your current subscription tier. Example: free.
+            scopes (KeyScopes): What your API key may do, as a map from a resource to the actions allowed on it. Names are
+                lower case: `{ "backtests": ["read", "write", "execute"], "exchanges": ["read"] }`. A key
+                with no scopes is `{}`. `GET /account` and `POST /auth/token` return the same map for the
+                same key. The API reports the scopes of a key; it does not yet refuse an operation because
+                a scope is missing.
+                 Example: {'backtests': ['read', 'write', 'execute'], 'exchanges': ['read']}.
             max_execute (int): Maximum number of strategy executions (and sweeps) you can have running at the same time
                 through the API. Starting one past this number is answered with `429`, whose message
                 carries the same number. The value already includes any API allowance your plan has.
@@ -51,6 +58,7 @@ class Account:
 
     user_id: str
     tier: str
+    scopes: KeyScopes
     max_execute: int
     max_range_days: int
     max_sweep_cartesian: int
@@ -65,6 +73,8 @@ class Account:
         user_id = self.user_id
 
         tier = self.tier
+
+        scopes = self.scopes.to_dict()
 
         max_execute = self.max_execute
 
@@ -88,6 +98,7 @@ class Account:
             {
                 "userId": user_id,
                 "tier": tier,
+                "scopes": scopes,
                 "maxExecute": max_execute,
                 "maxRangeDays": max_range_days,
                 "maxSweepCartesian": max_sweep_cartesian,
@@ -104,11 +115,14 @@ class Account:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.account_links import AccountLinks
+        from ..models.key_scopes import KeyScopes
 
         d = dict(src_dict)
         user_id = d.pop("userId")
 
         tier = d.pop("tier")
+
+        scopes = KeyScopes.from_dict(d.pop("scopes"))
 
         max_execute = d.pop("maxExecute")
 
@@ -129,6 +143,7 @@ class Account:
         account = cls(
             user_id=user_id,
             tier=tier,
+            scopes=scopes,
             max_execute=max_execute,
             max_range_days=max_range_days,
             max_sweep_cartesian=max_sweep_cartesian,

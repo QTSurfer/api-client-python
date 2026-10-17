@@ -112,8 +112,22 @@ def sync_detailed(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
-    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
-    `instruments`
+    `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
+    `dex` source reads one
+    pool, takes only `kline`, and needs the pool's address as its single instrument. See the \"Live
+    execution\" guide,
+    \"Sources\".
+
+    `venueType`, `exchange` and `segment` have to be ones `GET /exchanges` lists together: the exchange
+    under that
+    venue type, and the segment among its `liveSegments`. Case and the spaces around a value do not
+    matter, and the
+    run reports them back in lower case (`cx`, the older spelling of `cex`, is still read). Anything
+    else is refused
+    with `400`, naming what the list has.
+
+    `instruments` can be left out, except for a `dex` source. A QTScript strategy can declare which
+    instruments it accepts with an `instruments`
     line in its source; when the compilation of the strategy records that selection as a list of pairs,
     a
     start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run
@@ -225,8 +239,22 @@ def sync(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
-    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
-    `instruments`
+    `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
+    `dex` source reads one
+    pool, takes only `kline`, and needs the pool's address as its single instrument. See the \"Live
+    execution\" guide,
+    \"Sources\".
+
+    `venueType`, `exchange` and `segment` have to be ones `GET /exchanges` lists together: the exchange
+    under that
+    venue type, and the segment among its `liveSegments`. Case and the spaces around a value do not
+    matter, and the
+    run reports them back in lower case (`cx`, the older spelling of `cex`, is still read). Anything
+    else is refused
+    with `400`, naming what the list has.
+
+    `instruments` can be left out, except for a `dex` source. A QTScript strategy can declare which
+    instruments it accepts with an `instruments`
     line in its source; when the compilation of the strategy records that selection as a list of pairs,
     a
     start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run
@@ -333,8 +361,22 @@ async def asyncio_detailed(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
-    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
-    `instruments`
+    `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
+    `dex` source reads one
+    pool, takes only `kline`, and needs the pool's address as its single instrument. See the \"Live
+    execution\" guide,
+    \"Sources\".
+
+    `venueType`, `exchange` and `segment` have to be ones `GET /exchanges` lists together: the exchange
+    under that
+    venue type, and the segment among its `liveSegments`. Case and the spaces around a value do not
+    matter, and the
+    run reports them back in lower case (`cx`, the older spelling of `cex`, is still read). Anything
+    else is refused
+    with `400`, naming what the list has.
+
+    `instruments` can be left out, except for a `dex` source. A QTScript strategy can declare which
+    instruments it accepts with an `instruments`
     line in its source; when the compilation of the strategy records that selection as a list of pairs,
     a
     start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run
@@ -444,8 +486,22 @@ async def asyncio(
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
 
-    `instruments` can be left out. A QTScript strategy can declare which instruments it accepts with an
-    `instruments`
+    `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
+    `dex` source reads one
+    pool, takes only `kline`, and needs the pool's address as its single instrument. See the \"Live
+    execution\" guide,
+    \"Sources\".
+
+    `venueType`, `exchange` and `segment` have to be ones `GET /exchanges` lists together: the exchange
+    under that
+    venue type, and the segment among its `liveSegments`. Case and the spaces around a value do not
+    matter, and the
+    run reports them back in lower case (`cx`, the older spelling of `cex`, is still read). Anything
+    else is refused
+    with `400`, naming what the list has.
+
+    `instruments` can be left out, except for a `dex` source. A QTScript strategy can declare which
+    instruments it accepts with an `instruments`
     line in its source; when the compilation of the strategy records that selection as a list of pairs,
     a
     start that leaves `instruments` out, or sends `[\"*\"]`, takes that list, and otherwise the run

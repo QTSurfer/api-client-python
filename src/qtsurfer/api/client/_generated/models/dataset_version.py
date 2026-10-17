@@ -27,11 +27,12 @@ class DatasetVersion:
                 to storage; see `dataFormat`. Example: 4831022.
             rows (int | Unset): Number of data rows. Example: 86400.
             cadence (str | Unset): The cadence discovered from the data's own timestamps. Either a fixed grid — `1s`,
-                `5s`, `15s`, `1m`, `5m`, `15m`, `30m`, `1h`, `4h`, `1d` — when at least half the
-                intervals between consecutive rows fall on that step (small clock jitter tolerated), or
-                `rt`: native data at the rate it was captured, each row at its own timestamp with no
-                fixed step — per-trade on-chain swaps, block-spaced or sub-second ticks, irregular
-                intervals. An `rt` dataset can be resampled to any fixed cadence at prepare time.
+                `5s`, `15s`, `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `8h`, `12h`, `1d`,
+                `1w` — when at least half the intervals between consecutive rows fall on that step
+                (small clock jitter tolerated), or `rt`: native data at the rate it was captured, each
+                row at its own timestamp with no fixed step — per-trade on-chain swaps, block-spaced
+                or sub-second ticks, irregular intervals. An `rt` dataset can be resampled to any
+                fixed cadence at prepare time.
                  Example: 1s.
             timestamp_unit (DatasetVersionTimestampUnit | Unset): The unit the `timestamp` column was uploaded in —
                 ISO-8601, or the epoch band its
