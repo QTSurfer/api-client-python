@@ -80,3 +80,11 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             --title "$GITHUB_REF_NAME" \
             --notes-file /tmp/release-notes.md
+
+  reference-docs:
+    needs: release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/reference-docs.yml
+    with:
+      tag: ${{ github.ref_name }}
