@@ -1,0 +1,397 @@
+<h1 align="center">QTSurfer API Client · Python</h1>
+
+<p align="center">
+  <a href="https://github.com/QTSurfer/api-client-python/actions/workflows/ci.yml"><img src="https://github.com/QTSurfer/api-client-python/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://pypi.org/project/qtsurfer-api-client/"><img src="https://img.shields.io/pypi/v/qtsurfer-api-client.svg" alt="PyPI"></a>
+  <a href="https://pypi.org/project/qtsurfer-api-client/"><img src="https://img.shields.io/pypi/pyversions/qtsurfer-api-client.svg" alt="Python versions"></a>
+  <a href="https://qtsurfer.github.io/api-client-python/"><img src="https://img.shields.io/badge/docs-pdoc-blue" alt="pdoc"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
+</p>
+
+<p align="center">
+  Auto-generated Python client for the <a href="https://github.com/QTSurfer/qtsurfer-api">QTSurfer API</a>, built from the OpenAPI 3.1 spec with <a href="https://github.com/openapi-generators/openapi-python-client">openapi-python-client</a> on top of <a href="https://www.python-httpx.org/">httpx</a>.
+</p>
+
+<p align="center">
+  <code>pip install qtsurfer-api-client</code>
+</p>
+
+---
+
+Intentionally thin: one function per endpoint, 1:1 with the spec. For workflow orchestration (polling, retries, domain objects, unified errors), use [`qtsurfer-sdk`](https://github.com/QTSurfer/sdk-python).
+
+- **Sync-first, httpx-powered** — same call site shape as the Java/TS siblings.
+- **Spec-driven** — generated sources fetched from [`QTSurfer/qtsurfer-api`](https://github.com/QTSurfer/qtsurfer-api) by `scripts/regenerate.sh`.
+- **Fully typed** — `py.typed` marker, `mypy --strict` clean (consumers see precise types for every request/response).
+- **Python 3.11+** — modern type hints, no compat shims.
+
+## Installation
+
+```bash
+pip install qtsurfer-api-client
+```
+
+Or with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv add qtsurfer-api-client
+```
+
+## Quick start
+
+```python
+import os
+
+from qtsurfer.api.client import AuthenticatedClient
+from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
+
+client = AuthenticatedClient(
+    base_url="https://api.qtsurfer.net/v1",  # Staging beta server
+    token=os.environ["QTSURFER_TOKEN"],
+)
+
+exchanges = list_exchanges.sync(client=client)
+for ex in exchanges or []:
+    print(ex.id, ex.name)
+
+instruments = list_instruments.sync(client=client, exchange_id="binance")
+print(f"{len(instruments.data)} instruments on binance ({instruments.meta.segment})")
+```
+
+### API key → JWT
+
+Every endpoint above expects a short-lived JWT in the `Authorization: Bearer …`
+header. Exchange a long-lived API key for one via `authenticate`:
+
+```python
+import os
+
+from qtsurfer.api.client import AuthenticatedClient
+from qtsurfer.api.client.api.auth import authenticate
+from qtsurfer.api.client.models import AuthTokenResponse
+
+# AuthenticatedClient also drives the apikey header — set prefix="" so it
+# sends `X-API-Key: <key>` instead of `Authorization: Bearer <key>`.
+apikey_client = AuthenticatedClient(
+    base_url="https://api.qtsurfer.net/v1",
+    token=os.environ["QTSURFER_APIKEY"],
+    prefix="",
+    auth_header_name="X-API-Key",
+)
+
+response = authenticate.sync_detailed(client=apikey_client)
+if response.status_code != 200 or not isinstance(response.parsed, AuthTokenResponse):
+    raise RuntimeError(f"Authentication refused: {response.status_code} {response.parsed}")
+token_response = response.parsed
+jwt = token_response.access_token  # use this in subsequent calls
+```
+
+`token_response.scopes`, when present, is a `KeyScopes` map from resource to actions,
+such as `{"backtests": ["read", "write", "execute"]}`, not an array. `get_account`
+returns the same required map. The API reports grants but does not yet enforce individual operation scopes.
+A scope is a resource and an action: each listed resource has at least one action;
+`{}` means no scopes. A successful response looks like:
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scopes": {"backtests": ["read", "write", "execute"], "exchanges": ["read"]},
+  "tier": "free"
+}
+```
+
+Where a deployment requires scopes, a valid key with none returns `403` and a typed
+`AuthTokenError` with `code == AuthTokenErrorCode.APIKEY_WITHOUT_SCOPES` (`apikey_without_scopes`).
+No token is minted: create a key with at least one scope in the web app. Invalid,
+revoked, or expired keys still return `401`; this `403` is a key configuration issue,
+so retrying the same key does not fix it. Reporting grants does not mean that every
+operation already enforces its individual scope.
+
+Exchange discovery returns required `venue_type`, `segments`, and `live_segments`.
+Both instrument routes return `InstrumentCatalogueResponse`: either `InstrumentListResponse`
+(`meta.venue_type == "cex"`) or `PoolListResponse` (`"dex"`). Pool ids are live-run
+addresses; symbols name signals. Missing market values are `UNSET`, never null.
+Live sources use `LiveSourceRequestVenueType.CEX` / `.DEX`; DEX needs exactly one
+pool address, `kline`, and a discovered live protocol. CEX imports use
+`DatasetImportRequestType.CEX` with a `DatasetImportCexRequest` block.
+
+For production use, prefer the [`qtsurfer-sdk`](https://github.com/QTSurfer/sdk-python)
+`auth(apikey)` helper — it handles token refresh, env-var pickup
+(`QTSURFER_APIKEY`), and pluggable token storage so callers don't reinvent any
+of it on top of the raw client.
+
+Each generated endpoint module exposes four entrypoints:
+
+| Function | Returns |
+| --- | --- |
+| `sync(...)` | parsed model (or `None` on a defined error response) |
+| `sync_detailed(...)` | full `Response[...]` (status, headers, parsed, content) |
+| `asyncio(...)` | parsed model, awaitable |
+| `asyncio_detailed(...)` | full `Response[...]`, awaitable |
+
+## API surface
+
+| Module | Operation | Method · Path |
+| --- | --- | --- |
+| `api.auth` | `authenticate` | `POST /auth/token` — exchange API key for a short-lived JWT |
+| `api.account` | `get_account` | `GET /account` |
+| `api.account` | `get_account_usage` | `GET /account/usage` |
+| `api.exchange` | `list_exchanges` | `GET /exchanges` |
+| `api.exchange` | `list_instruments` | `GET /exchange/{exchangeId}/instruments` (default `spot` segment) |
+| `api.exchange` | `list_segment_instruments` | `GET /exchange/{exchangeId}/{segment}/instruments` |
+| `api.exchange` | `download_tickers` | `GET /exchange/{exchangeId}/tickers/{base}/{quote}` |
+| `api.exchange` | `download_klines` | `GET /exchange/{exchangeId}/klines/{base}/{quote}` |
+| `api.strategy` | `get_strategy` | `GET /strategy/{strategyId}` |
+| `api.strategy` | `list_strategies` | `GET /strategies` — optional `include_deleted` returns deleted entries with `deleted_at` |
+| `api.strategy` | `delete_strategy` | `DELETE /strategy/{strategyId}` |
+| `api.strategy` | `get_strategy_code` | `GET /strategy/{strategyId}/code` |
+| `api.strategy` | `validate_strategy` | `POST /strategy/{strategyId}/validate` |
+| `api.backtesting` | `prepare_backtest` | `POST /backtest/{exchangeId}/{type}/prepare` |
+| `api.backtesting` | `get_prepare_status` | `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` |
+| `api.backtesting` | `execute_backtest` | `POST /backtest/{exchangeId}/{type}/execute` |
+| `api.backtesting` | `cancel_backtest` | `DELETE /backtest/{exchangeId}/{type}/execute/{jobId}` |
+| `api.backtesting` | `get_backtest_result` | `GET /backtest/{exchangeId}/{type}/execute/{jobId}` |
+| `api.backtesting` | `execute_sweep` | `POST /backtest/{exchangeId}/{type}/executeSweep/{requestId}` |
+| `api.backtesting` | `get_sweep_result` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}` |
+| `api.backtesting` | `cancel_sweep` | `DELETE /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}` |
+| `api.backtesting` | `get_sweep_sensitivity` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/sensitivity` |
+| `api.backtesting` | `get_sweep_run_equity_curve` | `GET /backtest/{exchangeId}/{type}/executeSweep/{requestId}/{sweepId}/runs/{runIx}/equityCurve` |
+| `api.dataset` | `create_dataset` | `POST /datasets` — create a dataset and get a presigned upload URL |
+| `api.dataset` | `list_datasets` | `GET /datasets` — optional `include_deleted` returns deleted entries with `deleted_at` |
+| `api.dataset` | `get_dataset` | `GET /datasets/{datasetId}` |
+| `api.dataset` | `delete_dataset` | `DELETE /datasets/{datasetId}` |
+| `api.dataset` | `open_dataset_upload` | `POST /datasets/{datasetId}/uploads` — open the next upload session |
+| `api.dataset` | `finalize_dataset_upload` | `POST /datasets/{datasetId}/uploads/{uploadId}/finalize` |
+| `api.dataset` | `get_dataset_upload` | `GET /datasets/{datasetId}/uploads/{uploadId}` |
+| `api.dataset` | `import_dataset` | `POST /datasets/imports` — create a dataset from source history |
+| `api.dataset` | `get_dataset_import` | `GET /datasets/{datasetId}/imports/{importId}` |
+| `api.live_execution` | `start_live` | `POST /strategy/{strategyId}/live` |
+| `api.live_execution` | `get_live` | `GET /strategy/{strategyId}/live` |
+| `api.live_execution` | `stop_live` | `DELETE /strategy/{strategyId}/live` |
+| `api.live_execution` | `list_live` | `GET /live` — page the caller's own runs |
+| `api.live_execution` | `get_live_run` | `GET /live/{runId}` — read one of the caller's runs |
+| `api.live_execution` | `list_public_live` | `GET /live/public` |
+| `api.live_execution` | `update_live` | `PATCH /live/{runId}` |
+| `api.live_execution` | `update_live_params` | `PUT /live/{runId}/params` |
+| `api.live_execution` | `send_live_command` | `POST /live/{runId}/commands` — deliver a transient command to a running strategy |
+| `api.live_execution` | `rotate_live_stream` | `POST /live/{runId}/stream` — rotate a leaked stream URL |
+| `api.live_execution` | `revoke_live_stream` | `DELETE /live/{runId}/stream` — permanently revoke a stream URL |
+| `api.live_execution` | `get_live_run_signals` | `GET /live/{runId}/signals` |
+| `api.live_execution` | `get_live_run_paper` | `GET /live/{runId}/paper` — read simulated account snapshots |
+| `api.live_execution` | `get_live_run_paper_equity` | `GET /live/{runId}/paper/equity` — page simulated equity history |
+| `api.live_execution` | `mint_live_connection_token` | `POST /live/token` |
+
+Forty-seven of the spec's forty-eight operations, all reachable through `qtsurfer.api.client.api`
+as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
+openapi-python-client does not support, so no module is generated for it — call it through the
+underlying `httpx` client.
+
+### Datasets — backtest against your own data
+
+Upload CSV or parquet ticker data and prepare/execute a backtest against it via the reserved
+`exchangeId: user` value on the existing `prepare_backtest`/`execute_backtest` endpoints:
+`create_dataset` returns a `datasetId` plus a presigned URL to `PUT` the file to directly (or a
+gzip/zip containing exactly one file), then
+`finalize_dataset_upload` kicks off ingest and `get_dataset_upload` polls until `status` is
+`ready` or `failed`. `PrepareRequest.instrument` is optional for this reason — pass `dataset_id`
+(and optionally `dataset_version_id` to pin a specific past version) instead when the exchange is
+`user`. `list_datasets`/`get_dataset` never `404` for "none yet", same convention as
+`list_strategies`; `delete_dataset` is a soft delete that doesn't disrupt a backtest already
+running against one of the dataset's versions.
+
+Pass `include_deleted=True` to `list_datasets` or `list_strategies` when reconciling a local
+catalogue; deleted entries carry `deleted_at`, which distinguishes them from resources that never
+existed. The default remains active entries only.
+
+`DatasetCreated` contains only the metadata known immediately after creation (`dataset_id`, `name`,
+`type_`, `instrument`) and its first upload session. Query `get_dataset` for version-derived range,
+cadence, and current-version metadata after the relevant lifecycle stage completes. Once ready,
+`data_url` is a presigned URL for the stored data and `data_format` tells whether it is `lastra` or
+`parquet`; choose the reader from `data_format`, not from the uploaded file name.
+
+To add a later version, call `open_dataset_upload(dataset_id)` to obtain a `DatasetUploadSession`.
+It returns the currently open session again if a previous response was lost. After finalization,
+open a new session before uploading again: finalizing an upload that already produced a version
+returns `409`.
+
+### Datasets — import source history
+
+`import_dataset` starts a source-side dataset import and returns `DatasetImportCreated` with the
+new dataset and import ids. Poll `get_dataset_import(dataset_id, import_id)` until the status is
+`ready` or `failed`. A ready response carries the resulting `DatasetVersion`; a failed response
+carries its error. Dataset listings now include the current version's `status`, timestamp unit,
+and coverage metrics, so select the timestamp decoder from `timestamp_unit` when reading stored
+data.
+
+### Live execution
+
+`start_live` starts a compiled strategy against one live source. Use `get_live` to inspect its
+latest state, `get_live_run` to read a specific run (including its monotonic `updated_at_ms`),
+`update_live` and `update_live_params` to change it, and `stop_live` to stop it.
+`list_public_live` is the unauthenticated listing for public runs. `get_live_run_signals` pages
+recorded signals regardless of WebSocket relay: a `410` response means the supplied cursor has
+expired, so restart from its `availableSinceMs` value. `mint_live_connection_token` creates a
+short-lived WebSocket connection token for a run.
+
+A strategy that has already passed its sandbox trial starts subsequent runs directly in `LIVE`.
+Set `StartLiveRequest.sandbox=True` to repeat the sandbox trial, for example while debugging its
+signals over the WebSocket connection. This field is available in client version `0.128.25` and
+later.
+
+Paper trading is opt-in through `StartLiveRequest.paper`; it simulates balances and fills without
+sending orders. Read current simulated accounts with `get_live_run_paper`, and page their equity
+history oldest-first with `get_live_run_paper_equity`.
+
+`send_live_command` requires the run owner and a strategy that implements
+`CommandRequestHandler`. Commands are transient, are not persisted or replayed to replicas started
+later, and should not replace `update_live_params` for state that must survive restarts. A `202`
+means accepted, not processed; `503` guarantees it was not sent. The operation has no idempotency
+key, so avoid blind retries after an ambiguous network failure.
+
+Set `StartLiveRequest.stream=True` to request a secret plain-WebSocket `stream_url`; treat it
+like a password. `rotate_live_stream` replaces a possibly leaked URL, while `revoke_live_stream`
+disables it permanently for that run. `LiveRunDetail.stats` is an optional periodic snapshot, so
+its absence means no snapshot exists yet rather than zero activity.
+
+`StartLiveRequest.warm_from` is a start-only replay window in seconds (`0` through `3600`) for
+initialising strategy indicators. `0` disables replay; when omitted, the platform retains its
+automatic current-quarter-hour warm-up. The effective integer is returned as `warm_from` by
+`start_live`, `get_live`, and `get_live_run`; it is absent, never `None`, only for runs created
+before this field existed. Changing it requires stopping and starting a new run — it is not a
+`update_live_params` setting.
+
+Each live-start source uses `LiveSourceRequest`; its `instruments` field is optional. Omit it to
+let the platform use the strategy's declared instruments when available, or to read every
+instrument on that exchange and segment otherwise. You can also send `["*"]` for that automatic
+selection. An explicit list supports one-sided wildcards such as `*/USDT` and `BTC/*`. Symbols are
+case-insensitive and spaces around them are ignored (`btc/usdt` is the same as `BTC/USDT`); invalid
+pair syntax is rejected when the run starts. The returned `LiveSource.instruments` tells you what
+the run actually reads.
+
+`Account.max_sweep_cartesian` reports the account's maximum Cartesian sweep grid size. Live-run
+responses also expose optional `reason` text when a run stops or fails.
+
+> Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
+
+All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, `Dataset`, `DatasetWithLinks`, `DatasetCreated`, `DatasetVersion`, `DatasetUploadState`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return `InstrumentCatalogueResponse`, either `InstrumentListResponse` for CEX or `PoolListResponse` for DEX (HAL envelope: `data` + `meta` + `_links`) — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. Against a dataset-backed prepare (`exchangeId: user`), `PrepareJobState` reports coverage on the dataset's own cadence grid instead — `cadence`/`gaps`/`largest_gap_steps` — with `total_hours`/`hours_with_data`/`hours_without_data` absent in that case. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
+
+A full `StrategyState` (from `get_strategy`, and from `validate_strategy`'s already-validated `200`) carries an optional `field_links` (`_links` on the wire) — a `StrategyLinks` with a `code: HalLink` pointing at `get_strategy_code`. `validate_strategy`'s `202` omits it, since a check that just started has nothing to link to yet. `list_strategies` returns every strategy you've registered and not deleted, most recently compiled first, but deliberately without each one's `validation` state — check that per strategy with `get_strategy`. `delete_strategy` removes a strategy from both `get_strategy` and `list_strategies`; it doesn't touch backtests already run against it, and re-submitting the same source afterwards registers a new strategy under a new id. `get_strategy_code`'s `404` covers two indistinguishable cases: an id never registered by you, or one that resolves only through a shared/marketplace reference with no source of its own.
+
+### Equity curves
+
+`execute_backtest` accepts optional `EquityCurveOptions` (`resample`, `differential`, and
+`out_mode`) to shape the returned `ResultMap.equity_curve`, plus `params` for one scalar strategy
+property vector. `ResultMap.params` echoes that vector when one was supplied. Sweep submissions accept
+`EquityCurveRequest`, which also controls which trial curves are retained. A retained trial curve
+is exposed as an `EquityCurveResult.url` on its sweep row and may also be inline in the natural
+view; inspect `points` or `equities` to tell. Use `get_sweep_run_equity_curve` to retrieve a chosen
+transform. The returned `EquityCurveResult.meta` describes the shape actually served, including any
+server-applied size guard, so treat it as authoritative over requested defaults.
+
+> **`POST /strategy` (`compileStrategy`)** is currently omitted by the generator because the spec declares its request body as `text/plain` and `openapi-python-client` only emits JSON / form / multipart bodies. Call it directly via the underlying `httpx` client (`client.get_httpx_client().post("/strategy", content=src, headers={"Content-Type": "text/plain"})`) until the spec is restructured. The other `api.strategy` operations have no such restriction and generate normally.
+
+### Binary downloads (`/exchange/{ex}/tickers|klines/{base}/{quote}`)
+
+These endpoints return raw [Lastra](https://github.com/QTSurfer/lastra-java) bytes (default) or
+Parquet (`format=parquet`). Import the public `api.exchange` adapters: generated binary
+success responses are omitted by the generator. Public `sync()` / `asyncio()` return bytes
+or `ResponseError`; detailed variants retain headers, status, parsed value, and content.
+
+```python
+from qtsurfer.api.client import AuthenticatedClient
+from datetime import UTC, datetime, timedelta
+from qtsurfer.api.client.api.exchange import download_tickers
+
+client = AuthenticatedClient(base_url="https://api.qtsurfer.net/v1", token=token)
+
+response = download_tickers.sync_detailed(
+    client=client,
+    exchange_id="binance",
+    base="BTC",
+    quote="USDT",
+    hour=(datetime.now(UTC) - timedelta(hours=2)).strftime("%Y-%m-%dT%H"),
+)
+if response.status_code == 200:
+    with open("BTC_USDT.lastra", "wb") as f:
+        f.write(response.content)
+else:
+    print(response.parsed.reason, response.headers.get("Retry-After"))
+```
+
+Hourly downloads cover seven days. Lastra MIME is `application/vnd.qtsurfer.lastra`,
+and `ts` uses microseconds (`X-Ts-Unit: micros` and column metadata `ts_unit: micros`);
+Parquet timestamps remain milliseconds. Recent hours may be provisional (`X-Data-Status`
+and ISO-8601 `X-Data-Through`) or unavailable (`404 NOT_YET_AVAILABLE` with `Retry-After`).
+Do not archive provisional data as a complete hour. `404 NO_DATA` is a stored empty hour;
+`503 TEMPORARILY_UNAVAILABLE` is retryable after `Retry-After`. `400 OUTSIDE_WINDOW`
+includes `ResponseError.next_`, a CEX import request for the hour; add a dataset name.
+Unknown reasons should be handled like absent reasons, using status and message.
+
+For very large segments, drop down to the underlying `httpx.Client` (`client.get_httpx_client()`) and stream:
+
+```python
+with client.get_httpx_client().stream(
+    "GET",
+    "/exchange/binance/klines/BTC/USDT",
+    params={"hour": "2026-10-15T10", "format": "parquet"},
+) as r:
+    r.raise_for_status()
+    with open("out.parquet", "wb") as f:
+        for chunk in r.iter_bytes():
+            f.write(chunk)
+```
+
+## Configuring the client
+
+Both `Client` and `AuthenticatedClient` accept the standard hooks of the upstream generator:
+
+```python
+from qtsurfer.api.client import AuthenticatedClient
+
+client = AuthenticatedClient(
+    base_url="https://api.qtsurfer.net/v1",
+    token=token,
+    timeout=httpx.Timeout(30.0),
+    verify_ssl=True,
+    headers={"X-Request-Id": "..."},
+    raise_on_unexpected_status=True,
+)
+```
+
+Need per-call customisation (e.g. swap the underlying `httpx.Client` for one with a custom transport)? Use `client.with_httpx_client(my_httpx_client)` or `client.set_httpx_client(...)`.
+
+## Regenerating the client
+
+The `src/qtsurfer/api/client/_generated/` directory is a committed build artifact produced from the OpenAPI spec hosted at [`QTSurfer/qtsurfer-api`](https://github.com/QTSurfer/qtsurfer-api/blob/main/openapi.yaml). Never hand-edit it.
+
+```bash
+uv sync                    # install pinned dev deps
+./scripts/regenerate.sh    # fetch spec + regenerate + sync pyproject version
+uv run ruff check src/ tests/
+uv run mypy src/
+uv run pytest -v
+```
+
+Generator configuration lives in `codegen.config.yaml`. The spec URL is hard-coded in `scripts/regenerate.sh`; point it at a tag/commit for fully reproducible builds.
+
+## Development
+
+| Command | Description |
+| ------ | ----------- |
+| `uv sync` | Install dependencies from `uv.lock` |
+| `./scripts/regenerate.sh` | Re-fetch spec + regenerate client |
+| `uv run ruff check src/ tests/` | Lint |
+| `uv run ruff format src/ tests/` | Format |
+| `uv run mypy src/` | Type-check (`--strict`) |
+| `uv run pytest -v` | Run tests |
+| `uv run python -m build` | Build wheel + sdist into `dist/` |
+
+## Versioning
+
+`pyproject.toml`'s `version` field is kept in lockstep with the `info.version` of the OpenAPI spec by `scripts/regenerate.sh`. Tags pushed to `main` (`vX.Y.Z`) trigger the PyPI publish workflow via OIDC trusted publishing.
+
+## License
+
+Apache-2.0 — see [LICENSE](./LICENSE).

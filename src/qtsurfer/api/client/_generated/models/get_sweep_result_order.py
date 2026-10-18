@@ -1,0 +1,9 @@
+from enum import Enum
+
+
+class GetSweepResultOrder(str, Enum):
+    NATURAL = "natural"
+    RANKED = "ranked"
+
+    def __str__(self) -> str:
+        return str(self.value)

@@ -1,0 +1,220 @@
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..models.start_live_request_visibility import StartLiveRequestVisibility
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.live_paper_config import LivePaperConfig
+    from ..models.live_source_request import LiveSourceRequest
+    from ..models.start_live_request_params import StartLiveRequestParams
+
+
+T = TypeVar("T", bound="StartLiveRequest")
+
+
+@_attrs_define
+class StartLiveRequest:
+    """
+    Attributes:
+        sources (list[LiveSourceRequest]):
+        params (StartLiveRequestParams | Unset): Strategy parameters to start with. Opaque key/value pairs — see this
+            strategy's own `declaredProperties` (from `POST /strategy`) for the keys it accepts.
+        visibility (StartLiveRequestVisibility | Unset): A `public` run appears in `GET /live/public` and its signal
+            channel accepts subscriptions from anyone, not only you — from the moment it is in the `live` stage, which is
+            when it is promoted or, for a run that starts there, at once. While it is a `sandbox` trial, `public` is only
+            what you asked for, and only you can read it. Default: StartLiveRequestVisibility.PRIVATE.
+        relay (bool | Unset): Request that this run's signals be relayed over its WebSocket channel, from its first
+            signal — in the `sandbox` stage too, where only you can subscribe to it. See the "Live execution" guide.
+            Default: False.
+        sandbox (bool | Unset): Start in the `sandbox` stage even though an earlier run of yours already took this
+            compiled strategy
+            through it. Without it, such a strategy starts in `LIVE` at once; with `true` it starts in `SANDBOX` like
+            a first run, which is how to read its signals back over the connection (`history`, kept for the
+            `sandbox` stage only) while you debug it. For a strategy that has not been through the sandbox it
+            changes nothing: it always starts there. Anything other than `true` or `false` is `400`.
+             Default: False.
+        stream (bool | Unset): Ask for a **stream URL**: a secret address that a simple client, or a service that passes
+            your signals
+            on to others, can open as a plain WebSocket to receive this run's signals as they are produced, one JSON
+            text frame per signal, with none of the live-execution protocol around it. The URL comes back as
+            `streamUrl` in the response to this call. Available from the `sandbox` stage on, on the plans that may
+            broadcast; any other plan gets `429`. It can be asked for **only when the run is started** (not added
+            later), and it also turns `relay` on. See the "Live execution" guide, "A plain WebSocket stream of a run".
+             Default: False.
+        warm_from (int | Unset): How many seconds before the run's start to replay the market feed from, so the
+            strategy's indicators and
+            windows have history when its first live tick arrives. `0` replays nothing: the run delivers its first
+            signal as soon as it is running, but its indicators start empty and the first bar of a window can be
+            partial. Omitted, the platform replays from the start of the current 15-minute block: between 0 and 900
+            seconds before the run's start, depending on when it starts (0 if it starts exactly on a quarter hour),
+            so the first bar of a 15-minute window is complete. The value in effect, the one you sent or the one the
+            platform chose, is reported back as `warmFrom` on the run. Signals about the replayed time
+            are not pushed on the run's channel or stream: they describe events from before the run started.
+            It can be set **only when the run is started**: it is not a parameter of `PUT /live/{runId}/params`, and
+            changing it means stopping the run and starting it again. Anything that is not an integer from 0 to 3600
+            is `400`. See the "Live execution" guide, "Warming up".
+        name (str | Unset):
+        description (str | Unset):
+        paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
+            (same fields,
+            defaults and limits), plus `output`. An empty object takes every default. Each quote
+            currency the run trades gets its own simulated account, opened with `initialFunding` in
+            that currency; accounts are never added together. As returned on a run, the block is
+            normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
+            in.
+    """
+
+    sources: list[LiveSourceRequest]
+    params: StartLiveRequestParams | Unset = UNSET
+    visibility: StartLiveRequestVisibility | Unset = StartLiveRequestVisibility.PRIVATE
+    relay: bool | Unset = False
+    sandbox: bool | Unset = False
+    stream: bool | Unset = False
+    warm_from: int | Unset = UNSET
+    name: str | Unset = UNSET
+    description: str | Unset = UNSET
+    paper: LivePaperConfig | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        sources = []
+        for sources_item_data in self.sources:
+            sources_item = sources_item_data.to_dict()
+            sources.append(sources_item)
+
+        params: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.params, Unset):
+            params = self.params.to_dict()
+
+        visibility: str | Unset = UNSET
+        if not isinstance(self.visibility, Unset):
+            visibility = self.visibility.value
+
+        relay = self.relay
+
+        sandbox = self.sandbox
+
+        stream = self.stream
+
+        warm_from = self.warm_from
+
+        name = self.name
+
+        description = self.description
+
+        paper: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.paper, Unset):
+            paper = self.paper.to_dict()
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "sources": sources,
+            }
+        )
+        if params is not UNSET:
+            field_dict["params"] = params
+        if visibility is not UNSET:
+            field_dict["visibility"] = visibility
+        if relay is not UNSET:
+            field_dict["relay"] = relay
+        if sandbox is not UNSET:
+            field_dict["sandbox"] = sandbox
+        if stream is not UNSET:
+            field_dict["stream"] = stream
+        if warm_from is not UNSET:
+            field_dict["warmFrom"] = warm_from
+        if name is not UNSET:
+            field_dict["name"] = name
+        if description is not UNSET:
+            field_dict["description"] = description
+        if paper is not UNSET:
+            field_dict["paper"] = paper
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.live_paper_config import LivePaperConfig
+        from ..models.live_source_request import LiveSourceRequest
+        from ..models.start_live_request_params import StartLiveRequestParams
+
+        d = dict(src_dict)
+        sources = []
+        _sources = d.pop("sources")
+        for sources_item_data in _sources:
+            sources_item = LiveSourceRequest.from_dict(sources_item_data)
+
+            sources.append(sources_item)
+
+        _params = d.pop("params", UNSET)
+        params: StartLiveRequestParams | Unset
+        if isinstance(_params, Unset):
+            params = UNSET
+        else:
+            params = StartLiveRequestParams.from_dict(_params)
+
+        _visibility = d.pop("visibility", UNSET)
+        visibility: StartLiveRequestVisibility | Unset
+        if isinstance(_visibility, Unset):
+            visibility = UNSET
+        else:
+            visibility = StartLiveRequestVisibility(_visibility)
+
+        relay = d.pop("relay", UNSET)
+
+        sandbox = d.pop("sandbox", UNSET)
+
+        stream = d.pop("stream", UNSET)
+
+        warm_from = d.pop("warmFrom", UNSET)
+
+        name = d.pop("name", UNSET)
+
+        description = d.pop("description", UNSET)
+
+        _paper = d.pop("paper", UNSET)
+        paper: LivePaperConfig | Unset
+        if isinstance(_paper, Unset):
+            paper = UNSET
+        else:
+            paper = LivePaperConfig.from_dict(_paper)
+
+        start_live_request = cls(
+            sources=sources,
+            params=params,
+            visibility=visibility,
+            relay=relay,
+            sandbox=sandbox,
+            stream=stream,
+            warm_from=warm_from,
+            name=name,
+            description=description,
+            paper=paper,
+        )
+
+        start_live_request.additional_properties = d
+        return start_live_request
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties
