@@ -78,6 +78,7 @@ from .execute_sweep_result_ranking import ExecuteSweepResultRanking
 from .execute_sweep_result_status import ExecuteSweepResultStatus
 from .finalize_dataset_upload_response_202 import FinalizeDatasetUploadResponse202
 from .get_backtest_result_response_202 import GetBacktestResultResponse202
+from .get_live_run_paper_equity_measure import GetLiveRunPaperEquityMeasure
 from .get_strategy_code_response_200 import GetStrategyCodeResponse200
 from .get_sweep_result_objective import GetSweepResultObjective
 from .get_sweep_result_order import GetSweepResultOrder
@@ -91,6 +92,8 @@ from .instrument_list_meta import InstrumentListMeta
 from .instrument_list_meta_segment import InstrumentListMetaSegment
 from .instrument_list_meta_venue_type import InstrumentListMetaVenueType
 from .instrument_list_response import InstrumentListResponse
+from .insufficient_scope_error import InsufficientScopeError
+from .insufficient_scope_error_code import InsufficientScopeErrorCode
 from .job_state import JobState
 from .job_state_status import JobStateStatus
 from .key_scopes import KeyScopes
@@ -103,13 +106,15 @@ from .live_paper import LivePaper
 from .live_paper_account import LivePaperAccount
 from .live_paper_account_equity_kind import LivePaperAccountEquityKind
 from .live_paper_config import LivePaperConfig
+from .live_paper_config_accounts import LivePaperConfigAccounts
 from .live_paper_config_fee_leg import LivePaperConfigFeeLeg
 from .live_paper_config_output import LivePaperConfigOutput
-from .live_paper_equity_page import LivePaperEquityPage
-from .live_paper_equity_page_links import LivePaperEquityPageLinks
-from .live_paper_equity_page_links_next import LivePaperEquityPageLinksNext
-from .live_paper_equity_point import LivePaperEquityPoint
-from .live_paper_equity_point_kind import LivePaperEquityPointKind
+from .live_paper_equity_curve import LivePaperEquityCurve
+from .live_paper_equity_curve_links import LivePaperEquityCurveLinks
+from .live_paper_equity_curve_links_next import LivePaperEquityCurveLinksNext
+from .live_paper_equity_curve_measure import LivePaperEquityCurveMeasure
+from .live_paper_instrument import LivePaperInstrument
+from .live_paper_instrument_open_position import LivePaperInstrumentOpenPosition
 from .live_paper_kpi import LivePaperKpi
 from .live_paper_position import LivePaperPosition
 from .live_paper_stage import LivePaperStage
@@ -281,6 +286,7 @@ __all__ = (
     "ExecuteSweepResultStatus",
     "FinalizeDatasetUploadResponse202",
     "GetBacktestResultResponse202",
+    "GetLiveRunPaperEquityMeasure",
     "GetStrategyCodeResponse200",
     "GetSweepResultObjective",
     "GetSweepResultOrder",
@@ -294,6 +300,8 @@ __all__ = (
     "InstrumentListMetaSegment",
     "InstrumentListMetaVenueType",
     "InstrumentListResponse",
+    "InsufficientScopeError",
+    "InsufficientScopeErrorCode",
     "JobState",
     "JobStateStatus",
     "KeyScopes",
@@ -306,13 +314,15 @@ __all__ = (
     "LivePaperAccount",
     "LivePaperAccountEquityKind",
     "LivePaperConfig",
+    "LivePaperConfigAccounts",
     "LivePaperConfigFeeLeg",
     "LivePaperConfigOutput",
-    "LivePaperEquityPage",
-    "LivePaperEquityPageLinks",
-    "LivePaperEquityPageLinksNext",
-    "LivePaperEquityPoint",
-    "LivePaperEquityPointKind",
+    "LivePaperEquityCurve",
+    "LivePaperEquityCurveLinks",
+    "LivePaperEquityCurveLinksNext",
+    "LivePaperEquityCurveMeasure",
+    "LivePaperInstrument",
+    "LivePaperInstrumentOpenPosition",
     "LivePaperKpi",
     "LivePaperPosition",
     "LivePaperStage",

@@ -1,10 +1,10 @@
 from enum import Enum
 
 
-class LivePaperEquityPointKind(str, Enum):
+class LivePaperEquityCurveMeasure(str, Enum):
     EQUITY = "equity"
-    GAP = "gap"
-    MARK = "mark"
+    REALISEDPNL = "realisedPnl"
+    TOTALPNL = "totalPnl"
 
     def __str__(self) -> str:
         return str(self.value)

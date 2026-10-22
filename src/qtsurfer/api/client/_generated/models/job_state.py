@@ -38,6 +38,11 @@ class JobState:
             2025-01-04T14:00:00Z.
         end_time (datetime.datetime | None | Unset): Timestamp for when the preparation finished Example:
             2025-01-04T14:00:20Z.
+        retryable (bool | Unset): Present in the `state` of an execute job and not in the `state` of a prepare. Whether
+            sending
+            the same request again can succeed once the job has failed: `true` for a temporary fault
+            reading the market data, `false` for any other failure, such as a strategy that throws. A job
+            that has not failed carries `false`.
     """
 
     context_id: str
@@ -47,6 +52,7 @@ class JobState:
     status_detail: None | str | Unset = UNSET
     start_time: datetime.datetime | None | Unset = UNSET
     end_time: datetime.datetime | None | Unset = UNSET
+    retryable: bool | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -80,6 +86,8 @@ class JobState:
         else:
             end_time = self.end_time
 
+        retryable = self.retryable
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -96,6 +104,8 @@ class JobState:
             field_dict["startTime"] = start_time
         if end_time is not UNSET:
             field_dict["endTime"] = end_time
+        if retryable is not UNSET:
+            field_dict["retryable"] = retryable
 
         return field_dict
 
@@ -153,6 +163,8 @@ class JobState:
 
         end_time = _parse_end_time(d.pop("endTime", UNSET))
 
+        retryable = d.pop("retryable", UNSET)
+
         job_state = cls(
             context_id=context_id,
             status=status,
@@ -161,6 +173,7 @@ class JobState:
             status_detail=status_detail,
             start_time=start_time,
             end_time=end_time,
+            retryable=retryable,
         )
 
         job_state.additional_properties = d

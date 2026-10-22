@@ -56,6 +56,11 @@ class PrepareJobState:
                 2025-01-04T14:00:00Z.
             end_time (datetime.datetime | None | Unset): Timestamp for when the preparation finished Example:
                 2025-01-04T14:00:20Z.
+            retryable (bool | Unset): Present in the `state` of an execute job and not in the `state` of a prepare. Whether
+                sending
+                the same request again can succeed once the job has failed: `true` for a temporary fault
+                reading the market data, `false` for any other failure, such as a strategy that throws. A job
+                that has not failed carries `false`.
             data_from (datetime.datetime | None | Unset): Start of the available data range for the prepared instrument.
                 Example: 2026-04-14T13:00:00Z.
             data_to (datetime.datetime | None | Unset): End of the available data range for the prepared instrument.
@@ -94,6 +99,7 @@ class PrepareJobState:
     status_detail: None | str | Unset = UNSET
     start_time: datetime.datetime | None | Unset = UNSET
     end_time: datetime.datetime | None | Unset = UNSET
+    retryable: bool | Unset = UNSET
     data_from: datetime.datetime | None | Unset = UNSET
     data_to: datetime.datetime | None | Unset = UNSET
     coverage_ratio: float | Unset = UNSET
@@ -135,6 +141,8 @@ class PrepareJobState:
             end_time = self.end_time.isoformat()
         else:
             end_time = self.end_time
+
+        retryable = self.retryable
 
         data_from: None | str | Unset
         if isinstance(self.data_from, Unset):
@@ -187,6 +195,8 @@ class PrepareJobState:
             field_dict["startTime"] = start_time
         if end_time is not UNSET:
             field_dict["endTime"] = end_time
+        if retryable is not UNSET:
+            field_dict["retryable"] = retryable
         if data_from is not UNSET:
             field_dict["dataFrom"] = data_from
         if data_to is not UNSET:
@@ -264,6 +274,8 @@ class PrepareJobState:
 
         end_time = _parse_end_time(d.pop("endTime", UNSET))
 
+        retryable = d.pop("retryable", UNSET)
+
         def _parse_data_from(data: object) -> datetime.datetime | None | Unset:
             if data is None:
                 return data
@@ -327,6 +339,7 @@ class PrepareJobState:
             status_detail=status_detail,
             start_time=start_time,
             end_time=end_time,
+            retryable=retryable,
             data_from=data_from,
             data_to=data_to,
             coverage_ratio=coverage_ratio,

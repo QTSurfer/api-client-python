@@ -8,6 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.accepted_job import AcceptedJob
 from ...models.data_source_type import DataSourceType
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.prepare_request import PrepareRequest
 from ...models.response_error import ResponseError
 from ...types import Response
@@ -39,7 +40,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> AcceptedJob | ResponseError | None:
+) -> AcceptedJob | InsufficientScopeError | ResponseError | None:
     if response.status_code == 202:
         response_202 = AcceptedJob.from_dict(response.json())
 
@@ -49,6 +50,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -68,7 +74,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[AcceptedJob | ResponseError]:
+) -> Response[AcceptedJob | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -83,7 +89,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> Response[AcceptedJob | ResponseError]:
+) -> Response[AcceptedJob | InsufficientScopeError | ResponseError]:
     """Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
@@ -99,7 +105,11 @@ def sync_detailed(
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
-    two request shapes.
+    two request shapes. A `ticker` prepare takes any dataset; a `kline` prepare takes a dataset
+    whose `type` is `klines` (its rows are the bars, at its own cadence or a coarser exact
+    multiple of it) and is `400` over any other, naming the dataset's type. The `type` that
+    counts is the one of the version the prepare reads (the current one, or the one
+    `datasetVersionId` pins), and it is read from the data: a file of candles is `klines`.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -129,7 +139,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AcceptedJob | ResponseError]
+        Response[AcceptedJob | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -151,7 +161,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> AcceptedJob | ResponseError | None:
+) -> AcceptedJob | InsufficientScopeError | ResponseError | None:
     """Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
@@ -167,7 +177,11 @@ def sync(
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
-    two request shapes.
+    two request shapes. A `ticker` prepare takes any dataset; a `kline` prepare takes a dataset
+    whose `type` is `klines` (its rows are the bars, at its own cadence or a coarser exact
+    multiple of it) and is `400` over any other, naming the dataset's type. The `type` that
+    counts is the one of the version the prepare reads (the current one, or the one
+    `datasetVersionId` pins), and it is read from the data: a file of candles is `klines`.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -197,7 +211,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AcceptedJob | ResponseError
+        AcceptedJob | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -214,7 +228,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> Response[AcceptedJob | ResponseError]:
+) -> Response[AcceptedJob | InsufficientScopeError | ResponseError]:
     """Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
@@ -230,7 +244,11 @@ async def asyncio_detailed(
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
-    two request shapes.
+    two request shapes. A `ticker` prepare takes any dataset; a `kline` prepare takes a dataset
+    whose `type` is `klines` (its rows are the bars, at its own cadence or a coarser exact
+    multiple of it) and is `400` over any other, naming the dataset's type. The `type` that
+    counts is the one of the version the prepare reads (the current one, or the one
+    `datasetVersionId` pins), and it is read from the data: a file of candles is `klines`.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -260,7 +278,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AcceptedJob | ResponseError]
+        Response[AcceptedJob | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -280,7 +298,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> AcceptedJob | ResponseError | None:
+) -> AcceptedJob | InsufficientScopeError | ResponseError | None:
     """Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
@@ -296,7 +314,11 @@ async def asyncio(
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
     endpoints) — send `datasetId` in place of `instrument`. See `PrepareRequest` below for the
-    two request shapes.
+    two request shapes. A `ticker` prepare takes any dataset; a `kline` prepare takes a dataset
+    whose `type` is `klines` (its rows are the bars, at its own cadence or a coarser exact
+    multiple of it) and is `400` over any other, naming the dataset's type. The `type` that
+    counts is the one of the version the prepare reads (the current one, or the one
+    `datasetVersionId` pins), and it is read from the data: a file of candles is `klines`.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -326,7 +348,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AcceptedJob | ResponseError
+        AcceptedJob | InsufficientScopeError | ResponseError
     """
 
     return (

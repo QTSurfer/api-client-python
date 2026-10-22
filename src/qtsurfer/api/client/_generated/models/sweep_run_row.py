@@ -49,9 +49,10 @@ class SweepRunRow:
             meaningfully computable, rather than genuinely zero. A present value is the computed probability, however small.
         equity_curve (EquityCurveResult | Unset): An equity curve, shaped per `meta.outMode`: `points` when `ARRAY`,
             `timestamps` + `equities` (parallel arrays) when `SHORT`. Used identically wherever a curve is returned — a
-            plain backtest's inline `equityCurve` and a sweep row's `equityCurve` are the same type. `url` is present
-            *instead of* any points when the curve is served by pointer rather than inline (a sweep row's top-N winners
-            only): `GET` it separately to fetch this exact same shape with the points populated.
+            plain backtest's inline `equityCurve`, a sweep row's `equityCurve` and a live paper account's curve (`GET
+            /live/{runId}/paper/equity`) are the same type. `url` is present *instead of* any points when the curve is
+            served by pointer rather than inline (a sweep row's top-N winners only): `GET` it separately to fetch this exact
+            same shape with the points populated.
     """
 
     run_ix: int

@@ -7,6 +7,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.create_dataset_body import CreateDatasetBody
 from ...models.dataset_created import DatasetCreated
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -32,7 +33,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> DatasetCreated | ResponseError | None:
+) -> DatasetCreated | InsufficientScopeError | ResponseError | None:
     if response.status_code == 201:
         response_201 = DatasetCreated.from_dict(response.json())
 
@@ -42,6 +43,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 409:
         response_409 = ResponseError.from_dict(response.json())
@@ -61,7 +67,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[DatasetCreated | ResponseError]:
+) -> Response[DatasetCreated | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -74,7 +80,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: CreateDatasetBody,
-) -> Response[DatasetCreated | ResponseError]:
+) -> Response[DatasetCreated | InsufficientScopeError | ResponseError]:
     r"""Create a dataset and get a URL to upload it to
 
      Creates a dataset AND its first upload session in one call — a presigned URL your client
@@ -120,7 +126,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[DatasetCreated | ResponseError]
+        Response[DatasetCreated | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -138,7 +144,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: CreateDatasetBody,
-) -> DatasetCreated | ResponseError | None:
+) -> DatasetCreated | InsufficientScopeError | ResponseError | None:
     r"""Create a dataset and get a URL to upload it to
 
      Creates a dataset AND its first upload session in one call — a presigned URL your client
@@ -184,7 +190,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        DatasetCreated | ResponseError
+        DatasetCreated | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -197,7 +203,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: CreateDatasetBody,
-) -> Response[DatasetCreated | ResponseError]:
+) -> Response[DatasetCreated | InsufficientScopeError | ResponseError]:
     r"""Create a dataset and get a URL to upload it to
 
      Creates a dataset AND its first upload session in one call — a presigned URL your client
@@ -243,7 +249,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[DatasetCreated | ResponseError]
+        Response[DatasetCreated | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -259,7 +265,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: CreateDatasetBody,
-) -> DatasetCreated | ResponseError | None:
+) -> DatasetCreated | InsufficientScopeError | ResponseError | None:
     r"""Create a dataset and get a URL to upload it to
 
      Creates a dataset AND its first upload session in one call — a presigned URL your client
@@ -305,7 +311,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        DatasetCreated | ResponseError
+        DatasetCreated | InsufficientScopeError | ResponseError
     """
 
     return (

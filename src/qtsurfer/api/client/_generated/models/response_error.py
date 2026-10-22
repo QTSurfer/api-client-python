@@ -26,6 +26,11 @@ class ResponseError:
             Present only on an error that has one, and each operation that can return one lists
             the values it uses. A client treats a value it does not know like an absent `reason`.
              Example: OUTSIDE_WINDOW.
+        retryable (bool | Unset): Whether sending the same request again can succeed. `true` for `408`, `425`, `429` and
+            every `5xx`; `false` for every other `4xx`, which fails the same way until the request
+            changes: a field of the wrong type, a strategy that does not compile, a missing
+            parameter. A plan limit, a `429` without `Retry-After`, is `false`. When the answer
+            carries a `Retry-After`, wait that long before sending the request again.
         next_ (ErrorNextCall | Unset): The call that gets past an error, ready to send: a client that wants the same
             thing by
             another route makes this request. Present only on an error that has one.
@@ -34,6 +39,7 @@ class ResponseError:
     code: int
     message: str
     reason: str | Unset = UNSET
+    retryable: bool | Unset = UNSET
     next_: ErrorNextCall | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -43,6 +49,8 @@ class ResponseError:
         message = self.message
 
         reason = self.reason
+
+        retryable = self.retryable
 
         next_: dict[str, Any] | Unset = UNSET
         if not isinstance(self.next_, Unset):
@@ -58,6 +66,8 @@ class ResponseError:
         )
         if reason is not UNSET:
             field_dict["reason"] = reason
+        if retryable is not UNSET:
+            field_dict["retryable"] = retryable
         if next_ is not UNSET:
             field_dict["next"] = next_
 
@@ -74,6 +84,8 @@ class ResponseError:
 
         reason = d.pop("reason", UNSET)
 
+        retryable = d.pop("retryable", UNSET)
+
         _next_ = d.pop("next", UNSET)
         next_: ErrorNextCall | Unset
         if isinstance(_next_, Unset):
@@ -85,6 +97,7 @@ class ResponseError:
             code=code,
             message=message,
             reason=reason,
+            retryable=retryable,
             next_=next_,
         )
 

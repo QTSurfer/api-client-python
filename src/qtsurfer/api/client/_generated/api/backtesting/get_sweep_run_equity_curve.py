@@ -9,6 +9,7 @@ from ...client import AuthenticatedClient, Client
 from ...models.data_source_type import DataSourceType
 from ...models.equity_curve_out_mode import EquityCurveOutMode
 from ...models.equity_curve_result import EquityCurveResult
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import UNSET, Response, Unset
 
@@ -56,11 +57,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> EquityCurveResult | ResponseError | None:
+) -> EquityCurveResult | InsufficientScopeError | ResponseError | None:
     if response.status_code == 200:
         response_200 = EquityCurveResult.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -75,7 +81,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[EquityCurveResult | ResponseError]:
+) -> Response[EquityCurveResult | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -95,7 +101,7 @@ def sync_detailed(
     out_mode: EquityCurveOutMode | Unset = EquityCurveOutMode.ARRAY,
     resample: int | Unset = UNSET,
     differential: bool | Unset = False,
-) -> Response[EquityCurveResult | ResponseError]:
+) -> Response[EquityCurveResult | InsufficientScopeError | ResponseError]:
     """Get one sweep trial's equity curve
 
      The resource a leaderboard row's `equityCurve.url` points at — only reachable when that
@@ -142,7 +148,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[EquityCurveResult | ResponseError]
+        Response[EquityCurveResult | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -174,7 +180,7 @@ def sync(
     out_mode: EquityCurveOutMode | Unset = EquityCurveOutMode.ARRAY,
     resample: int | Unset = UNSET,
     differential: bool | Unset = False,
-) -> EquityCurveResult | ResponseError | None:
+) -> EquityCurveResult | InsufficientScopeError | ResponseError | None:
     """Get one sweep trial's equity curve
 
      The resource a leaderboard row's `equityCurve.url` points at — only reachable when that
@@ -221,7 +227,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        EquityCurveResult | ResponseError
+        EquityCurveResult | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -248,7 +254,7 @@ async def asyncio_detailed(
     out_mode: EquityCurveOutMode | Unset = EquityCurveOutMode.ARRAY,
     resample: int | Unset = UNSET,
     differential: bool | Unset = False,
-) -> Response[EquityCurveResult | ResponseError]:
+) -> Response[EquityCurveResult | InsufficientScopeError | ResponseError]:
     """Get one sweep trial's equity curve
 
      The resource a leaderboard row's `equityCurve.url` points at — only reachable when that
@@ -295,7 +301,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[EquityCurveResult | ResponseError]
+        Response[EquityCurveResult | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -325,7 +331,7 @@ async def asyncio(
     out_mode: EquityCurveOutMode | Unset = EquityCurveOutMode.ARRAY,
     resample: int | Unset = UNSET,
     differential: bool | Unset = False,
-) -> EquityCurveResult | ResponseError | None:
+) -> EquityCurveResult | InsufficientScopeError | ResponseError | None:
     """Get one sweep trial's equity curve
 
      The resource a leaderboard row's `equityCurve.url` points at — only reachable when that
@@ -372,7 +378,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        EquityCurveResult | ResponseError
+        EquityCurveResult | InsufficientScopeError | ResponseError
     """
 
     return (

@@ -5,6 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.list_datasets_response_200 import ListDatasetsResponse200
 from ...types import UNSET, Response, Unset
 
@@ -31,11 +32,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ListDatasetsResponse200 | None:
+) -> InsufficientScopeError | ListDatasetsResponse200 | None:
     if response.status_code == 200:
         response_200 = ListDatasetsResponse200.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -45,7 +51,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ListDatasetsResponse200]:
+) -> Response[InsufficientScopeError | ListDatasetsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -58,7 +64,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     include_deleted: bool | Unset = False,
-) -> Response[ListDatasetsResponse200]:
+) -> Response[InsufficientScopeError | ListDatasetsResponse200]:
     """List your datasets
 
      Every dataset you have created and not deleted, most recently created first. Never a `404`
@@ -76,7 +82,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ListDatasetsResponse200]
+        Response[InsufficientScopeError | ListDatasetsResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -94,7 +100,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     include_deleted: bool | Unset = False,
-) -> ListDatasetsResponse200 | None:
+) -> InsufficientScopeError | ListDatasetsResponse200 | None:
     """List your datasets
 
      Every dataset you have created and not deleted, most recently created first. Never a `404`
@@ -112,7 +118,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ListDatasetsResponse200
+        InsufficientScopeError | ListDatasetsResponse200
     """
 
     return sync_detailed(
@@ -125,7 +131,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     include_deleted: bool | Unset = False,
-) -> Response[ListDatasetsResponse200]:
+) -> Response[InsufficientScopeError | ListDatasetsResponse200]:
     """List your datasets
 
      Every dataset you have created and not deleted, most recently created first. Never a `404`
@@ -143,7 +149,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ListDatasetsResponse200]
+        Response[InsufficientScopeError | ListDatasetsResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -159,7 +165,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     include_deleted: bool | Unset = False,
-) -> ListDatasetsResponse200 | None:
+) -> InsufficientScopeError | ListDatasetsResponse200 | None:
     """List your datasets
 
      Every dataset you have created and not deleted, most recently created first. Never a `404`
@@ -177,7 +183,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ListDatasetsResponse200
+        InsufficientScopeError | ListDatasetsResponse200
     """
 
     return (

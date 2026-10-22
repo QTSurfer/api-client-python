@@ -8,6 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.cancel_backtest_response_200 import CancelBacktestResponse200
 from ...models.data_source_type import DataSourceType
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -32,11 +33,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> CancelBacktestResponse200 | ResponseError | None:
+) -> CancelBacktestResponse200 | InsufficientScopeError | ResponseError | None:
     if response.status_code == 200:
         response_200 = CancelBacktestResponse200.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -51,7 +57,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[CancelBacktestResponse200 | ResponseError]:
+) -> Response[CancelBacktestResponse200 | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -66,7 +72,7 @@ def sync_detailed(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[CancelBacktestResponse200 | ResponseError]:
+) -> Response[CancelBacktestResponse200 | InsufficientScopeError | ResponseError]:
     """Cancel a running backtest execution
 
      Requests cancellation of the specified execution. The execution
@@ -96,7 +102,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[CancelBacktestResponse200 | ResponseError]
+        Response[CancelBacktestResponse200 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -118,7 +124,7 @@ def sync(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> CancelBacktestResponse200 | ResponseError | None:
+) -> CancelBacktestResponse200 | InsufficientScopeError | ResponseError | None:
     """Cancel a running backtest execution
 
      Requests cancellation of the specified execution. The execution
@@ -148,7 +154,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        CancelBacktestResponse200 | ResponseError
+        CancelBacktestResponse200 | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -165,7 +171,7 @@ async def asyncio_detailed(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[CancelBacktestResponse200 | ResponseError]:
+) -> Response[CancelBacktestResponse200 | InsufficientScopeError | ResponseError]:
     """Cancel a running backtest execution
 
      Requests cancellation of the specified execution. The execution
@@ -195,7 +201,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[CancelBacktestResponse200 | ResponseError]
+        Response[CancelBacktestResponse200 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -215,7 +221,7 @@ async def asyncio(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> CancelBacktestResponse200 | ResponseError | None:
+) -> CancelBacktestResponse200 | InsufficientScopeError | ResponseError | None:
     """Cancel a running backtest execution
 
      Requests cancellation of the specified execution. The execution
@@ -245,7 +251,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        CancelBacktestResponse200 | ResponseError
+        CancelBacktestResponse200 | InsufficientScopeError | ResponseError
     """
 
     return (

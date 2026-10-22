@@ -5,6 +5,7 @@ from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
+from ..models.live_paper_config_accounts import LivePaperConfigAccounts
 from ..models.live_paper_config_fee_leg import LivePaperConfigFeeLeg
 from ..models.live_paper_config_output import LivePaperConfigOutput
 from ..types import UNSET, Unset
@@ -15,15 +16,17 @@ T = TypeVar("T", bound="LivePaperConfig")
 @_attrs_define
 class LivePaperConfig:
     """Paper trading for this run: the same economics as a backtest's `baseConfig` (same fields,
-    defaults and limits), plus `output`. An empty object takes every default. Each quote
-    currency the run trades gets its own simulated account, opened with `initialFunding` in
-    that currency; accounts are never added together. As returned on a run, the block is
+    defaults and limits), plus `output` and `accounts`. An empty object takes every default.
+    By default each quote currency the run trades gets its own simulated account, opened with
+    `initialFunding` in that currency; with `accounts: instrument` each instrument gets one
+    instead. Accounts are never added together. As returned on a run, the block is
     normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
-    in.
+    in; `accounts` is returned when the request gave it.
 
         Attributes:
-            initial_funding (float | Unset): Starting capital of each account, in that account's own quote currency.
-                Default: 100.0.
+            initial_funding (float | Unset): Starting capital of each account, in that account's own quote currency. With
+                `accounts: instrument` it is the capital of EACH instrument's account: it is never the run's total capital and
+                accounts are never added together. Default: 100.0.
             fee_rate (float | Unset): Fee rate for both sides (0.001 = 0.1%). Accepted on start; returned resolved into the
                 two fields below. Default: 0.001.
             buy_fee_rate (float | Unset): Buy-side fee rate; overrides `feeRate`.
@@ -31,10 +34,18 @@ class LivePaperConfig:
             fee_leg (LivePaperConfigFeeLeg | Unset): Which asset fees are charged in. Case-insensitive on start. Default:
                 LivePaperConfigFeeLeg.RECEIVED.
             percent_amount_to_lock (float | Unset): Share of the account's free balance each entry locks, in percent.
-                Omitted, the strategy's own setting applies, and without one 10%.
+                Omitted, the strategy's own setting applies, and without one 10% (the whole free balance, as a backtest, with
+                `accounts: instrument`, where nothing is shared).
             output (LivePaperConfigOutput | Unset): `separate` keeps paper output out of the run's signals (read it with
                 `GET /live/{runId}/paper`); `mix` also interleaves it into the run's signals as `type: paper`, right after the
                 signal that caused it. Default: LivePaperConfigOutput.SEPARATE.
+            accounts (LivePaperConfigAccounts | Unset): How the run's accounts are split, fixed when it starts. `currency`
+                (the default) is one shared account per quote currency: every instrument of a currency draws on the same
+                balance, as on a venue with one wallet per asset. `instrument` is one isolated account per instrument, each a
+                simulation of that instrument alone with its own `initialFunding`, which is what makes it comparable with a
+                backtest of the instrument but less realistic, since a venue has one wallet per asset and not one per pair. It
+                needs the instruments of the run named: a wildcard is refused, on every plan. Default:
+                LivePaperConfigAccounts.CURRENCY.
     """
 
     initial_funding: float | Unset = 100.0
@@ -44,6 +55,7 @@ class LivePaperConfig:
     fee_leg: LivePaperConfigFeeLeg | Unset = LivePaperConfigFeeLeg.RECEIVED
     percent_amount_to_lock: float | Unset = UNSET
     output: LivePaperConfigOutput | Unset = LivePaperConfigOutput.SEPARATE
+    accounts: LivePaperConfigAccounts | Unset = LivePaperConfigAccounts.CURRENCY
 
     def to_dict(self) -> dict[str, Any]:
         initial_funding = self.initial_funding
@@ -64,6 +76,10 @@ class LivePaperConfig:
         if not isinstance(self.output, Unset):
             output = self.output.value
 
+        accounts: str | Unset = UNSET
+        if not isinstance(self.accounts, Unset):
+            accounts = self.accounts.value
+
         field_dict: dict[str, Any] = {}
 
         field_dict.update({})
@@ -81,6 +97,8 @@ class LivePaperConfig:
             field_dict["percentAmountToLock"] = percent_amount_to_lock
         if output is not UNSET:
             field_dict["output"] = output
+        if accounts is not UNSET:
+            field_dict["accounts"] = accounts
 
         return field_dict
 
@@ -111,6 +129,13 @@ class LivePaperConfig:
         else:
             output = LivePaperConfigOutput(_output)
 
+        _accounts = d.pop("accounts", UNSET)
+        accounts: LivePaperConfigAccounts | Unset
+        if isinstance(_accounts, Unset):
+            accounts = UNSET
+        else:
+            accounts = LivePaperConfigAccounts(_accounts)
+
         live_paper_config = cls(
             initial_funding=initial_funding,
             fee_rate=fee_rate,
@@ -119,6 +144,7 @@ class LivePaperConfig:
             fee_leg=fee_leg,
             percent_amount_to_lock=percent_amount_to_lock,
             output=output,
+            accounts=accounts,
         )
 
         return live_paper_config

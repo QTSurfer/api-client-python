@@ -8,14 +8,14 @@ from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="LivePaperEquityPageLinksNext")
+T = TypeVar("T", bound="LivePaperEquityCurveLinksNext")
 
 
 @_attrs_define
-class LivePaperEquityPageLinksNext:
+class LivePaperEquityCurveLinksNext:
     """
     Attributes:
-        href (str | Unset):
+        href (str | Unset): The next page; follow it as given, the cursor is opaque.
     """
 
     href: str | Unset = UNSET
@@ -37,12 +37,12 @@ class LivePaperEquityPageLinksNext:
         d = dict(src_dict)
         href = d.pop("href", UNSET)
 
-        live_paper_equity_page_links_next = cls(
+        live_paper_equity_curve_links_next = cls(
             href=href,
         )
 
-        live_paper_equity_page_links_next.additional_properties = d
-        return live_paper_equity_page_links_next
+        live_paper_equity_curve_links_next.additional_properties = d
+        return live_paper_equity_curve_links_next
 
     @property
     def additional_keys(self) -> list[str]:

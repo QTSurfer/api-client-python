@@ -43,6 +43,8 @@ from qtsurfer.api.client.models import (
     InstrumentCoverage,
     InstrumentDetail,
     InstrumentListResponse,
+    InsufficientScopeError,
+    InsufficientScopeErrorCode,
     ListStrategiesResponse200,
     LiveCommandResult,
     LiveRunDetail,
@@ -98,11 +100,32 @@ def test_list_exchanges_request_and_response(client: AuthenticatedClient) -> Non
     assert sent.headers["Authorization"] == "Bearer test-token"
 
     # Verify response was parsed into typed models.
-    assert exchanges is not None
+    assert isinstance(exchanges, list)
     assert len(exchanges) == 2
     assert isinstance(exchanges[0], Exchange)
     assert exchanges[0].id == "binance"
     assert exchanges[1].id == "bybit"
+
+
+@respx.mock
+def test_protected_operation_parses_insufficient_scope_403(client: AuthenticatedClient) -> None:
+    respx.get(f"{BASE_URL}/exchanges").mock(
+        return_value=httpx.Response(
+            403,
+            json={
+                "code": "insufficient_scope",
+                "message": "The key does not have the required scope.",
+                "required": "exchanges:read",
+            },
+        )
+    )
+
+    response = list_exchanges.sync_detailed(client=client)
+
+    assert response.status_code == 403
+    assert isinstance(response.parsed, InsufficientScopeError)
+    assert response.parsed.code is InsufficientScopeErrorCode.INSUFFICIENT_SCOPE
+    assert response.parsed.required == "exchanges:read"
 
 
 @respx.mock

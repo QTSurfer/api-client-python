@@ -7,6 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.delete_strategy_response_200 import DeleteStrategyResponse200
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -27,11 +28,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> DeleteStrategyResponse200 | ResponseError | None:
+) -> DeleteStrategyResponse200 | InsufficientScopeError | ResponseError | None:
     if response.status_code == 200:
         response_200 = DeleteStrategyResponse200.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -46,7 +52,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[DeleteStrategyResponse200 | ResponseError]:
+) -> Response[DeleteStrategyResponse200 | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -59,7 +65,7 @@ def sync_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[DeleteStrategyResponse200 | ResponseError]:
+) -> Response[DeleteStrategyResponse200 | InsufficientScopeError | ResponseError]:
     """Release a registered strategy
 
      Removes a strategy from `GET /strategy/{strategyId}` and `GET /strategies`. This is not
@@ -86,7 +92,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[DeleteStrategyResponse200 | ResponseError]
+        Response[DeleteStrategyResponse200 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -104,7 +110,7 @@ def sync(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> DeleteStrategyResponse200 | ResponseError | None:
+) -> DeleteStrategyResponse200 | InsufficientScopeError | ResponseError | None:
     """Release a registered strategy
 
      Removes a strategy from `GET /strategy/{strategyId}` and `GET /strategies`. This is not
@@ -131,7 +137,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        DeleteStrategyResponse200 | ResponseError
+        DeleteStrategyResponse200 | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -144,7 +150,7 @@ async def asyncio_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[DeleteStrategyResponse200 | ResponseError]:
+) -> Response[DeleteStrategyResponse200 | InsufficientScopeError | ResponseError]:
     """Release a registered strategy
 
      Removes a strategy from `GET /strategy/{strategyId}` and `GET /strategies`. This is not
@@ -171,7 +177,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[DeleteStrategyResponse200 | ResponseError]
+        Response[DeleteStrategyResponse200 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -187,7 +193,7 @@ async def asyncio(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> DeleteStrategyResponse200 | ResponseError | None:
+) -> DeleteStrategyResponse200 | InsufficientScopeError | ResponseError | None:
     """Release a registered strategy
 
      Removes a strategy from `GET /strategy/{strategyId}` and `GET /strategies`. This is not
@@ -214,7 +220,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        DeleteStrategyResponse200 | ResponseError
+        DeleteStrategyResponse200 | InsufficientScopeError | ResponseError
     """
 
     return (

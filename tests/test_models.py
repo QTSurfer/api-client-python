@@ -30,14 +30,18 @@ from qtsurfer.api.client.models import (
     HalLink,
     InstrumentCoverage,
     InstrumentDetail,
+    InsufficientScopeError,
+    InsufficientScopeErrorCode,
     JobState,
     JobStateStatus,
     ListStrategiesResponse200,
+    LivePaperEquityCurve,
     LiveSignal,
     LiveSignalInstrument,
     LiveSignalPage,
     LiveSignalStage,
     LiveSignalType,
+    ResponseError,
     ResultMap,
     ResultMapParams,
     ScalarStrategyParamValue,
@@ -135,6 +139,45 @@ def test_start_live_request_serializes_sandbox_override() -> None:
 
     assert request.to_dict()["sandbox"] is True
     assert StartLiveRequest.from_dict({"sources": [], "sandbox": True}).sandbox is True
+
+
+def test_scope_error_and_retryable_error_fields_roundtrip() -> None:
+    scope_error = InsufficientScopeError.from_dict(
+        {
+            "code": "insufficient_scope",
+            "message": "Missing datasets:read.",
+            "required": "datasets:read",
+        }
+    )
+    assert scope_error.code is InsufficientScopeErrorCode.INSUFFICIENT_SCOPE
+    assert scope_error.required == "datasets:read"
+
+    response_error = ResponseError.from_dict(
+        {"code": "TEMPORARILY_UNAVAILABLE", "message": "Try later", "retryable": True}
+    )
+    assert response_error.retryable is True
+    assert response_error.to_dict()["retryable"] is True
+
+
+def test_live_paper_equity_curve_roundtrip_uses_shared_curve_shape() -> None:
+    payload = {
+        "meta": {
+            "inputPointCount": 1,
+            "outputPointCount": 1,
+            "resampled": False,
+            "differential": False,
+            "outMode": "ARRAY",
+        },
+        "measure": "totalPnl",
+        "gaps": [],
+        "points": [{"timestamp": 1, "equity": 12.5}],
+        "instrument": "BTC/USDT",
+    }
+    curve = LivePaperEquityCurve.from_dict(payload)
+    assert curve.instrument == "BTC/USDT"
+    assert not isinstance(curve.points, types.Unset)
+    assert curve.points[0].equity == 12.5
+    assert curve.to_dict() == payload
 
 
 def test_list_strategies_response_roundtrip() -> None:

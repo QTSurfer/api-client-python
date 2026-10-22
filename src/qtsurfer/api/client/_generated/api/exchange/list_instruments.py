@@ -7,6 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.instrument_list_response import InstrumentListResponse
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.pool_list_response import PoolListResponse
 from ...models.response_error import ResponseError
 from ...types import Response
@@ -28,7 +29,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError | None:
     if response.status_code == 200:
 
         def _parse_response_200(data: object) -> InstrumentListResponse | PoolListResponse:
@@ -55,6 +56,11 @@ def _parse_response(
 
         return response_400
 
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
+
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
 
@@ -68,7 +74,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -81,7 +87,7 @@ def sync_detailed(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError]:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
@@ -101,7 +107,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | PoolListResponse | ResponseError]
+        Response[InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -119,7 +125,7 @@ def sync(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError | None:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
@@ -139,7 +145,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | PoolListResponse | ResponseError
+        InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -152,7 +158,7 @@ async def asyncio_detailed(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[InstrumentListResponse | PoolListResponse | ResponseError]:
+) -> Response[InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError]:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
@@ -172,7 +178,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InstrumentListResponse | PoolListResponse | ResponseError]
+        Response[InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -188,7 +194,7 @@ async def asyncio(
     exchange_id: str,
     *,
     client: AuthenticatedClient | Client,
-) -> InstrumentListResponse | PoolListResponse | ResponseError | None:
+) -> InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError | None:
     r"""List an exchange's instruments (default spot segment)
 
      \"Give me binance instruments\" — returns the exchange's DEFAULT segment (`spot`)
@@ -208,7 +214,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InstrumentListResponse | PoolListResponse | ResponseError
+        InstrumentListResponse | PoolListResponse | InsufficientScopeError | ResponseError
     """
 
     return (

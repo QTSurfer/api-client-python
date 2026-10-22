@@ -28,12 +28,20 @@ class DatasetWithLinks:
     Attributes:
         dataset_id (str): Opaque id, returned by `POST /datasets`. Example: ds_3f9a1c2e7b0d4a5f.
         name (str): Unique among your datasets. Example: My BTC ticks.
-        type_ (DatasetType): `ticker` for an upload, a `dex` import with no `cadence` requested (native per-trade
-            data) or a `cex` import with `dataType: ticker`. `klines` for a `dex` import that
-            requested a candle `cadence` — pre-aggregated bars rather than raw ticks — or a `cex`
-            import with `dataType: klines`. Purely informational; both shapes are read the same
-            way.
-             Example: ticker.
+        type_ (DatasetType): What the rows of the current version are, decided when the version became `ready`. An
+            import that knows what it fetched says so: a `cex` import is its `dataType`, a `dex`
+            import of candles is `klines`. Everything else (an upload, a `dex` import of on-chain
+            swaps) is read from the data: `ticker` when any row carries an order book (`bid`,
+            `bidSize`, `ask`, `askSize`), or when there is only a price, or only some of
+            `open`/`high`/`low`/`close`; `klines` when there is no book and `open`, `high`, `low`
+            and `close` are on every row (candles). A file with no book whose `high` and `low`
+            hardly ever change, or whose opens do not follow the closes before them (the
+            exchange's 24-hour figures), stays `ticker`. A `kline` backtest needs `klines`; a
+            `ticker` one takes either. Before the first version is
+            `ready` it is only the label of the way the dataset was created (`ticker` for an
+            upload, `klines` for an import that asked for candles). Datasets stored before this
+            rule keep the `type` they had.
+             Example: klines.
         instrument (str): Exchange instrument identifier (e.g. a currency pair) Example: BTC/USDT.
         created_at (datetime.datetime): When the dataset was created. Example: 2026-08-20T09:00:00Z.
         status (DatasetStatus): * `ready` — `currentVersionId` is set; `from`/`to`/`cadence`/`bytes`/`rows`/`gaps`/

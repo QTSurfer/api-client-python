@@ -8,6 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.data_source_type import DataSourceType
 from ...models.get_sweep_sensitivity_objective import GetSweepSensitivityObjective
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...models.sweep_sensitivity import SweepSensitivity
 from ...types import UNSET, Response, Unset
@@ -48,11 +49,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ResponseError | SweepSensitivity | None:
+) -> InsufficientScopeError | ResponseError | SweepSensitivity | None:
     if response.status_code == 200:
         response_200 = SweepSensitivity.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -67,7 +73,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ResponseError | SweepSensitivity]:
+) -> Response[InsufficientScopeError | ResponseError | SweepSensitivity]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -84,7 +90,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     objective: GetSweepSensitivityObjective | Unset = UNSET,
-) -> Response[ResponseError | SweepSensitivity]:
+) -> Response[InsufficientScopeError | ResponseError | SweepSensitivity]:
     """Get sweep sensitivity surfaces
 
      How the objective moves as each parameter moves — the question a leaderboard cannot answer.
@@ -134,7 +140,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ResponseError | SweepSensitivity]
+        Response[InsufficientScopeError | ResponseError | SweepSensitivity]
     """
 
     kwargs = _get_kwargs(
@@ -160,7 +166,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     objective: GetSweepSensitivityObjective | Unset = UNSET,
-) -> ResponseError | SweepSensitivity | None:
+) -> InsufficientScopeError | ResponseError | SweepSensitivity | None:
     """Get sweep sensitivity surfaces
 
      How the objective moves as each parameter moves — the question a leaderboard cannot answer.
@@ -210,7 +216,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ResponseError | SweepSensitivity
+        InsufficientScopeError | ResponseError | SweepSensitivity
     """
 
     return sync_detailed(
@@ -231,7 +237,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     objective: GetSweepSensitivityObjective | Unset = UNSET,
-) -> Response[ResponseError | SweepSensitivity]:
+) -> Response[InsufficientScopeError | ResponseError | SweepSensitivity]:
     """Get sweep sensitivity surfaces
 
      How the objective moves as each parameter moves — the question a leaderboard cannot answer.
@@ -281,7 +287,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ResponseError | SweepSensitivity]
+        Response[InsufficientScopeError | ResponseError | SweepSensitivity]
     """
 
     kwargs = _get_kwargs(
@@ -305,7 +311,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     objective: GetSweepSensitivityObjective | Unset = UNSET,
-) -> ResponseError | SweepSensitivity | None:
+) -> InsufficientScopeError | ResponseError | SweepSensitivity | None:
     """Get sweep sensitivity surfaces
 
      How the objective moves as each parameter moves — the question a leaderboard cannot answer.
@@ -355,7 +361,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ResponseError | SweepSensitivity
+        InsufficientScopeError | ResponseError | SweepSensitivity
     """
 
     return (

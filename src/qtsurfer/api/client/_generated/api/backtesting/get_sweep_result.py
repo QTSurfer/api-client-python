@@ -11,6 +11,7 @@ from ...models.execute_sweep_result import ExecuteSweepResult
 from ...models.get_sweep_result_objective import GetSweepResultObjective
 from ...models.get_sweep_result_order import GetSweepResultOrder
 from ...models.get_sweep_result_ranking import GetSweepResultRanking
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import UNSET, Response, Unset
 
@@ -64,11 +65,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ExecuteSweepResult | ResponseError | None:
+) -> ExecuteSweepResult | InsufficientScopeError | ResponseError | None:
     if response.status_code == 200:
         response_200 = ExecuteSweepResult.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -83,7 +89,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ExecuteSweepResult | ResponseError]:
+) -> Response[ExecuteSweepResult | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -102,7 +108,7 @@ def sync_detailed(
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
     ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
-) -> Response[ExecuteSweepResult | ResponseError]:
+) -> Response[ExecuteSweepResult | InsufficientScopeError | ResponseError]:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
@@ -159,7 +165,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ExecuteSweepResult | ResponseError]
+        Response[ExecuteSweepResult | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -189,7 +195,7 @@ def sync(
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
     ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
-) -> ExecuteSweepResult | ResponseError | None:
+) -> ExecuteSweepResult | InsufficientScopeError | ResponseError | None:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
@@ -246,7 +252,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ExecuteSweepResult | ResponseError
+        ExecuteSweepResult | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -271,7 +277,7 @@ async def asyncio_detailed(
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
     ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
-) -> Response[ExecuteSweepResult | ResponseError]:
+) -> Response[ExecuteSweepResult | InsufficientScopeError | ResponseError]:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
@@ -328,7 +334,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ExecuteSweepResult | ResponseError]
+        Response[ExecuteSweepResult | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -356,7 +362,7 @@ async def asyncio(
     objective: GetSweepResultObjective | Unset = UNSET,
     order: GetSweepResultOrder | Unset = GetSweepResultOrder.RANKED,
     ranking: GetSweepResultRanking | Unset = GetSweepResultRanking.PLATEAU,
-) -> ExecuteSweepResult | ResponseError | None:
+) -> ExecuteSweepResult | InsufficientScopeError | ResponseError | None:
     """Get sweep progress and results
 
      Returns incremental sweep progress. The default `ranked` view sorts and may truncate the
@@ -413,7 +419,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ExecuteSweepResult | ResponseError
+        ExecuteSweepResult | InsufficientScopeError | ResponseError
     """
 
     return (

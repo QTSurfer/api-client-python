@@ -6,6 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.live_signal_page import LiveSignalPage
 from ...models.response_error import ResponseError
 from ...types import UNSET, Response, Unset
@@ -48,7 +49,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> LiveSignalPage | ResponseError | None:
+) -> InsufficientScopeError | LiveSignalPage | ResponseError | None:
     if response.status_code == 200:
         response_200 = LiveSignalPage.from_dict(response.json())
 
@@ -58,6 +59,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -77,7 +83,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[LiveSignalPage | ResponseError]:
+) -> Response[InsufficientScopeError | LiveSignalPage | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -95,7 +101,7 @@ def sync_detailed(
     type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
-) -> Response[LiveSignalPage | ResponseError]:
+) -> Response[InsufficientScopeError | LiveSignalPage | ResponseError]:
     """Read a run's signals
 
      Returns one page of the signals a run has already produced, newest-last, optionally from a
@@ -136,7 +142,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveSignalPage | ResponseError]
+        Response[InsufficientScopeError | LiveSignalPage | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -164,7 +170,7 @@ def sync(
     type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
-) -> LiveSignalPage | ResponseError | None:
+) -> InsufficientScopeError | LiveSignalPage | ResponseError | None:
     """Read a run's signals
 
      Returns one page of the signals a run has already produced, newest-last, optionally from a
@@ -205,7 +211,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveSignalPage | ResponseError
+        InsufficientScopeError | LiveSignalPage | ResponseError
     """
 
     return sync_detailed(
@@ -228,7 +234,7 @@ async def asyncio_detailed(
     type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
-) -> Response[LiveSignalPage | ResponseError]:
+) -> Response[InsufficientScopeError | LiveSignalPage | ResponseError]:
     """Read a run's signals
 
      Returns one page of the signals a run has already produced, newest-last, optionally from a
@@ -269,7 +275,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveSignalPage | ResponseError]
+        Response[InsufficientScopeError | LiveSignalPage | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -295,7 +301,7 @@ async def asyncio(
     type_: str | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 20,
-) -> LiveSignalPage | ResponseError | None:
+) -> InsufficientScopeError | LiveSignalPage | ResponseError | None:
     """Read a run's signals
 
      Returns one page of the signals a run has already produced, newest-last, optionally from a
@@ -336,7 +342,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveSignalPage | ResponseError
+        InsufficientScopeError | LiveSignalPage | ResponseError
     """
 
     return (

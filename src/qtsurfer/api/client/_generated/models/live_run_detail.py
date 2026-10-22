@@ -78,11 +78,12 @@ class LiveRunDetail:
             treat it as opaque.
         paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
             (same fields,
-            defaults and limits), plus `output`. An empty object takes every default. Each quote
-            currency the run trades gets its own simulated account, opened with `initialFunding` in
-            that currency; accounts are never added together. As returned on a run, the block is
+            defaults and limits), plus `output` and `accounts`. An empty object takes every default.
+            By default each quote currency the run trades gets its own simulated account, opened with
+            `initialFunding` in that currency; with `accounts: instrument` each instrument gets one
+            instead. Accounts are never added together. As returned on a run, the block is
             normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
-            in.
+            in; `accounts` is returned when the request gave it.
         stats (LiveRunStats | Unset): What a run has been doing, as of its last snapshot. The platform refreshes it
             about once a minute
             while the run is being executed, so `opsPerSecond` is an average over that interval, not an

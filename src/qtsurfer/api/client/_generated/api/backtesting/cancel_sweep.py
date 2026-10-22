@@ -8,6 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.cancel_sweep_response_200 import CancelSweepResponse200
 from ...models.data_source_type import DataSourceType
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -34,11 +35,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> CancelSweepResponse200 | ResponseError | None:
+) -> CancelSweepResponse200 | InsufficientScopeError | ResponseError | None:
     if response.status_code == 200:
         response_200 = CancelSweepResponse200.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -53,7 +59,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[CancelSweepResponse200 | ResponseError]:
+) -> Response[CancelSweepResponse200 | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -69,7 +75,7 @@ def sync_detailed(
     sweep_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[CancelSweepResponse200 | ResponseError]:
+) -> Response[CancelSweepResponse200 | InsufficientScopeError | ResponseError]:
     """Cancel a running parameter sweep
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
@@ -105,7 +111,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[CancelSweepResponse200 | ResponseError]
+        Response[CancelSweepResponse200 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -129,7 +135,7 @@ def sync(
     sweep_id: str,
     *,
     client: AuthenticatedClient,
-) -> CancelSweepResponse200 | ResponseError | None:
+) -> CancelSweepResponse200 | InsufficientScopeError | ResponseError | None:
     """Cancel a running parameter sweep
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
@@ -165,7 +171,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        CancelSweepResponse200 | ResponseError
+        CancelSweepResponse200 | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -184,7 +190,7 @@ async def asyncio_detailed(
     sweep_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[CancelSweepResponse200 | ResponseError]:
+) -> Response[CancelSweepResponse200 | InsufficientScopeError | ResponseError]:
     """Cancel a running parameter sweep
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
@@ -220,7 +226,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[CancelSweepResponse200 | ResponseError]
+        Response[CancelSweepResponse200 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -242,7 +248,7 @@ async def asyncio(
     sweep_id: str,
     *,
     client: AuthenticatedClient,
-) -> CancelSweepResponse200 | ResponseError | None:
+) -> CancelSweepResponse200 | InsufficientScopeError | ResponseError | None:
     """Cancel a running parameter sweep
 
      Requests cancellation between parameter vectors. Completed rows remain readable.
@@ -278,7 +284,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        CancelSweepResponse200 | ResponseError
+        CancelSweepResponse200 | InsufficientScopeError | ResponseError
     """
 
     return (

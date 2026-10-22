@@ -9,20 +9,21 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.live_paper_equity_page_links_next import LivePaperEquityPageLinksNext
+    from ..models.live_paper_equity_curve_links_next import LivePaperEquityCurveLinksNext
 
 
-T = TypeVar("T", bound="LivePaperEquityPageLinks")
+T = TypeVar("T", bound="LivePaperEquityCurveLinks")
 
 
 @_attrs_define
-class LivePaperEquityPageLinks:
-    """
+class LivePaperEquityCurveLinks:
+    """Present on a page of the raw curve while there is a next one.
+
     Attributes:
-        next_ (LivePaperEquityPageLinksNext | Unset):
+        next_ (LivePaperEquityCurveLinksNext | Unset):
     """
 
-    next_: LivePaperEquityPageLinksNext | Unset = UNSET
+    next_: LivePaperEquityCurveLinksNext | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -40,22 +41,22 @@ class LivePaperEquityPageLinks:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.live_paper_equity_page_links_next import LivePaperEquityPageLinksNext
+        from ..models.live_paper_equity_curve_links_next import LivePaperEquityCurveLinksNext
 
         d = dict(src_dict)
         _next_ = d.pop("next", UNSET)
-        next_: LivePaperEquityPageLinksNext | Unset
+        next_: LivePaperEquityCurveLinksNext | Unset
         if isinstance(_next_, Unset):
             next_ = UNSET
         else:
-            next_ = LivePaperEquityPageLinksNext.from_dict(_next_)
+            next_ = LivePaperEquityCurveLinksNext.from_dict(_next_)
 
-        live_paper_equity_page_links = cls(
+        live_paper_equity_curve_links = cls(
             next_=next_,
         )
 
-        live_paper_equity_page_links.additional_properties = d
-        return live_paper_equity_page_links
+        live_paper_equity_curve_links.additional_properties = d
+        return live_paper_equity_curve_links
 
     @property
     def additional_keys(self) -> list[str]:

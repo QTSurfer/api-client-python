@@ -31,8 +31,8 @@ class AuthTokenResponse:
             lower case: `{ "backtests": ["read", "write", "execute"], "exchanges": ["read"] }`. A scope
             is a resource and an action: a resource is listed only with at least one action, and a key
             with no scope is `{}`. `GET /account` and `POST /auth/token` return the same map for the
-            same key. The API reports the scopes of a key; it does not yet refuse an operation because
-            a scope is missing.
+            same key. An operation that needs a scope the key does not carry is answered `403` with the
+            code `insufficient_scope`, and says which scope it needed.
              Example: {'backtests': ['read', 'write', 'execute'], 'exchanges': ['read']}.
     """
 

@@ -5,6 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.live_connection_token import LiveConnectionToken
 from ...types import Response
 
@@ -19,11 +20,18 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> LiveConnectionToken | None:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> InsufficientScopeError | LiveConnectionToken | None:
     if response.status_code == 200:
         response_200 = LiveConnectionToken.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -31,7 +39,9 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return None
 
 
-def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[LiveConnectionToken]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[InsufficientScopeError | LiveConnectionToken]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -43,7 +53,7 @@ def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[LiveConnectionToken]:
+) -> Response[InsufficientScopeError | LiveConnectionToken]:
     r"""Mint a WebSocket connection token
 
      Mints a short-lived token for the WebSocket connection used to receive a run's signals in
@@ -56,7 +66,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveConnectionToken]
+        Response[InsufficientScopeError | LiveConnectionToken]
     """
 
     kwargs = _get_kwargs()
@@ -71,7 +81,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-) -> LiveConnectionToken | None:
+) -> InsufficientScopeError | LiveConnectionToken | None:
     r"""Mint a WebSocket connection token
 
      Mints a short-lived token for the WebSocket connection used to receive a run's signals in
@@ -84,7 +94,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveConnectionToken
+        InsufficientScopeError | LiveConnectionToken
     """
 
     return sync_detailed(
@@ -95,7 +105,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[LiveConnectionToken]:
+) -> Response[InsufficientScopeError | LiveConnectionToken]:
     r"""Mint a WebSocket connection token
 
      Mints a short-lived token for the WebSocket connection used to receive a run's signals in
@@ -108,7 +118,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveConnectionToken]
+        Response[InsufficientScopeError | LiveConnectionToken]
     """
 
     kwargs = _get_kwargs()
@@ -121,7 +131,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-) -> LiveConnectionToken | None:
+) -> InsufficientScopeError | LiveConnectionToken | None:
     r"""Mint a WebSocket connection token
 
      Mints a short-lived token for the WebSocket connection used to receive a run's signals in
@@ -134,7 +144,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveConnectionToken
+        InsufficientScopeError | LiveConnectionToken
     """
 
     return (

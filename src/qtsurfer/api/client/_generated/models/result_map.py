@@ -66,9 +66,10 @@ class ResultMap:
             max_drawdown_percent (float | Unset): Maximum percentage drawdown from peak equity Example: 8.75.
             equity_curve (EquityCurveResult | Unset): An equity curve, shaped per `meta.outMode`: `points` when `ARRAY`,
                 `timestamps` + `equities` (parallel arrays) when `SHORT`. Used identically wherever a curve is returned — a
-                plain backtest's inline `equityCurve` and a sweep row's `equityCurve` are the same type. `url` is present
-                *instead of* any points when the curve is served by pointer rather than inline (a sweep row's top-N winners
-                only): `GET` it separately to fetch this exact same shape with the points populated.
+                plain backtest's inline `equityCurve`, a sweep row's `equityCurve` and a live paper account's curve (`GET
+                /live/{runId}/paper/equity`) are the same type. `url` is present *instead of* any points when the curve is
+                served by pointer rather than inline (a sweep row's top-N winners only): `GET` it separately to fetch this exact
+                same shape with the points populated.
             params (ResultMapParams | Unset): The strategy properties this run was given, echoed back as sent. Absent when
                 the request carried none, so its presence is what distinguishes a parameterised run from one at the declared
                 defaults — a stored result cannot otherwise say which vector produced it, and this endpoint is meant to be

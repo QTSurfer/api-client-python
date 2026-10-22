@@ -88,7 +88,7 @@ jwt = token_response.access_token  # use this in subsequent calls
 
 `token_response.scopes`, when present, is a `KeyScopes` map from resource to actions,
 such as `{"backtests": ["read", "write", "execute"]}`, not an array. `get_account`
-returns the same required map. The API reports grants but does not yet enforce individual operation scopes.
+returns the same map. Protected operations enforce their required scope.
 A scope is a resource and an action: each listed resource has at least one action;
 `{}` means no scopes. A successful response looks like:
 
@@ -106,8 +106,9 @@ Where a deployment requires scopes, a valid key with none returns `403` and a ty
 `AuthTokenError` with `code == AuthTokenErrorCode.APIKEY_WITHOUT_SCOPES` (`apikey_without_scopes`).
 No token is minted: create a key with at least one scope in the web app. Invalid,
 revoked, or expired keys still return `401`; this `403` is a key configuration issue,
-so retrying the same key does not fix it. Reporting grants does not mean that every
-operation already enforces its individual scope.
+so retrying the same key does not fix it. A separate `403` from a protected operation
+parses as `InsufficientScopeError` (`code == InsufficientScopeErrorCode.INSUFFICIENT_SCOPE`)
+with `required` naming the missing `resource:action` scope; grant it to the key before retrying.
 
 Exchange discovery returns required `venue_type`, `segments`, and `live_segments`.
 Both instrument routes return `InstrumentCatalogueResponse`: either `InstrumentListResponse`
@@ -211,6 +212,11 @@ cadence, and current-version metadata after the relevant lifecycle stage complet
 `data_url` is a presigned URL for the stored data and `data_format` tells whether it is `lastra` or
 `parquet`; choose the reader from `data_format`, not from the uploaded file name.
 
+The ready version determines `Dataset.type_` from its data. A CSV of candles is `klines`, even when
+it was uploaded rather than imported; a `kline` backtest accepts only a `klines` version, while a
+`ticker` backtest accepts either type. Before the first version is ready, `type_` is only the
+creation/import label.
+
 To add a later version, call `open_dataset_upload(dataset_id)` to obtain a `DatasetUploadSession`.
 It returns the currently open session again if a previous response was lost. After finalization,
 open a new session before uploading again: finalizing an upload that already produced a version
@@ -241,8 +247,14 @@ signals over the WebSocket connection. This field is available in client version
 later.
 
 Paper trading is opt-in through `StartLiveRequest.paper`; it simulates balances and fills without
-sending orders. Read current simulated accounts with `get_live_run_paper`, and page their equity
-history oldest-first with `get_live_run_paper_equity`.
+sending orders. By default, each quote currency has a separate account; set
+`LivePaperConfig.accounts=LivePaperConfigAccounts.INSTRUMENT` for one independent account per
+instrument. `get_live_run_paper` returns account and per-instrument realised/unrealised PnL, open
+position marks, and total PnL when marks are available. `get_live_run_paper_equity` returns the
+shared equity-curve shape with its `meta` and `gaps`; select an account by `currency` (or by
+`instrument` for instrument accounts), and an instrument's `realisedPnl` or `totalPnl` curve with
+`instrument` and `measure`. The endpoint also supports `out_mode`, `resample`, `differential`,
+`since_ms`, `limit`, and `cursor`.
 
 `send_live_command` requires the run owner and a strategy that implements
 `CommandRequestHandler`. Commands are transient, are not persisted or replayed to replicas started
@@ -275,7 +287,7 @@ responses also expose optional `reason` text when a run stops or fails.
 
 > Exact module/function names are produced from `operationId` in the OpenAPI spec. Run `scripts/regenerate.sh` to refresh and check `src/qtsurfer/api/client/_generated/api/` for the authoritative listing.
 
-All generated model types (`Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, `Dataset`, `DatasetWithLinks`, `DatasetCreated`, `DatasetVersion`, `DatasetUploadState`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return `InstrumentCatalogueResponse`, either `InstrumentListResponse` for CEX or `PoolListResponse` for DEX (HAL envelope: `data` + `meta` + `_links`) — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. Against a dataset-backed prepare (`exchangeId: user`), `PrepareJobState` reports coverage on the dataset's own cadence grid instead — `cadence`/`gaps`/`largest_gap_steps` — with `total_hours`/`hours_with_data`/`hours_without_data` absent in that case. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
+All generated model types (`InsufficientScopeError`, `Exchange`, `InstrumentDetail`, `InstrumentCoverage`, `CoverageWindow`, `JobState`, `PrepareJobState`, `StrategyState`, `StrategyLinks`, `BacktestJobResult`, `ResultMap`, `ResponseError`, `Dataset`, `DatasetWithLinks`, `DatasetCreated`, `DatasetVersion`, `DatasetUploadState`, `LivePaperEquityCurve`, …) live under `qtsurfer.api.client.models`. `list_instruments`/`list_segment_instruments` return `InstrumentCatalogueResponse`, either `InstrumentListResponse` for CEX or `PoolListResponse` for DEX (HAL envelope: `data` + `meta` + `_links`) — each `InstrumentDetail.coverage` carries per-data-type `CoverageWindow`s instead of flat `dataFrom`/`dataTo`. A single-instrument `get_prepare_status` returns a `PrepareJobState` — always terminal (`status: Completed`), with a `coverage_ratio` and a per-hour `hours_without_data` breakdown to act on instead of polling. Against a dataset-backed prepare (`exchangeId: user`), `PrepareJobState` reports coverage on the dataset's own cadence grid instead — `cadence`/`gaps`/`largest_gap_steps` — with `total_hours`/`hours_with_data`/`hours_without_data` absent in that case. `get_strategy` returns a `StrategyState`, whose `validation` field (`not_validated` / `pending` / `passed` / `failed`) reports the outcome of the most recent `validate_strategy` check rather than a compile job status.
 
 A full `StrategyState` (from `get_strategy`, and from `validate_strategy`'s already-validated `200`) carries an optional `field_links` (`_links` on the wire) — a `StrategyLinks` with a `code: HalLink` pointing at `get_strategy_code`. `validate_strategy`'s `202` omits it, since a check that just started has nothing to link to yet. `list_strategies` returns every strategy you've registered and not deleted, most recently compiled first, but deliberately without each one's `validation` state — check that per strategy with `get_strategy`. `delete_strategy` removes a strategy from both `get_strategy` and `list_strategies`; it doesn't touch backtests already run against it, and re-submitting the same source afterwards registers a new strategy under a new id. `get_strategy_code`'s `404` covers two indistinguishable cases: an id never registered by you, or one that resolves only through a shared/marketplace reference with no source of its own.
 

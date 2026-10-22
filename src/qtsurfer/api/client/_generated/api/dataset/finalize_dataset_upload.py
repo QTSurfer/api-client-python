@@ -7,6 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.finalize_dataset_upload_response_202 import FinalizeDatasetUploadResponse202
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -29,11 +30,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> FinalizeDatasetUploadResponse202 | ResponseError | None:
+) -> FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError | None:
     if response.status_code == 202:
         response_202 = FinalizeDatasetUploadResponse202.from_dict(response.json())
 
         return response_202
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -63,7 +69,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[FinalizeDatasetUploadResponse202 | ResponseError]:
+) -> Response[FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -77,7 +83,7 @@ def sync_detailed(
     upload_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[FinalizeDatasetUploadResponse202 | ResponseError]:
+) -> Response[FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError]:
     """Finalize an uploaded file and start ingest
 
      Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
@@ -99,7 +105,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[FinalizeDatasetUploadResponse202 | ResponseError]
+        Response[FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -119,7 +125,7 @@ def sync(
     upload_id: str,
     *,
     client: AuthenticatedClient,
-) -> FinalizeDatasetUploadResponse202 | ResponseError | None:
+) -> FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError | None:
     """Finalize an uploaded file and start ingest
 
      Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
@@ -141,7 +147,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        FinalizeDatasetUploadResponse202 | ResponseError
+        FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -156,7 +162,7 @@ async def asyncio_detailed(
     upload_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[FinalizeDatasetUploadResponse202 | ResponseError]:
+) -> Response[FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError]:
     """Finalize an uploaded file and start ingest
 
      Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
@@ -178,7 +184,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[FinalizeDatasetUploadResponse202 | ResponseError]
+        Response[FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -196,7 +202,7 @@ async def asyncio(
     upload_id: str,
     *,
     client: AuthenticatedClient,
-) -> FinalizeDatasetUploadResponse202 | ResponseError | None:
+) -> FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError | None:
     """Finalize an uploaded file and start ingest
 
      Call once the file has been PUT to the `upload.url` from `POST /datasets` (or from
@@ -218,7 +224,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        FinalizeDatasetUploadResponse202 | ResponseError
+        FinalizeDatasetUploadResponse202 | InsufficientScopeError | ResponseError
     """
 
     return (

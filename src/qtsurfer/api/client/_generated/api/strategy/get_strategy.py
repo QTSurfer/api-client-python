@@ -6,6 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...models.strategy_state import StrategyState
 from ...types import Response
@@ -27,11 +28,16 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ResponseError | StrategyState | None:
+) -> InsufficientScopeError | ResponseError | StrategyState | None:
     if response.status_code == 200:
         response_200 = StrategyState.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -46,7 +52,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ResponseError | StrategyState]:
+) -> Response[InsufficientScopeError | ResponseError | StrategyState]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -59,7 +65,7 @@ def sync_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[ResponseError | StrategyState]:
+) -> Response[InsufficientScopeError | ResponseError | StrategyState]:
     """Get a strategy by id, including its validation state
 
      Reports that the strategy is registered — implied by a `200` at all — and what validating it
@@ -81,7 +87,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ResponseError | StrategyState]
+        Response[InsufficientScopeError | ResponseError | StrategyState]
     """
 
     kwargs = _get_kwargs(
@@ -99,7 +105,7 @@ def sync(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> ResponseError | StrategyState | None:
+) -> InsufficientScopeError | ResponseError | StrategyState | None:
     """Get a strategy by id, including its validation state
 
      Reports that the strategy is registered — implied by a `200` at all — and what validating it
@@ -121,7 +127,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ResponseError | StrategyState
+        InsufficientScopeError | ResponseError | StrategyState
     """
 
     return sync_detailed(
@@ -134,7 +140,7 @@ async def asyncio_detailed(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[ResponseError | StrategyState]:
+) -> Response[InsufficientScopeError | ResponseError | StrategyState]:
     """Get a strategy by id, including its validation state
 
      Reports that the strategy is registered — implied by a `200` at all — and what validating it
@@ -156,7 +162,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ResponseError | StrategyState]
+        Response[InsufficientScopeError | ResponseError | StrategyState]
     """
 
     kwargs = _get_kwargs(
@@ -172,7 +178,7 @@ async def asyncio(
     strategy_id: str,
     *,
     client: AuthenticatedClient,
-) -> ResponseError | StrategyState | None:
+) -> InsufficientScopeError | ResponseError | StrategyState | None:
     """Get a strategy by id, including its validation state
 
      Reports that the strategy is registered — implied by a `200` at all — and what validating it
@@ -194,7 +200,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ResponseError | StrategyState
+        InsufficientScopeError | ResponseError | StrategyState
     """
 
     return (

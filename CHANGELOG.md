@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.46] — 2026-10-22
+
+### Added ✨
+
+- Parse protected-operation `403` responses as `InsufficientScopeError`, with the missing
+  `resource:action` in `required` (44 operations).
+- Model paper accounts per instrument, per-instrument realised/unrealised metrics and position marks,
+  and the new paper equity-curve response with its measures, filters, and continuation link.
+- Expose `retryable` on `ResponseError` and execution `JobState`.
+
+### Changed 🔄
+
+- Target OpenAPI `0.128.46`. Paper-equity history now uses the shared equity-curve shape and supports
+  account/instrument selection, `measure`, transforms, and cursor pagination.
+- A ready dataset's type reflects its ingested rows; `kline` preparations require a `klines` version.
+- Scope enforcement errors and API-key-without-scopes errors are distinct typed `403` responses.
+
 ## [0.128.37] — 2026-10-17
 
 ### Added ✨
@@ -27,7 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   at least one action, and `{}` represents no scopes. Successful authentication examples
   use the resource-to-actions map.
 - Token scopes are a `KeyScopes` resource-to-actions map, also required on account responses.
-  The API reports grants but does not yet enforce them.
+  Protected operations enforce their required scope and return a typed `403` when it is missing.
 - Live sources use `cex` / `dex` enums. DEX runs require one pool address and `kline` data;
   discover valid exchange / live-segment combinations before starting a run.
 - Exchange metadata and instrument `symbol` are required. Unknown market values are absent

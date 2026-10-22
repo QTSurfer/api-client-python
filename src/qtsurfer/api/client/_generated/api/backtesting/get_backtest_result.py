@@ -9,6 +9,7 @@ from ...client import AuthenticatedClient, Client
 from ...models.backtest_job_result import BacktestJobResult
 from ...models.data_source_type import DataSourceType
 from ...models.get_backtest_result_response_202 import GetBacktestResultResponse202
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -33,7 +34,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> BacktestJobResult | GetBacktestResultResponse202 | ResponseError | None:
+) -> BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError | None:
     if response.status_code == 200:
         response_200 = BacktestJobResult.from_dict(response.json())
 
@@ -49,6 +50,11 @@ def _parse_response(
 
         return response_400
 
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
+
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
 
@@ -62,7 +68,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[BacktestJobResult | GetBacktestResultResponse202 | ResponseError]:
+) -> Response[BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -77,7 +83,7 @@ def sync_detailed(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[BacktestJobResult | GetBacktestResultResponse202 | ResponseError]:
+) -> Response[BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError]:
     """Get the result of a backtest execution job
 
      Retrieves the current state and results of the execute job identified by `jobId`.
@@ -109,7 +115,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[BacktestJobResult | GetBacktestResultResponse202 | ResponseError]
+        Response[BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -131,7 +137,7 @@ def sync(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> BacktestJobResult | GetBacktestResultResponse202 | ResponseError | None:
+) -> BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError | None:
     """Get the result of a backtest execution job
 
      Retrieves the current state and results of the execute job identified by `jobId`.
@@ -163,7 +169,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        BacktestJobResult | GetBacktestResultResponse202 | ResponseError
+        BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError
     """
 
     return sync_detailed(
@@ -180,7 +186,7 @@ async def asyncio_detailed(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[BacktestJobResult | GetBacktestResultResponse202 | ResponseError]:
+) -> Response[BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError]:
     """Get the result of a backtest execution job
 
      Retrieves the current state and results of the execute job identified by `jobId`.
@@ -212,7 +218,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[BacktestJobResult | GetBacktestResultResponse202 | ResponseError]
+        Response[BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -232,7 +238,7 @@ async def asyncio(
     job_id: str,
     *,
     client: AuthenticatedClient,
-) -> BacktestJobResult | GetBacktestResultResponse202 | ResponseError | None:
+) -> BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError | None:
     """Get the result of a backtest execution job
 
      Retrieves the current state and results of the execute job identified by `jobId`.
@@ -264,7 +270,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        BacktestJobResult | GetBacktestResultResponse202 | ResponseError
+        BacktestJobResult | GetBacktestResultResponse202 | InsufficientScopeError | ResponseError
     """
 
     return (

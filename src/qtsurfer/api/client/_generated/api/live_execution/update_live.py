@@ -6,6 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.live_run_compact import LiveRunCompact
 from ...models.response_error import ResponseError
 from ...models.update_live_request import UpdateLiveRequest
@@ -37,7 +38,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> LiveRunCompact | ResponseError | None:
+) -> InsufficientScopeError | LiveRunCompact | ResponseError | None:
     if response.status_code == 200:
         response_200 = LiveRunCompact.from_dict(response.json())
 
@@ -47,6 +48,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 403:
+        response_403 = InsufficientScopeError.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         response_404 = ResponseError.from_dict(response.json())
@@ -61,7 +67,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[LiveRunCompact | ResponseError]:
+) -> Response[InsufficientScopeError | LiveRunCompact | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -75,7 +81,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: UpdateLiveRequest | Unset = UNSET,
-) -> Response[LiveRunCompact | ResponseError]:
+) -> Response[InsufficientScopeError | LiveRunCompact | ResponseError]:
     """Change a run's visibility, name, or description
 
      Owner only, addressed by `runId` directly rather than through its strategy — this is a
@@ -94,7 +100,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveRunCompact | ResponseError]
+        Response[InsufficientScopeError | LiveRunCompact | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -114,7 +120,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: UpdateLiveRequest | Unset = UNSET,
-) -> LiveRunCompact | ResponseError | None:
+) -> InsufficientScopeError | LiveRunCompact | ResponseError | None:
     """Change a run's visibility, name, or description
 
      Owner only, addressed by `runId` directly rather than through its strategy — this is a
@@ -133,7 +139,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveRunCompact | ResponseError
+        InsufficientScopeError | LiveRunCompact | ResponseError
     """
 
     return sync_detailed(
@@ -148,7 +154,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: UpdateLiveRequest | Unset = UNSET,
-) -> Response[LiveRunCompact | ResponseError]:
+) -> Response[InsufficientScopeError | LiveRunCompact | ResponseError]:
     """Change a run's visibility, name, or description
 
      Owner only, addressed by `runId` directly rather than through its strategy — this is a
@@ -167,7 +173,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[LiveRunCompact | ResponseError]
+        Response[InsufficientScopeError | LiveRunCompact | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -185,7 +191,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: UpdateLiveRequest | Unset = UNSET,
-) -> LiveRunCompact | ResponseError | None:
+) -> InsufficientScopeError | LiveRunCompact | ResponseError | None:
     """Change a run's visibility, name, or description
 
      Owner only, addressed by `runId` directly rather than through its strategy — this is a
@@ -204,7 +210,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        LiveRunCompact | ResponseError
+        InsufficientScopeError | LiveRunCompact | ResponseError
     """
 
     return (

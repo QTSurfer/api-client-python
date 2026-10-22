@@ -29,7 +29,10 @@ class DatasetCreated:
             upload (DatasetUploadTarget): A presigned destination for uploading a raw dataset file directly to storage.
             dataset_id (str): Opaque id of the newly created dataset. Example: ds_3f9a1c2e7b0d4a5f.
             name (str): Unique name of the newly created dataset. Example: My BTC ticks.
-            type_ (DatasetCreatedType): Always `ticker` in v1. Example: ticker.
+            type_ (DatasetCreatedType): The label of a dataset that has no data yet, always `ticker` for an upload. The
+                dataset's `type` is read from the data once the upload has been ingested (see
+                `Dataset.type`): a file of candles is `klines` then.
+                 Example: ticker.
             instrument (str): Exchange instrument identifier (e.g. a currency pair) Example: BTC/USDT.
     """
 
