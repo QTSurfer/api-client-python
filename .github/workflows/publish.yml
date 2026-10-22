@@ -44,7 +44,7 @@ jobs:
           fi
 
       - name: Fetch openapi.yaml
-        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer.github.io/main/openapi.yaml -o openapi.yaml
+        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml -o openapi.yaml
 
       - name: Build
         run: uv run python -m build

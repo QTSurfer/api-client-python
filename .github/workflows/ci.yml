@@ -43,7 +43,7 @@ jobs:
       # spec cross-check in tests/test_smoke.py skips here and the suite cannot see a spec
       # operation that generates no module at all — the drift that hid compileStrategy.
       - name: Fetch openapi.yaml
-        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer.github.io/main/openapi.yaml -o openapi.yaml
+        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml -o openapi.yaml
 
       - name: Pytest
         run: uv run pytest -v
@@ -64,7 +64,7 @@ jobs:
         run: uv sync --frozen
 
       - name: Fetch openapi.yaml
-        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer.github.io/main/openapi.yaml -o openapi.yaml
+        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml -o openapi.yaml
 
       - name: Verify pyproject.toml version matches openapi.yaml
         run: |
