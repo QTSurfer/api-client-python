@@ -47,17 +47,24 @@ class PrepareRequest:
                 what omitting it means, depends on the source:
 
                 * Managed exchange, `ticker` or `funding` — one of `1s`, `5s`, `1m`, `3m`, `5m`, `15m`,
-                  `30m`, `1h`, `2h`, `4h`, `8h`, `12h`, `1d`, `1w`, `1q`; any other label returns `400`.
-                  Omitted = `1s`, the publisher's native cadence.
+                  `30m`, `1h`, `2h`, `4h`, `8h`, `12h`, `1d`, `1w`, `1q`; any other label returns `400`,
+                  and one your plan does not include returns `402`. Omitted = the finest cadence your plan
+                  includes.
                 * Managed exchange, `kline` — the same labels as above, `1s` to `1q`; a label that is
-                  not a whole number of seconds returns `400`. Omitted = `1s`. This is the width of the
+                  not a whole number of seconds returns `400`. Omitted = the finest cadence your plan
+                  includes. This is the width of the
                   bars a run reads: it is chosen here, once, and the same strategy can be run at
                   several cadences by preparing the range at each.
                 * Dataset (`exchangeId: user`) — omitted = the dataset version's own discovered
                   `cadence` (see `DatasetVersion.cadence`), served as-is. Any cadence equal to or
                   coarser than it and an exact multiple of it is accepted, including ones outside the
                   managed-exchange list (e.g. `15s`); an `rt` dataset can be resampled to any fixed
-                  cadence.
+                  cadence. Your plan does not limit it.
+
+                What a managed exchange's data is prepared at depends on your plan: the "Cadences by plan" section of the
+                Backtests guide
+                lists the cadences each plan includes and its default. Omitted = the plan's default. A
+                cadence your plan does not include is `402`.
     """
 
     from_: str

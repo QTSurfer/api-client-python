@@ -7,14 +7,20 @@ import pytest
 import respx
 
 from qtsurfer.api.client import AuthenticatedClient, types
+from qtsurfer.api.client.api.backtesting import prepare_backtest
 from qtsurfer.api.client.api.dataset import import_dataset
 from qtsurfer.api.client.api.exchange import list_instruments, list_segment_instruments
 from qtsurfer.api.client.models import (
     AuthTokenResponse,
+    DatasetImportCreated,
     DatasetImportRequest,
+    DataSourceType,
     KeyScopes,
     LiveSourceRequest,
+    PlanRequiredError,
     PoolListResponse,
+    PrepareAccepted,
+    PrepareRequest,
 )
 
 BASE = "https://api.example/v1"
@@ -104,6 +110,7 @@ def test_cex_import_posts_typed_source_and_expanded_cadence() -> None:
                 "name": "BTC history",
                 "instrument": "BTC/USDT",
                 "status": "fetching",
+                "cadence": "8h",
             },
         )
     )
@@ -115,6 +122,79 @@ def test_cex_import_posts_typed_source_and_expanded_cadence() -> None:
     assert sent["cex"] == payload["cex"]
     assert sent["type"] == "cex"
     assert sent["cadence"] == "8h"
+    assert isinstance(result.parsed, DatasetImportCreated)
+    assert result.parsed.cadence == "8h"
+
+
+@respx.mock
+def test_prepare_reports_effective_plan_cadence() -> None:
+    respx.post(BASE + "/backtest/binance/ticker/prepare").mock(
+        return_value=httpx.Response(202, json={"jobId": "prep-1", "cadence": "3m"})
+    )
+    result = prepare_backtest.sync_detailed(
+        "binance",
+        DataSourceType.TICKER,
+        client=AuthenticatedClient(base_url=BASE, token="jwt"),
+        body=PrepareRequest(from_="2026-10-01T00:00:00Z", to="2026-10-02T00:00:00Z", instrument="BTC/USDT"),
+    )
+    assert result.status_code == 202
+    assert isinstance(result.parsed, PrepareAccepted)
+    assert result.parsed.cadence == "3m"
+
+
+@pytest.mark.parametrize("operation", ["prepare", "import"])
+@respx.mock
+def test_plan_excluded_cadence_is_typed_402(operation: str) -> None:
+    route = (
+        respx.post(BASE + "/backtest/binance/ticker/prepare")
+        if operation == "prepare"
+        else respx.post(BASE + "/datasets/imports")
+    )
+    route.mock(
+        return_value=httpx.Response(
+            402,
+            json={
+                "code": 402,
+                "message": "cadence 1m is not included in your plan (free)",
+                "retryable": False,
+                "upgradeUrl": "https://example.com/upgrade",
+            },
+        )
+    )
+    client = AuthenticatedClient(base_url=BASE, token="jwt")
+
+    result = (
+        prepare_backtest.sync_detailed(
+            "binance",
+            DataSourceType.TICKER,
+            client=client,
+            body=PrepareRequest(
+                from_="2026-10-01T00:00:00Z",
+                to="2026-10-02T00:00:00Z",
+                instrument="BTC/USDT",
+                cadence="1m",
+            ),
+        )
+        if operation == "prepare"
+        else import_dataset.sync_detailed(
+            client=client,
+            body=DatasetImportRequest.from_dict(
+                {
+                    "name": "BTC history",
+                    "instrument": "BTC/USDT",
+                    "from": "2026-10-01T00:00:00Z",
+                    "to": "2026-10-02T00:00:00Z",
+                    "type": "cex",
+                    "cadence": "1m",
+                    "cex": {"exchange": "binance", "segment": "spot", "dataType": "klines"},
+                }
+            ),
+        )
+    )
+    assert result.status_code == 402
+    assert isinstance(result.parsed, PlanRequiredError)
+    assert result.parsed.retryable is False
+    assert result.parsed.upgrade_url == "https://example.com/upgrade"
 
 
 def test_dex_live_source_uses_pool_address_and_kline() -> None:

@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.49] — 2026-10-26
+
+### Added ✨
+
+- Return the effective cadence from `prepare_backtest` as `PrepareAccepted.cadence`, including the
+  plan default when no cadence was requested. Dataset imports return `DatasetImportCreated.cadence`
+  when it is known at acceptance.
+- Parse plan-excluded cadence requests on `prepare_backtest` and `import_dataset` as typed
+  `PlanRequiredError` responses (`402`, non-retryable, with an optional `upgrade_url`).
+
+### Changed 🔄
+
+- Target OpenAPI `0.128.49`. Managed-exchange preparation and imports use cadences allowed by the
+  account plan; omitted cadence uses its default. DEX imports default to candles, except when a plan
+  includes the source's native rate and cadence is omitted, which keeps per-trade data. User uploads
+  and prepares against those datasets are not limited by plan cadences.
+
 ## [0.128.48] — 2026-10-26
 
 ### Added ✨

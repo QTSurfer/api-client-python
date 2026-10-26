@@ -212,6 +212,12 @@ cadence, and current-version metadata after the relevant lifecycle stage complet
 `data_url` is a presigned URL for the stored data and `data_format` tells whether it is `lastra` or
 `parquet`; choose the reader from `data_format`, not from the uploaded file name.
 
+Managed-exchange backtests use the cadences included in the account's plan. Omitted `cadence` uses
+the plan default; a cadence outside the plan returns `402` as `PlanRequiredError` and cannot succeed
+by retrying. The `202` response is `PrepareAccepted` and includes the cadence in effect. Preparing
+an uploaded dataset with `exchangeId="user"` uses that dataset's own cadence rules and is not
+limited by plan cadences.
+
 The ready version determines `Dataset.type_` from its data. A CSV of candles is `klines`, even when
 it was uploaded rather than imported; a `kline` backtest accepts only a `klines` version, while a
 `ticker` backtest accepts either type. Before the first version is ready, `type_` is only the
@@ -225,11 +231,17 @@ returns `409`.
 ### Datasets — import source history
 
 `import_dataset` starts a source-side dataset import and returns `DatasetImportCreated` with the
-new dataset and import ids. Poll `get_dataset_import(dataset_id, import_id)` until the status is
-`ready` or `failed`. A ready response carries the resulting `DatasetVersion`; a failed response
-carries its error. Dataset listings now include the current version's `status`, timestamp unit,
-and coverage metrics, so select the timestamp decoder from `timestamp_unit` when reading stored
-data.
+new dataset and import ids, plus the effective `cadence` when known. Poll
+`get_dataset_import(dataset_id, import_id)` until the status is `ready` or `failed`. A ready response
+carries the resulting `DatasetVersion`; a failed response carries its error. Dataset listings now
+include the current version's `status`, timestamp unit, and coverage metrics, so select the timestamp
+decoder from `timestamp_unit` when reading stored data.
+
+Managed imports use cadences included in the account plan; omission selects the plan default. A
+cadence outside the plan returns a typed `PlanRequiredError` (`402`), which is non-retryable. DEX
+imports with an explicit cadence produce candles; omission also produces candles except on plans
+that include the source's native rate, where it keeps per-trade data. User file uploads are not
+subject to plan cadence limits.
 
 ### Live execution
 

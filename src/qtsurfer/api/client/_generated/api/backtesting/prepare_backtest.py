@@ -6,9 +6,10 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.accepted_job import AcceptedJob
 from ...models.data_source_type import DataSourceType
 from ...models.insufficient_scope_error import InsufficientScopeError
+from ...models.plan_required_error import PlanRequiredError
+from ...models.prepare_accepted import PrepareAccepted
 from ...models.prepare_request import PrepareRequest
 from ...models.response_error import ResponseError
 from ...types import Response
@@ -40,9 +41,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> AcceptedJob | InsufficientScopeError | ResponseError | None:
+) -> InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError | None:
     if response.status_code == 202:
-        response_202 = AcceptedJob.from_dict(response.json())
+        response_202 = PrepareAccepted.from_dict(response.json())
 
         return response_202
 
@@ -50,6 +51,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 402:
+        response_402 = PlanRequiredError.from_dict(response.json())
+
+        return response_402
 
     if response.status_code == 403:
         response_403 = InsufficientScopeError.from_dict(response.json())
@@ -74,7 +80,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[AcceptedJob | InsufficientScopeError | ResponseError]:
+) -> Response[InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -89,8 +95,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> Response[AcceptedJob | InsufficientScopeError | ResponseError]:
-    """Prepare backtest data
+) -> Response[InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError]:
+    r"""Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
     poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
@@ -101,6 +107,12 @@ def sync_detailed(
     Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
     data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
     the bar width from `cadence` — see `PrepareRequest`.
+
+    The cadence of an exchange's data is held to your plan: the \"Cadences by plan\" section of the
+    Backtests guide lists the cadences each
+    plan includes. A cadence your plan does not include is `402`, and a request that names none
+    gets the plan's default. The `202` says the `cadence` in effect. None of this applies to
+    `exchangeId: user`: your own data is prepared at its own cadence, whatever the plan.
 
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
@@ -139,7 +151,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AcceptedJob | InsufficientScopeError | ResponseError]
+        Response[InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -161,8 +173,8 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> AcceptedJob | InsufficientScopeError | ResponseError | None:
-    """Prepare backtest data
+) -> InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError | None:
+    r"""Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
     poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
@@ -173,6 +185,12 @@ def sync(
     Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
     data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
     the bar width from `cadence` — see `PrepareRequest`.
+
+    The cadence of an exchange's data is held to your plan: the \"Cadences by plan\" section of the
+    Backtests guide lists the cadences each
+    plan includes. A cadence your plan does not include is `402`, and a request that names none
+    gets the plan's default. The `202` says the `cadence` in effect. None of this applies to
+    `exchangeId: user`: your own data is prepared at its own cadence, whatever the plan.
 
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
@@ -211,7 +229,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AcceptedJob | InsufficientScopeError | ResponseError
+        InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError
     """
 
     return sync_detailed(
@@ -228,8 +246,8 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> Response[AcceptedJob | InsufficientScopeError | ResponseError]:
-    """Prepare backtest data
+) -> Response[InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError]:
+    r"""Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
     poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
@@ -240,6 +258,12 @@ async def asyncio_detailed(
     Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
     data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
     the bar width from `cadence` — see `PrepareRequest`.
+
+    The cadence of an exchange's data is held to your plan: the \"Cadences by plan\" section of the
+    Backtests guide lists the cadences each
+    plan includes. A cadence your plan does not include is `402`, and a request that names none
+    gets the plan's default. The `202` says the `cadence` in effect. None of this applies to
+    `exchangeId: user`: your own data is prepared at its own cadence, whatever the plan.
 
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
@@ -278,7 +302,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AcceptedJob | InsufficientScopeError | ResponseError]
+        Response[InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -298,8 +322,8 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: PrepareRequest,
-) -> AcceptedJob | InsufficientScopeError | ResponseError | None:
-    """Prepare backtest data
+) -> InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError | None:
+    r"""Prepare backtest data
 
      Enqueues a prepare task over the requested date range. Returns immediately with a `jobId`;
     poll `GET /backtest/{exchangeId}/{type}/prepare/{jobId}` for completion.
@@ -310,6 +334,12 @@ async def asyncio(
     Every source in `DataSourceType` can be prepared, but not every one can then be run: `funding`
     data can be prepared and is rejected by `execute` and `executeSweep`. A `kline` prepare takes
     the bar width from `cadence` — see `PrepareRequest`.
+
+    The cadence of an exchange's data is held to your plan: the \"Cadences by plan\" section of the
+    Backtests guide lists the cadences each
+    plan includes. A cadence your plan does not include is `402`, and a request that names none
+    gets the plan's default. The `202` says the `cadence` in effect. None of this applies to
+    `exchangeId: user`: your own data is prepared at its own cadence, whatever the plan.
 
     **`exchangeId: user` is reserved for your own uploaded data.** Instead of a managed
     exchange, it prepares from a dataset you created via `POST /datasets` (see the **Dataset**
@@ -348,7 +378,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AcceptedJob | InsufficientScopeError | ResponseError
+        InsufficientScopeError | PlanRequiredError | PrepareAccepted | ResponseError
     """
 
     return (

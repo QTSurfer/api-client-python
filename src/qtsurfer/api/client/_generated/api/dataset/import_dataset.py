@@ -8,6 +8,7 @@ from ...client import AuthenticatedClient, Client
 from ...models.dataset_import_created import DatasetImportCreated
 from ...models.dataset_import_request import DatasetImportRequest
 from ...models.insufficient_scope_error import InsufficientScopeError
+from ...models.plan_required_error import PlanRequiredError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -33,7 +34,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> DatasetImportCreated | InsufficientScopeError | ResponseError | None:
+) -> DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError | None:
     if response.status_code == 202:
         response_202 = DatasetImportCreated.from_dict(response.json())
 
@@ -43,6 +44,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 402:
+        response_402 = PlanRequiredError.from_dict(response.json())
+
+        return response_402
 
     if response.status_code == 403:
         response_403 = InsufficientScopeError.from_dict(response.json())
@@ -67,7 +73,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[DatasetImportCreated | InsufficientScopeError | ResponseError]:
+) -> Response[DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -80,8 +86,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: DatasetImportRequest,
-) -> Response[DatasetImportCreated | InsufficientScopeError | ResponseError]:
-    """Create a dataset by importing history instead of uploading it
+) -> Response[DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError]:
+    r"""Create a dataset by importing history instead of uploading it
 
      A second way to get data into a dataset, alongside `POST /datasets`: instead of `PUT`ting a
     file yourself, ask the API to go fetch history on your behalf. Creates the dataset and
@@ -102,16 +108,27 @@ def sync_detailed(
     picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
     your tier like any import (`maxImportRangeHours` of `GET /account`).
 
-    A `dex` import has two data shapes, chosen by the top-level `cadence`:
+    **An import is held to your plan's cadences,** the same ones as the preparation of an
+    exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan
+    does not include is `402`; a
+    request that names none gets the plan's default; any other cadence your plan includes can be
+    asked for. The `202` says the `cadence` the dataset is built at. An upload is not held to
+    this: it is stored at the cadence detected in it.
 
-    * Omitted/blank (default) — on-chain swap history, replayed directly from the pool/pair's
-      own chain. Cadence is native, not resampled: each swap keeps the timestamp it happened
-      at rather than being bucketed into candles, so the resulting version's `cadence` is `rt`
-      unless the swaps happen to sit on a fixed grid (see `DatasetVersion.cadence`).
-    * One of `1s` / `1m` / `5m` — pre-aggregated candles at that width instead of raw trades.
-      The resulting dataset's `type` is `klines`, not `ticker`. Not every network supports every
-      cadence yet — an unsupported combination fails asynchronously, same as an unresolvable
-      pool (see the `failed` status on the poll endpoint below).
+    A `dex` import has two data shapes:
+
+    * Candles at the `cadence` you ask for, or at the plan's default when you ask for none. Every
+      cadence of the list is built, from the nearest width the source serves. The resulting dataset's
+    `type` is `klines`, not `ticker`, and
+      `dex.id` / `dex.version` are not needed. Not every network supports candles yet — an
+      unsupported combination fails asynchronously, same as an unresolvable pool (see the
+      `failed` status on the poll endpoint below).
+    * On-chain swap history (per-trade data), replayed directly from the pool/pair's own chain —
+      **only on a plan that includes the native rate of a source, and when `cadence` is omitted**.
+      Cadence is native, not resampled: each swap
+      keeps the timestamp it happened at rather than being bucketed into candles, so the
+      resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
+      `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
 
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
@@ -124,7 +141,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[DatasetImportCreated | InsufficientScopeError | ResponseError]
+        Response[DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -142,8 +159,8 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: DatasetImportRequest,
-) -> DatasetImportCreated | InsufficientScopeError | ResponseError | None:
-    """Create a dataset by importing history instead of uploading it
+) -> DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError | None:
+    r"""Create a dataset by importing history instead of uploading it
 
      A second way to get data into a dataset, alongside `POST /datasets`: instead of `PUT`ting a
     file yourself, ask the API to go fetch history on your behalf. Creates the dataset and
@@ -164,16 +181,27 @@ def sync(
     picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
     your tier like any import (`maxImportRangeHours` of `GET /account`).
 
-    A `dex` import has two data shapes, chosen by the top-level `cadence`:
+    **An import is held to your plan's cadences,** the same ones as the preparation of an
+    exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan
+    does not include is `402`; a
+    request that names none gets the plan's default; any other cadence your plan includes can be
+    asked for. The `202` says the `cadence` the dataset is built at. An upload is not held to
+    this: it is stored at the cadence detected in it.
 
-    * Omitted/blank (default) — on-chain swap history, replayed directly from the pool/pair's
-      own chain. Cadence is native, not resampled: each swap keeps the timestamp it happened
-      at rather than being bucketed into candles, so the resulting version's `cadence` is `rt`
-      unless the swaps happen to sit on a fixed grid (see `DatasetVersion.cadence`).
-    * One of `1s` / `1m` / `5m` — pre-aggregated candles at that width instead of raw trades.
-      The resulting dataset's `type` is `klines`, not `ticker`. Not every network supports every
-      cadence yet — an unsupported combination fails asynchronously, same as an unresolvable
-      pool (see the `failed` status on the poll endpoint below).
+    A `dex` import has two data shapes:
+
+    * Candles at the `cadence` you ask for, or at the plan's default when you ask for none. Every
+      cadence of the list is built, from the nearest width the source serves. The resulting dataset's
+    `type` is `klines`, not `ticker`, and
+      `dex.id` / `dex.version` are not needed. Not every network supports candles yet — an
+      unsupported combination fails asynchronously, same as an unresolvable pool (see the
+      `failed` status on the poll endpoint below).
+    * On-chain swap history (per-trade data), replayed directly from the pool/pair's own chain —
+      **only on a plan that includes the native rate of a source, and when `cadence` is omitted**.
+      Cadence is native, not resampled: each swap
+      keeps the timestamp it happened at rather than being bucketed into candles, so the
+      resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
+      `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
 
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
@@ -186,7 +214,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        DatasetImportCreated | InsufficientScopeError | ResponseError
+        DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError
     """
 
     return sync_detailed(
@@ -199,8 +227,8 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: DatasetImportRequest,
-) -> Response[DatasetImportCreated | InsufficientScopeError | ResponseError]:
-    """Create a dataset by importing history instead of uploading it
+) -> Response[DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError]:
+    r"""Create a dataset by importing history instead of uploading it
 
      A second way to get data into a dataset, alongside `POST /datasets`: instead of `PUT`ting a
     file yourself, ask the API to go fetch history on your behalf. Creates the dataset and
@@ -221,16 +249,27 @@ async def asyncio_detailed(
     picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
     your tier like any import (`maxImportRangeHours` of `GET /account`).
 
-    A `dex` import has two data shapes, chosen by the top-level `cadence`:
+    **An import is held to your plan's cadences,** the same ones as the preparation of an
+    exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan
+    does not include is `402`; a
+    request that names none gets the plan's default; any other cadence your plan includes can be
+    asked for. The `202` says the `cadence` the dataset is built at. An upload is not held to
+    this: it is stored at the cadence detected in it.
 
-    * Omitted/blank (default) — on-chain swap history, replayed directly from the pool/pair's
-      own chain. Cadence is native, not resampled: each swap keeps the timestamp it happened
-      at rather than being bucketed into candles, so the resulting version's `cadence` is `rt`
-      unless the swaps happen to sit on a fixed grid (see `DatasetVersion.cadence`).
-    * One of `1s` / `1m` / `5m` — pre-aggregated candles at that width instead of raw trades.
-      The resulting dataset's `type` is `klines`, not `ticker`. Not every network supports every
-      cadence yet — an unsupported combination fails asynchronously, same as an unresolvable
-      pool (see the `failed` status on the poll endpoint below).
+    A `dex` import has two data shapes:
+
+    * Candles at the `cadence` you ask for, or at the plan's default when you ask for none. Every
+      cadence of the list is built, from the nearest width the source serves. The resulting dataset's
+    `type` is `klines`, not `ticker`, and
+      `dex.id` / `dex.version` are not needed. Not every network supports candles yet — an
+      unsupported combination fails asynchronously, same as an unresolvable pool (see the
+      `failed` status on the poll endpoint below).
+    * On-chain swap history (per-trade data), replayed directly from the pool/pair's own chain —
+      **only on a plan that includes the native rate of a source, and when `cadence` is omitted**.
+      Cadence is native, not resampled: each swap
+      keeps the timestamp it happened at rather than being bucketed into candles, so the
+      resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
+      `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
 
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
@@ -243,7 +282,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[DatasetImportCreated | InsufficientScopeError | ResponseError]
+        Response[DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -259,8 +298,8 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: DatasetImportRequest,
-) -> DatasetImportCreated | InsufficientScopeError | ResponseError | None:
-    """Create a dataset by importing history instead of uploading it
+) -> DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError | None:
+    r"""Create a dataset by importing history instead of uploading it
 
      A second way to get data into a dataset, alongside `POST /datasets`: instead of `PUT`ting a
     file yourself, ask the API to go fetch history on your behalf. Creates the dataset and
@@ -281,16 +320,27 @@ async def asyncio(
     picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
     your tier like any import (`maxImportRangeHours` of `GET /account`).
 
-    A `dex` import has two data shapes, chosen by the top-level `cadence`:
+    **An import is held to your plan's cadences,** the same ones as the preparation of an
+    exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan
+    does not include is `402`; a
+    request that names none gets the plan's default; any other cadence your plan includes can be
+    asked for. The `202` says the `cadence` the dataset is built at. An upload is not held to
+    this: it is stored at the cadence detected in it.
 
-    * Omitted/blank (default) — on-chain swap history, replayed directly from the pool/pair's
-      own chain. Cadence is native, not resampled: each swap keeps the timestamp it happened
-      at rather than being bucketed into candles, so the resulting version's `cadence` is `rt`
-      unless the swaps happen to sit on a fixed grid (see `DatasetVersion.cadence`).
-    * One of `1s` / `1m` / `5m` — pre-aggregated candles at that width instead of raw trades.
-      The resulting dataset's `type` is `klines`, not `ticker`. Not every network supports every
-      cadence yet — an unsupported combination fails asynchronously, same as an unresolvable
-      pool (see the `failed` status on the poll endpoint below).
+    A `dex` import has two data shapes:
+
+    * Candles at the `cadence` you ask for, or at the plan's default when you ask for none. Every
+      cadence of the list is built, from the nearest width the source serves. The resulting dataset's
+    `type` is `klines`, not `ticker`, and
+      `dex.id` / `dex.version` are not needed. Not every network supports candles yet — an
+      unsupported combination fails asynchronously, same as an unresolvable pool (see the
+      `failed` status on the poll endpoint below).
+    * On-chain swap history (per-trade data), replayed directly from the pool/pair's own chain —
+      **only on a plan that includes the native rate of a source, and when `cadence` is omitted**.
+      Cadence is native, not resampled: each swap
+      keeps the timestamp it happened at rather than being bucketed into candles, so the
+      resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
+      `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
 
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
@@ -303,7 +353,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        DatasetImportCreated | InsufficientScopeError | ResponseError
+        DatasetImportCreated | InsufficientScopeError | PlanRequiredError | ResponseError
     """
 
     return (
