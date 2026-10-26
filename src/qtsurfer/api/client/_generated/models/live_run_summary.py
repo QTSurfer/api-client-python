@@ -33,10 +33,10 @@ class LiveRunSummary:
             run_id (str): This run's own id — its canonical identity for `PATCH`/`PUT .../params` and for `GET
                 /live/public`.
             visibility (LiveRunSummaryVisibility):
-            stage (LiveRunSummaryStage): A new run starts `SANDBOX`, a 24-hour trial in which it is compared against a
-                second execution and checked for resource use and stability. A run that passes moves to `LIVE` automatically
-                when the 24 hours are up. A run of a strategy that an earlier run of yours already took through the trial starts
-                `LIVE`, unless you started it with `sandbox: true`.
+            stage (LiveRunSummaryStage): A new run starts `SANDBOX`, a trial of `sandboxMinutes` minutes at least, and never
+                more than 24 hours, in which it is compared against a second execution and checked for resource use and
+                stability. A run that passes moves to `LIVE` automatically when the trial is over. A run of a strategy that an
+                earlier run of yours already took through the trial starts `LIVE`, unless you started it with `sandbox: true`.
             state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `RUNNING`, `LAGGING`
                 (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
                 for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different

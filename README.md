@@ -246,6 +246,13 @@ Set `StartLiveRequest.sandbox=True` to repeat the sandbox trial, for example whi
 signals over the WebSocket connection. This field is available in client version `0.128.25` and
 later.
 
+Set `StartLiveRequest.sandbox_minutes` to request a sandbox minimum of 5–1440 minutes. Omission
+uses the plan's shortest trial; a shorter-than-plan value returns `429`, while an invalid value
+returns `400`. The trial can continue past that minimum until enough market-feed updates are
+available to judge it, up to 24 hours. `LiveRunWithStream` and `LiveRunDetail` report the duration
+that was granted. Plan exclusions such as unavailable Pro indicators return typed
+`PlanRequiredError` (`402`) with `retryable=False` and an optional `upgrade_url`.
+
 Paper trading is opt-in through `StartLiveRequest.paper`; it simulates balances and fills without
 sending orders. By default, each quote currency has a separate account; set
 `LivePaperConfig.accounts=LivePaperConfigAccounts.INSTRUMENT` for one independent account per

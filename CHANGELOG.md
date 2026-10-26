@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.48] — 2026-10-26
+
+### Added ✨
+
+- Add `sandbox_minutes` to `StartLiveRequest`, `LiveRunWithStream`, and `LiveRunDetail` for the
+  plan-aware sandbox duration introduced in OpenAPI 0.128.47.
+- Parse strategy plan requirements as `CompileStrategyResponse200.requires`; add typed
+  `PlanRequiredError` responses for plan exclusions, including optional `upgrade_url`.
+
+### Changed 🔄
+
+- Target OpenAPI `0.128.48`. A plan that lacks a requested capability returns non-retryable `402`;
+  capacity and sandbox-duration limits remain `429`.
+- Document Pro-indicator requirements on strategy validation, backtests, sweeps, and live starts.
+
 ## [0.128.46] — 2026-10-22
 
 ### Added ✨

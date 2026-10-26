@@ -35,10 +35,10 @@ class LiveRunDetail:
         run_id (str): This run's own id — its canonical identity for `PATCH`/`PUT .../params` and for `GET
             /live/public`.
         visibility (LiveRunVisibility):
-        stage (LiveRunStage): A new run starts `SANDBOX`, a 24-hour trial in which it is compared against a second
-            execution and checked for resource use and stability. A run that passes moves to `LIVE` automatically when the
-            24 hours are up. A run of a strategy that an earlier run of yours already took through the trial starts `LIVE`,
-            unless you started it with `sandbox: true`.
+        stage (LiveRunStage): A new run starts `SANDBOX`, a trial of `sandboxMinutes` minutes at least, and never more
+            than 24 hours, in which it is compared against a second execution and checked for resource use and stability. A
+            run that passes moves to `LIVE` automatically when the trial is over. A run of a strategy that an earlier run of
+            yours already took through the trial starts `LIVE`, unless you started it with `sandbox: true`.
         state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `RUNNING`, `LAGGING`
             (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
             for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
@@ -71,11 +71,11 @@ class LiveRunDetail:
             live-run limit) until then; one that cannot run, and will not by waiting, because its strategy cannot
             consume its source type or because the pool of a `dex` run is not a pool or has no room to be followed,
             is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
-        gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole 24-hour trial and
-            present once it ends, so an absent `gate` means the trial has not finished. A run that started in `LIVE` without
-            a trial has it from the start: the verdict of the earlier run it relies on, with `inheritedFrom` naming that
-            run. `passed` is the verdict; the rest is diagnostic detail whose shape is not yet stabilized as public API:
-            treat it as opaque.
+        gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole trial and present once
+            it ends, so an absent `gate` means the trial has not finished. A run that started in `LIVE` without a trial has
+            it from the start: the verdict of the earlier run it relies on, with `inheritedFrom` naming that run. `passed`
+            is the verdict; the rest is diagnostic detail whose shape is not yet stabilized as public API: treat it as
+            opaque.
         paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
             (same fields,
             defaults and limits), plus `output` and `accounts`. An empty object takes every default.
@@ -92,6 +92,11 @@ class LiveRunDetail:
             started or, when none was, the one the platform chose (the distance from the run's start back to the start of
             the current 15-minute block, 0 to 900). It is never `null`. It is present on every run started since the field
             exists and absent from a run started before it existed. It never changes while the run exists.
+        sandbox_minutes (int | Unset): The sandbox trial this run was given, in minutes: the one requested when the run
+            was started or, when none was, the shortest one its plan gives. It is a minimum: a run that has not yet been fed
+            enough of the market feed to be judged stays in the sandbox past it, up to 24 hours. It is never `null`. It is
+            absent from a run that has none: one started before the field existed, and one that started in `LIVE` without a
+            trial. It never changes while the run exists.
     """
 
     strategy_id: str
@@ -113,6 +118,7 @@ class LiveRunDetail:
     paper: LivePaperConfig | Unset = UNSET
     stats: LiveRunStats | Unset = UNSET
     warm_from: int | Unset = UNSET
+    sandbox_minutes: int | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -163,6 +169,8 @@ class LiveRunDetail:
 
         warm_from = self.warm_from
 
+        sandbox_minutes = self.sandbox_minutes
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -195,6 +203,8 @@ class LiveRunDetail:
             field_dict["stats"] = stats
         if warm_from is not UNSET:
             field_dict["warmFrom"] = warm_from
+        if sandbox_minutes is not UNSET:
+            field_dict["sandboxMinutes"] = sandbox_minutes
 
         return field_dict
 
@@ -265,6 +275,8 @@ class LiveRunDetail:
 
         warm_from = d.pop("warmFrom", UNSET)
 
+        sandbox_minutes = d.pop("sandboxMinutes", UNSET)
+
         live_run_detail = cls(
             strategy_id=strategy_id,
             run_id=run_id,
@@ -285,6 +297,7 @@ class LiveRunDetail:
             paper=paper,
             stats=stats,
             warm_from=warm_from,
+            sandbox_minutes=sandbox_minutes,
         )
 
         live_run_detail.additional_properties = d

@@ -29,7 +29,7 @@ class ResponseError:
         retryable (bool | Unset): Whether sending the same request again can succeed. `true` for `408`, `425`, `429` and
             every `5xx`; `false` for every other `4xx`, which fails the same way until the request
             changes: a field of the wrong type, a strategy that does not compile, a missing
-            parameter. A plan limit, a `429` without `Retry-After`, is `false`. When the answer
+            parameter. A plan limit (a `402`, or a `429` without `Retry-After`) is `false`. When the answer
             carries a `Retry-After`, wait that long before sending the request again.
         next_ (ErrorNextCall | Unset): The call that gets past an error, ready to send: a client that wants the same
             thing by

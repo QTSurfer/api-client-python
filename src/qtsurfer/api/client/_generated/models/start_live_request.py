@@ -59,6 +59,17 @@ class StartLiveRequest:
             It can be set **only when the run is started**: it is not a parameter of `PUT /live/{runId}/params`, and
             changing it means stopping the run and starting it again. Anything that is not an integer from 0 to 3600
             is `400`. See the "Live execution" guide, "Warming up".
+        sandbox_minutes (int | Unset): How long, in minutes, the run is tried in the `sandbox` stage before it can be
+            promoted to `live`. Every plan has a
+            shortest trial; asking for less than your plan gives is `429`, and the longest is 1440 (24 hours). Omitted, the
+            run
+            gets your plan's shortest. The trial is also not over until the platform has fed the run enough of the market
+            feed to judge it, about one update for each second of the trial, so a run on a quiet instrument can stay in the
+            sandbox past this time, up to the 24 hours. The value in effect is reported back as `sandboxMinutes` on the run.
+            It can be set **only when the run is started**: changing it means stopping the run and starting it again.
+            Anything that is not an integer from 5 to 1440 (a string, a fraction, `null`) is `400`. A start that goes
+            straight to `live` because the strategy has already been through the trial has no sandbox and records none.
+            See the "Live execution" guide, "How long the sandbox lasts".
         name (str | Unset):
         description (str | Unset):
         paper (LivePaperConfig | Unset): Paper trading for this run: the same economics as a backtest's `baseConfig`
@@ -78,6 +89,7 @@ class StartLiveRequest:
     sandbox: bool | Unset = False
     stream: bool | Unset = False
     warm_from: int | Unset = UNSET
+    sandbox_minutes: int | Unset = UNSET
     name: str | Unset = UNSET
     description: str | Unset = UNSET
     paper: LivePaperConfig | Unset = UNSET
@@ -104,6 +116,8 @@ class StartLiveRequest:
         stream = self.stream
 
         warm_from = self.warm_from
+
+        sandbox_minutes = self.sandbox_minutes
 
         name = self.name
 
@@ -132,6 +146,8 @@ class StartLiveRequest:
             field_dict["stream"] = stream
         if warm_from is not UNSET:
             field_dict["warmFrom"] = warm_from
+        if sandbox_minutes is not UNSET:
+            field_dict["sandboxMinutes"] = sandbox_minutes
         if name is not UNSET:
             field_dict["name"] = name
         if description is not UNSET:
@@ -177,6 +193,8 @@ class StartLiveRequest:
 
         warm_from = d.pop("warmFrom", UNSET)
 
+        sandbox_minutes = d.pop("sandboxMinutes", UNSET)
+
         name = d.pop("name", UNSET)
 
         description = d.pop("description", UNSET)
@@ -196,6 +214,7 @@ class StartLiveRequest:
             sandbox=sandbox,
             stream=stream,
             warm_from=warm_from,
+            sandbox_minutes=sandbox_minutes,
             name=name,
             description=description,
             paper=paper,

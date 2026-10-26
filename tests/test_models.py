@@ -8,6 +8,8 @@ import datetime as _dt
 
 from qtsurfer.api.client import types
 from qtsurfer.api.client.models import (
+    CompileStrategyResponse200,
+    CompileStrategyResponse200RequiresItem,
     CoverageWindow,
     DatasetCreated,
     DatasetCreatedType,
@@ -36,11 +38,14 @@ from qtsurfer.api.client.models import (
     JobStateStatus,
     ListStrategiesResponse200,
     LivePaperEquityCurve,
+    LiveRunDetail,
+    LiveRunWithStream,
     LiveSignal,
     LiveSignalInstrument,
     LiveSignalPage,
     LiveSignalStage,
     LiveSignalType,
+    PlanRequiredError,
     ResponseError,
     ResultMap,
     ResultMapParams,
@@ -135,10 +140,54 @@ def test_strategy_state_roundtrip_without_links() -> None:
 
 
 def test_start_live_request_serializes_sandbox_override() -> None:
-    request = StartLiveRequest(sources=[], sandbox=True)
+    request = StartLiveRequest(sources=[], sandbox=True, sandbox_minutes=60)
 
     assert request.to_dict()["sandbox"] is True
-    assert StartLiveRequest.from_dict({"sources": [], "sandbox": True}).sandbox is True
+    assert request.to_dict()["sandboxMinutes"] == 60
+    parsed = StartLiveRequest.from_dict({"sources": [], "sandbox": True, "sandboxMinutes": 60})
+    assert parsed.sandbox is True
+    assert parsed.sandbox_minutes == 60
+
+
+def test_compile_strategy_reports_plan_requirements() -> None:
+    compiled = CompileStrategyResponse200.from_dict(
+        {"strategyId": "strategy-1", "declaredProperties": [], "requires": ["indicators.pro"]}
+    )
+
+    assert compiled.requires == [CompileStrategyResponse200RequiresItem.INDICATORS_PRO]
+    assert compiled.to_dict()["requires"] == ["indicators.pro"]
+
+
+def test_plan_required_error_and_live_sandbox_duration_models() -> None:
+    plan_error = PlanRequiredError.from_dict(
+        {
+            "code": 402,
+            "message": "This plan cannot run pro indicators.",
+            "retryable": False,
+            "upgradeUrl": "https://www.qtsurfer.com/pricing",
+        }
+    )
+    assert plan_error.retryable is False
+    assert plan_error.upgrade_url == "https://www.qtsurfer.com/pricing"
+
+    run_payload = {
+        "strategyId": "strategy-1",
+        "runId": "run-1",
+        "visibility": "private",
+        "stage": "SANDBOX",
+        "state": "STARTING",
+        "desired": "RUNNING",
+        "sources": [],
+        "params": {},
+        "paramsVersion": 1,
+        "relay": False,
+        "startedAtMs": 1_760_000_000_000,
+        "sandboxMinutes": 60,
+    }
+    started = LiveRunWithStream.from_dict(run_payload)
+    detailed = LiveRunDetail.from_dict({**run_payload, "updatedAtMs": 1_760_000_000_000})
+    assert started.sandbox_minutes == 60
+    assert detailed.sandbox_minutes == 60
 
 
 def test_scope_error_and_retryable_error_fields_roundtrip() -> None:

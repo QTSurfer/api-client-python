@@ -16,6 +16,7 @@ from .cancel_backtest_response_200_status import CancelBacktestResponse200Status
 from .cancel_sweep_response_200 import CancelSweepResponse200
 from .cancel_sweep_response_200_status import CancelSweepResponse200Status
 from .compile_strategy_response_200 import CompileStrategyResponse200
+from .compile_strategy_response_200_requires_item import CompileStrategyResponse200RequiresItem
 from .coverage_window import CoverageWindow
 from .create_dataset_body import CreateDatasetBody
 from .data_source_type import DataSourceType
@@ -152,6 +153,7 @@ from .live_stream_revoked import LiveStreamRevoked
 from .live_stream_url import LiveStreamUrl
 from .notice import Notice
 from .notice_provenance import NoticeProvenance
+from .plan_required_error import PlanRequiredError
 from .pool_detail import PoolDetail
 from .pool_links import PoolLinks
 from .pool_list_meta import PoolListMeta
@@ -224,6 +226,7 @@ __all__ = (
     "CancelSweepResponse200",
     "CancelSweepResponse200Status",
     "CompileStrategyResponse200",
+    "CompileStrategyResponse200RequiresItem",
     "CoverageWindow",
     "CreateDatasetBody",
     "Dataset",
@@ -360,6 +363,7 @@ __all__ = (
     "LiveStreamUrl",
     "Notice",
     "NoticeProvenance",
+    "PlanRequiredError",
     "PoolDetail",
     "PoolLinks",
     "PoolListMeta",

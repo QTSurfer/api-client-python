@@ -54,6 +54,7 @@ from qtsurfer.api.client.models import (
     LiveSourceRequestVenueType,
     LiveStreamRevoked,
     LiveStreamUrl,
+    PlanRequiredError,
     ResponseError,
     SendLiveCommandRequest,
     SendLiveCommandRequestProperties,
@@ -356,6 +357,7 @@ def test_start_live_stream_returns_secret_stream_url(client: AuthenticatedClient
                 "relay": True,
                 "startedAtMs": 1_759_777_200_000,
                 "warmFrom": 0,
+                "sandboxMinutes": 60,
                 "streamUrl": "wss://stream.example/run-1/secret",
             },
         )
@@ -371,6 +373,7 @@ def test_start_live_stream_returns_secret_stream_url(client: AuthenticatedClient
         ],
         stream=True,
         warm_from=0,
+        sandbox_minutes=60,
     )
 
     response = start_live.sync(strategy_id="strategy-1", body=body, client=client)
@@ -379,10 +382,38 @@ def test_start_live_stream_returns_secret_stream_url(client: AuthenticatedClient
     request_body = route.calls.last.request.read()
     assert b'"stream":true' in request_body
     assert b'"warmFrom":0' in request_body
+    assert b'"sandboxMinutes":60' in request_body
     assert b'"instruments"' not in request_body
     assert isinstance(response, LiveRunWithStream)
     assert response.stream_url == "wss://stream.example/run-1/secret"
     assert response.warm_from == 0
+    assert response.sandbox_minutes == 60
+
+
+@respx.mock
+def test_start_live_plan_refusal_is_typed(client: AuthenticatedClient) -> None:
+    respx.post(f"{BASE_URL}/strategy/strategy-1/live").mock(
+        return_value=httpx.Response(
+            402,
+            json={
+                "code": 402,
+                "message": "This plan does not include live execution.",
+                "retryable": False,
+                "upgradeUrl": "https://www.qtsurfer.com/pricing",
+            },
+        )
+    )
+
+    response = start_live.sync_detailed(
+        strategy_id="strategy-1",
+        body=StartLiveRequest(sources=[]),
+        client=client,
+    )
+
+    assert response.status_code == 402
+    assert isinstance(response.parsed, PlanRequiredError)
+    assert response.parsed.retryable is False
+    assert response.parsed.upgrade_url == "https://www.qtsurfer.com/pricing"
 
 
 @respx.mock
@@ -403,6 +434,7 @@ def test_get_live_returns_effective_warm_from(client: AuthenticatedClient) -> No
                 "relay": False,
                 "startedAtMs": 1_759_777_200_000,
                 "warmFrom": 900,
+                "sandboxMinutes": 60,
             },
         )
     )
@@ -412,6 +444,7 @@ def test_get_live_returns_effective_warm_from(client: AuthenticatedClient) -> No
     assert route.called
     assert isinstance(response, LiveRunWithStream)
     assert response.warm_from == 900
+    assert response.sandbox_minutes == 60
 
 
 @respx.mock

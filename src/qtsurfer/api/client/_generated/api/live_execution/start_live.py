@@ -8,6 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.insufficient_scope_error import InsufficientScopeError
 from ...models.live_run_with_stream import LiveRunWithStream
+from ...models.plan_required_error import PlanRequiredError
 from ...models.response_error import ResponseError
 from ...models.start_live_request import StartLiveRequest
 from ...types import Response
@@ -37,7 +38,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> InsufficientScopeError | LiveRunWithStream | ResponseError | None:
+) -> InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError | None:
     if response.status_code == 201:
         response_201 = LiveRunWithStream.from_dict(response.json())
 
@@ -47,6 +48,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 402:
+        response_402 = PlanRequiredError.from_dict(response.json())
+
+        return response_402
 
     if response.status_code == 403:
         response_403 = InsufficientScopeError.from_dict(response.json())
@@ -76,7 +82,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[InsufficientScopeError | LiveRunWithStream | ResponseError]:
+) -> Response[InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -90,7 +96,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> Response[InsufficientScopeError | LiveRunWithStream | ResponseError]:
+) -> Response[InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError]:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run begins in the **sandbox**
@@ -175,6 +181,16 @@ def sync_detailed(
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
+    **How long the sandbox lasts.** A new run is tried in the sandbox for at least as long as the
+    shortest trial your plan
+    gives, and for no more than 24 hours. Pass `sandboxMinutes` (an integer from 5 to 1440) to ask for a
+    longer one; asking
+    for less than your plan gives is `429`. Omitted, the run gets your plan's shortest trial. The value
+    in effect comes back
+    as `sandboxMinutes`. It can be set only here, when the run is started. See the \"Live execution\"
+    guide, \"How long the
+    sandbox lasts\".
+
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple
     client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
@@ -197,7 +213,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InsufficientScopeError | LiveRunWithStream | ResponseError]
+        Response[InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -217,7 +233,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> InsufficientScopeError | LiveRunWithStream | ResponseError | None:
+) -> InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError | None:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run begins in the **sandbox**
@@ -302,6 +318,16 @@ def sync(
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
+    **How long the sandbox lasts.** A new run is tried in the sandbox for at least as long as the
+    shortest trial your plan
+    gives, and for no more than 24 hours. Pass `sandboxMinutes` (an integer from 5 to 1440) to ask for a
+    longer one; asking
+    for less than your plan gives is `429`. Omitted, the run gets your plan's shortest trial. The value
+    in effect comes back
+    as `sandboxMinutes`. It can be set only here, when the run is started. See the \"Live execution\"
+    guide, \"How long the
+    sandbox lasts\".
+
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple
     client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
@@ -324,7 +350,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InsufficientScopeError | LiveRunWithStream | ResponseError
+        InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError
     """
 
     return sync_detailed(
@@ -339,7 +365,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> Response[InsufficientScopeError | LiveRunWithStream | ResponseError]:
+) -> Response[InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError]:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run begins in the **sandbox**
@@ -424,6 +450,16 @@ async def asyncio_detailed(
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
+    **How long the sandbox lasts.** A new run is tried in the sandbox for at least as long as the
+    shortest trial your plan
+    gives, and for no more than 24 hours. Pass `sandboxMinutes` (an integer from 5 to 1440) to ask for a
+    longer one; asking
+    for less than your plan gives is `429`. Omitted, the run gets your plan's shortest trial. The value
+    in effect comes back
+    as `sandboxMinutes`. It can be set only here, when the run is started. See the \"Live execution\"
+    guide, \"How long the
+    sandbox lasts\".
+
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple
     client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
@@ -446,7 +482,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[InsufficientScopeError | LiveRunWithStream | ResponseError]
+        Response[InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -464,7 +500,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: StartLiveRequest,
-) -> InsufficientScopeError | LiveRunWithStream | ResponseError | None:
+) -> InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError | None:
     r"""Start a strategy on a live market feed
 
      Starts your strategy against a live market feed. A new run begins in the **sandbox**
@@ -549,6 +585,16 @@ async def asyncio(
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".
 
+    **How long the sandbox lasts.** A new run is tried in the sandbox for at least as long as the
+    shortest trial your plan
+    gives, and for no more than 24 hours. Pass `sandboxMinutes` (an integer from 5 to 1440) to ask for a
+    longer one; asking
+    for less than your plan gives is `429`. Omitted, the run gets your plan's shortest trial. The value
+    in effect comes back
+    as `sandboxMinutes`. It can be set only here, when the run is started. See the \"Live execution\"
+    guide, \"How long the
+    sandbox lasts\".
+
     **A plain WebSocket stream.** Pass `stream: true` to get a secret URL for this run's signals that a
     simple
     client, or a service that passes them on to others, can open as an ordinary WebSocket, from the
@@ -571,7 +617,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        InsufficientScopeError | LiveRunWithStream | ResponseError
+        InsufficientScopeError | LiveRunWithStream | PlanRequiredError | ResponseError
     """
 
     return (

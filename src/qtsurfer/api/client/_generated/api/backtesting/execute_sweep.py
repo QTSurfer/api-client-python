@@ -10,6 +10,7 @@ from ...models.data_source_type import DataSourceType
 from ...models.execute_sweep_accepted import ExecuteSweepAccepted
 from ...models.execute_sweep_request import ExecuteSweepRequest
 from ...models.insufficient_scope_error import InsufficientScopeError
+from ...models.plan_required_error import PlanRequiredError
 from ...models.response_error import ResponseError
 from ...types import Response
 
@@ -42,7 +43,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ExecuteSweepAccepted | InsufficientScopeError | ResponseError | None:
+) -> ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError | None:
     if response.status_code == 202:
         response_202 = ExecuteSweepAccepted.from_dict(response.json())
 
@@ -52,6 +53,11 @@ def _parse_response(
         response_400 = ResponseError.from_dict(response.json())
 
         return response_400
+
+    if response.status_code == 402:
+        response_402 = PlanRequiredError.from_dict(response.json())
+
+        return response_402
 
     if response.status_code == 403:
         response_403 = InsufficientScopeError.from_dict(response.json())
@@ -76,7 +82,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ExecuteSweepAccepted | InsufficientScopeError | ResponseError]:
+) -> Response[ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -92,7 +98,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
-) -> Response[ExecuteSweepAccepted | InsufficientScopeError | ResponseError]:
+) -> Response[ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError]:
     r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
@@ -137,7 +143,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ExecuteSweepAccepted | InsufficientScopeError | ResponseError]
+        Response[ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -161,7 +167,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
-) -> ExecuteSweepAccepted | InsufficientScopeError | ResponseError | None:
+) -> ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError | None:
     r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
@@ -206,7 +212,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ExecuteSweepAccepted | InsufficientScopeError | ResponseError
+        ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError
     """
 
     return sync_detailed(
@@ -225,7 +231,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
-) -> Response[ExecuteSweepAccepted | InsufficientScopeError | ResponseError]:
+) -> Response[ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError]:
     r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
@@ -270,7 +276,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ExecuteSweepAccepted | InsufficientScopeError | ResponseError]
+        Response[ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError]
     """
 
     kwargs = _get_kwargs(
@@ -292,7 +298,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: ExecuteSweepRequest,
-) -> ExecuteSweepAccepted | InsufficientScopeError | ResponseError | None:
+) -> ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError | None:
     r"""Execute a parameter sweep over prepared data
 
      Runs a parameter matrix over the single immutable dataset identified by `requestId`.
@@ -337,7 +343,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ExecuteSweepAccepted | InsufficientScopeError | ResponseError
+        ExecuteSweepAccepted | InsufficientScopeError | PlanRequiredError | ResponseError
     """
 
     return (

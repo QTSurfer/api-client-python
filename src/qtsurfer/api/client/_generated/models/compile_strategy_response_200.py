@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.compile_strategy_response_200_requires_item import CompileStrategyResponse200RequiresItem
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -27,10 +28,17 @@ class CompileStrategyResponse200:
         declared_properties (list[DeclaredProperty] | Unset): What could be established about this strategy's sweep-key
             vocabulary without
             constructing it. See `DeclaredProperty` — best-effort, not exhaustive.
+        requires (list[CompileStrategyResponse200RequiresItem] | Unset): What the strategy needs from your plan, read
+            from the compiled strategy and not from how
+            it is written. `["indicators.pro"]` when it uses the pro indicators, `[]` when it needs
+            nothing more. Registering is accepted on every plan; a plan without what it lists cannot
+            run the strategy (`402`, see `PlanRequiredError`). Only this response carries it:
+            `GET /strategy/{strategyId}` does not.
     """
 
     strategy_id: str
     declared_properties: list[DeclaredProperty] | Unset = UNSET
+    requires: list[CompileStrategyResponse200RequiresItem] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -43,6 +51,13 @@ class CompileStrategyResponse200:
                 declared_properties_item = declared_properties_item_data.to_dict()
                 declared_properties.append(declared_properties_item)
 
+        requires: list[str] | Unset = UNSET
+        if not isinstance(self.requires, Unset):
+            requires = []
+            for requires_item_data in self.requires:
+                requires_item = requires_item_data.value
+                requires.append(requires_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -52,6 +67,8 @@ class CompileStrategyResponse200:
         )
         if declared_properties is not UNSET:
             field_dict["declaredProperties"] = declared_properties
+        if requires is not UNSET:
+            field_dict["requires"] = requires
 
         return field_dict
 
@@ -71,9 +88,19 @@ class CompileStrategyResponse200:
 
                 declared_properties.append(declared_properties_item)
 
+        _requires = d.pop("requires", UNSET)
+        requires: list[CompileStrategyResponse200RequiresItem] | Unset = UNSET
+        if _requires is not UNSET:
+            requires = []
+            for requires_item_data in _requires:
+                requires_item = CompileStrategyResponse200RequiresItem(requires_item_data)
+
+                requires.append(requires_item)
+
         compile_strategy_response_200 = cls(
             strategy_id=strategy_id,
             declared_properties=declared_properties,
+            requires=requires,
         )
 
         compile_strategy_response_200.additional_properties = d
