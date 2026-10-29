@@ -30,10 +30,10 @@ class DatasetImportRequest:
             name (str): A name unique among your datasets. `409` if already taken. Example: weth-usdc-week.
             instrument (str): Exchange instrument identifier (e.g. a currency pair) Example: BTC/USDT.
             from_ (datetime.datetime): Start of the range to fetch, inclusive. Must be before `to`. Example:
-                2026-08-01T00:00:00Z.
+                2026-10-27T00:00:00Z.
             to (datetime.datetime): End of the range to fetch, exclusive. The total span is capped by your tier — a
                 request wider than that ceiling is `400`, regardless of source type.
-                 Example: 2026-08-08T00:00:00Z.
+                 Example: 2026-10-27T06:00:00Z.
             type_ (DatasetImportRequestType): The kind of venue to import from, the same two values as the `venueType` of
                 `GET /exchanges`: `dex` — a pool/pair's own on-chain market (block `dex`) — or `cex` —
                 a centralized exchange's market history (block `cex`).
@@ -49,7 +49,8 @@ class DatasetImportRequest:
                   cadence: each swap at its own timestamp, so the resulting version's `cadence` is `rt`
                   unless the swaps happen to sit on a fixed grid (see `DatasetVersion.cadence`).
                   Not every network supports candles — an unsupported combination fails
-                  asynchronously, not at request time (see `DatasetImportState.error`).
+                  asynchronously, not at request time (see `DatasetImportState.error`). On `solana`,
+                  which has candles only, omitted is the plan's default as candles on every plan.
                 * `cex` — one of `1s`, `5s`, `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `8h`,
                   `12h`, `1d`, `1w`, `1q`, whether `dataType` is `ticker` or `klines`. Omitted = the
                   plan's default; on a plan that includes the native rate of a source, the finest

@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.50] — 2026-10-28
+
+### Added ✨
+
+- Model Solana as a DEX network for candle-only dataset imports; add `DatasetImportDexRequestNetwork.SOLANA`.
+  Its pool address is case-sensitive base58, with no protocol or version required, and omitted cadence uses
+  the plan default.
+
+### Changed 🔄
+
+- Target OpenAPI `0.128.50`. Candle imports whose start is more than 180 days old are rejected up front;
+  DEX candle bars may be absent for intervals with no trades.
+
 ## [0.128.49] — 2026-10-26
 
 ### Added ✨

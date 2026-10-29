@@ -130,6 +130,20 @@ def sync_detailed(
       resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
       `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
 
+    **Solana has candles only.** There is no per-trade import for a Solana pool, so a request
+    that names no `cadence` gets the plan's default as candles on every plan, elite included
+    (`1s`), and `dex.id`, `dex.version` and `dex.factory` are never needed. The `dex.contract`
+    of a Solana pool is its base58 address, which is case-sensitive: send it exactly as it is
+    written.
+
+    **Candles reach back a limited history** (the Datasets guide gives it). A candle import —
+    one that names a `cadence`, or that gets the plan's default — whose `from` is earlier than
+    that is `400` up front, whatever the network, instead of being accepted and failing later.
+    A per-trade import and a `cex` import are not held to it.
+
+    **A width in which the pool had no trade may have no bar:** the candles of a pool are not
+    a contiguous grid, and a missing one only means nothing traded and the price did not move.
+
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
             one type-specific block,
@@ -203,6 +217,20 @@ def sync(
       resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
       `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
 
+    **Solana has candles only.** There is no per-trade import for a Solana pool, so a request
+    that names no `cadence` gets the plan's default as candles on every plan, elite included
+    (`1s`), and `dex.id`, `dex.version` and `dex.factory` are never needed. The `dex.contract`
+    of a Solana pool is its base58 address, which is case-sensitive: send it exactly as it is
+    written.
+
+    **Candles reach back a limited history** (the Datasets guide gives it). A candle import —
+    one that names a `cadence`, or that gets the plan's default — whose `from` is earlier than
+    that is `400` up front, whatever the network, instead of being accepted and failing later.
+    A per-trade import and a `cex` import are not held to it.
+
+    **A width in which the pool had no trade may have no bar:** the candles of a pool are not
+    a contiguous grid, and a missing one only means nothing traded and the price did not move.
+
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
             one type-specific block,
@@ -270,6 +298,20 @@ async def asyncio_detailed(
       keeps the timestamp it happened at rather than being bucketed into candles, so the
       resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
       `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
+
+    **Solana has candles only.** There is no per-trade import for a Solana pool, so a request
+    that names no `cadence` gets the plan's default as candles on every plan, elite included
+    (`1s`), and `dex.id`, `dex.version` and `dex.factory` are never needed. The `dex.contract`
+    of a Solana pool is its base58 address, which is case-sensitive: send it exactly as it is
+    written.
+
+    **Candles reach back a limited history** (the Datasets guide gives it). A candle import —
+    one that names a `cadence`, or that gets the plan's default — whose `from` is earlier than
+    that is `400` up front, whatever the network, instead of being accepted and failing later.
+    A per-trade import and a `cex` import are not held to it.
+
+    **A width in which the pool had no trade may have no bar:** the candles of a pool are not
+    a contiguous grid, and a missing one only means nothing traded and the price did not move.
 
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus
@@ -341,6 +383,20 @@ async def asyncio(
       keeps the timestamp it happened at rather than being bucketed into candles, so the
       resulting version's `cadence` is `rt` unless the swaps happen to sit on a fixed grid (see
       `DatasetVersion.cadence`). Needs `dex.id` and `dex.version`.
+
+    **Solana has candles only.** There is no per-trade import for a Solana pool, so a request
+    that names no `cadence` gets the plan's default as candles on every plan, elite included
+    (`1s`), and `dex.id`, `dex.version` and `dex.factory` are never needed. The `dex.contract`
+    of a Solana pool is its base58 address, which is case-sensitive: send it exactly as it is
+    written.
+
+    **Candles reach back a limited history** (the Datasets guide gives it). A candle import —
+    one that names a `cadence`, or that gets the plan's default — whose `from` is earlier than
+    that is `400` up front, whatever the network, instead of being accepted and failing later.
+    A per-trade import and a `cex` import are not held to it.
+
+    **A width in which the pool had no trade may have no bar:** the candles of a pool are not
+    a contiguous grid, and a missing one only means nothing traded and the price did not move.
 
     Args:
         body (DatasetImportRequest): `POST /datasets/imports`'s request body. A common block plus

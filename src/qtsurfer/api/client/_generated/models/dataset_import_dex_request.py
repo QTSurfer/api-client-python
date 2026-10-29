@@ -26,9 +26,13 @@ class DatasetImportDexRequest:
                 '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640'}
 
         Attributes:
-            network (DatasetImportDexRequestNetwork): Which chain the pool/pair lives on. Example: ethereum.
-            contract (str): The pool (v3) or pair (v2) contract address. Example:
-                0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640.
+            network (DatasetImportDexRequestNetwork): Which chain the pool/pair lives on. `solana` has candles only: no per-
+                trade import, so
+                the plan's default cadence is built as candles there on every plan.
+                 Example: ethereum.
+            contract (str): The pool (v3) or pair (v2) contract address. On `solana`, the pool address in base58,
+                case-sensitive: send it exactly as it is written.
+                 Example: 0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640.
             id (DatasetImportDexRequestId | Unset): Which on-chain DEX protocol `contract` implements. Required unless the
                 top-level
                 `cadence` requested pre-aggregated candles, in which case it's ignored.
