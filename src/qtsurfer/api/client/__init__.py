@@ -88,6 +88,7 @@ class AuthenticatedClient(_GeneratedAuthenticatedClient):
             )
         return self._async_client
 
+
 try:
     __version__ = version("qtsurfer-api-client")
 except PackageNotFoundError:  # pragma: no cover - editable installs in dev
