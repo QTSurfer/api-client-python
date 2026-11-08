@@ -58,6 +58,12 @@ instruments = list_instruments.sync(client=client, exchange_id="binance")
 print(f"{len(instruments.data)} instruments on binance ({instruments.meta.segment})")
 ```
 
+When a connection to a host whose first DNS label is `api` fails before an HTTP response, the
+client retries that request once after changing that label to `api2` (for example,
+`api.qtsurfer.net` → `api2.qtsurfer.net`). The next request starts at the primary host again. HTTP
+responses, including `4xx` and `5xx`, are returned without host failover. Hosts whose first label is
+already `api2` are not rewritten.
+
 ### API key → JWT
 
 Every endpoint above expects a short-lived JWT in the `Authorization: Bearer …`

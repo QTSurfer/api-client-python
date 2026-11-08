@@ -11,7 +11,12 @@ import pytest
 import respx
 
 from qtsurfer.api.client import AuthenticatedClient, types
-from qtsurfer.api.client.api.backtesting import get_backtest_result, get_sweep_run_equity_curve
+from qtsurfer.api.client.api.backtesting import (
+    execute_backtest,
+    execute_sweep,
+    get_backtest_result,
+    get_sweep_run_equity_curve,
+)
 from qtsurfer.api.client.api.dataset import finalize_dataset_upload, list_datasets, open_dataset_upload
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 from qtsurfer.api.client.api.live_execution import (
@@ -37,6 +42,8 @@ from qtsurfer.api.client.models import (
     DeleteStrategyResponse200,
     EquityCurveResult,
     Exchange,
+    ExecuteBacktestBody,
+    ExecuteSweepRequest,
     GetBacktestResultResponse202,
     GetStrategyCodeResponse200,
     HalLink,
@@ -62,6 +69,8 @@ from qtsurfer.api.client.models import (
     StrategyLinks,
     StrategyState,
     StrategySummary,
+    SweepSpecRequest,
+    SweepSpecRequestParams,
 )
 
 BASE_URL = "https://api.qtsurfer.test/v1"
@@ -127,6 +136,52 @@ def test_protected_operation_parses_insufficient_scope_403(client: Authenticated
     assert isinstance(response.parsed, InsufficientScopeError)
     assert response.parsed.code is InsufficientScopeErrorCode.INSUFFICIENT_SCOPE
     assert response.parsed.required == "exchanges:read"
+
+
+@respx.mock
+def test_execute_backtest_parses_incompatible_strategy_409(client: AuthenticatedClient) -> None:
+    respx.post(f"{BASE_URL}/backtest/binance/ticker/execute").mock(
+        return_value=httpx.Response(
+            409,
+            json={"code": 409, "message": "The strategy must be recompiled for this platform."},
+        )
+    )
+
+    response = execute_backtest.sync_detailed(
+        "binance",
+        DataSourceType.TICKER,
+        client=client,
+        body=ExecuteBacktestBody(prepare_job_id="prepare-1", strategy_id="strategy-1"),
+    )
+
+    assert response.status_code == 409
+    assert isinstance(response.parsed, ResponseError)
+    assert response.parsed.message == "The strategy must be recompiled for this platform."
+
+
+@respx.mock
+def test_execute_sweep_parses_incompatible_strategy_409(client: AuthenticatedClient) -> None:
+    respx.post(f"{BASE_URL}/backtest/binance/ticker/executeSweep/request-1").mock(
+        return_value=httpx.Response(
+            409,
+            json={"code": 409, "message": "The strategy must be recompiled for this platform."},
+        )
+    )
+
+    response = execute_sweep.sync_detailed(
+        "binance",
+        DataSourceType.TICKER,
+        "request-1",
+        client=client,
+        body=ExecuteSweepRequest(
+            strategy_id="strategy-1",
+            sweep=SweepSpecRequest(params=SweepSpecRequestParams()),
+        ),
+    )
+
+    assert response.status_code == 409
+    assert isinstance(response.parsed, ResponseError)
+    assert response.parsed.message == "The strategy must be recompiled for this platform."
 
 
 @respx.mock

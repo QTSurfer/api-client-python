@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.54] — 2026-11-04
+
+### Added ✨
+
+- On connection failure to an API host, retry once after changing its first DNS label from `api` to
+  `api2`, preserving the suffix. Each new request starts with the primary host, and HTTP responses
+  are not retried.
+- Parse `409` incompatibility responses from `execute_backtest` and `execute_sweep` as `ResponseError`.
+  Recompile and register the strategy source against the current platform, then submit the new strategy ID.
+
+### Changed 🔄
+
+- Target OpenAPI `0.128.54`. `start_live` already parsed `409` responses; this release expands the server's
+  incompatible-strategy case alongside its existing active-run conflict. OpenAPI `0.128.51` and `0.128.54`
+  only changed guides and required no generated client changes.
+
 ## [0.128.50] — 2026-10-28
 
 ### Added ✨
