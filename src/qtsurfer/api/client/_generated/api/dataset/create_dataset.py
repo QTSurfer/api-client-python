@@ -99,9 +99,12 @@ def sync_detailed(
     **Upload format.** A CSV with a header row, a parquet file with the same columns by
     name, or a lastra file — our own native columnar format, the same one a dataset's
     `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
-    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
-    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
-    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (an ISO-8601
+    date or date-time, or numeric epoch seconds/millis/micros — detected from the first row,
+    then enforced for every later row), `close`. A date alone (`2010-06-29`) is midnight UTC; a
+    date-time with no zone (`2010-06-29T14:30:00` or `2010-06-29 14:30:00`) is UTC; an offset
+    or `Z` is honoured; day-first and month-first dates are not accepted. The Datasets guide
+    lists the forms. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
     `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
     only needs a timestamp series and a close series present. Cadence and timestamp unit are
     discovered from the data, not declared, for all three.
@@ -163,9 +166,12 @@ def sync(
     **Upload format.** A CSV with a header row, a parquet file with the same columns by
     name, or a lastra file — our own native columnar format, the same one a dataset's
     `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
-    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
-    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
-    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (an ISO-8601
+    date or date-time, or numeric epoch seconds/millis/micros — detected from the first row,
+    then enforced for every later row), `close`. A date alone (`2010-06-29`) is midnight UTC; a
+    date-time with no zone (`2010-06-29T14:30:00` or `2010-06-29 14:30:00`) is UTC; an offset
+    or `Z` is honoured; day-first and month-first dates are not accepted. The Datasets guide
+    lists the forms. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
     `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
     only needs a timestamp series and a close series present. Cadence and timestamp unit are
     discovered from the data, not declared, for all three.
@@ -222,9 +228,12 @@ async def asyncio_detailed(
     **Upload format.** A CSV with a header row, a parquet file with the same columns by
     name, or a lastra file — our own native columnar format, the same one a dataset's
     `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
-    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
-    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
-    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (an ISO-8601
+    date or date-time, or numeric epoch seconds/millis/micros — detected from the first row,
+    then enforced for every later row), `close`. A date alone (`2010-06-29`) is midnight UTC; a
+    date-time with no zone (`2010-06-29T14:30:00` or `2010-06-29 14:30:00`) is UTC; an offset
+    or `Z` is honoured; day-first and month-first dates are not accepted. The Datasets guide
+    lists the forms. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
     `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
     only needs a timestamp series and a close series present. Cadence and timestamp unit are
     discovered from the data, not declared, for all three.
@@ -284,9 +293,12 @@ async def asyncio(
     **Upload format.** A CSV with a header row, a parquet file with the same columns by
     name, or a lastra file — our own native columnar format, the same one a dataset's
     `dataUrl` hands back by default, so a downloaded dataset can be handed to another user to
-    upload with no conversion in between. For CSV/parquet, required: `timestamp` (ISO-8601, or
-    numeric epoch seconds/millis/micros — detected from the first row, then enforced for every
-    later row), `close`. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
+    upload with no conversion in between. For CSV/parquet, required: `timestamp` (an ISO-8601
+    date or date-time, or numeric epoch seconds/millis/micros — detected from the first row,
+    then enforced for every later row), `close`. A date alone (`2010-06-29`) is midnight UTC; a
+    date-time with no zone (`2010-06-29T14:30:00` or `2010-06-29 14:30:00`) is UTC; an offset
+    or `Z` is honoured; day-first and month-first dates are not accepted. The Datasets guide
+    lists the forms. Optional: `open`, `high`, `low`, `volume`, `quoteVolume`, `bid`,
     `bidSize`, `ask`, `askSize`. A lastra upload carries its own fixed column set instead and
     only needs a timestamp series and a close series present. Cadence and timestamp unit are
     discovered from the data, not declared, for all three.

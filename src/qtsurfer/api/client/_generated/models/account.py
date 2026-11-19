@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+from dateutil.parser import isoparse
+
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.account_links import AccountLinks
@@ -55,6 +59,13 @@ class Account:
                 /account/usage`'s `storageBytesUsed` for your current usage against this number.
                  Example: 104857600.
             field_links (AccountLinks): HAL `_links` for `GET /account`
+            api_key_expires_at (datetime.datetime | None | Unset): When the API key behind this token stops working, UTC.
+                Always in the answer; `null` when
+                no key expiry applies: a key that never expires, a token issued before this field existed
+                (ask for a new one), or a credential that is not an API key. It is the same moment as the
+                `key_exp` of `POST /auth/token`. Rotate the key before it: after it, `POST /auth/token`
+                answers `401`. A token already issued keeps working until its own expiry.
+                 Example: 2026-12-05T10:05:00Z.
     """
 
     user_id: str
@@ -68,6 +79,7 @@ class Account:
     max_dataset_bytes: int
     max_total_storage_bytes: int
     field_links: AccountLinks
+    api_key_expires_at: datetime.datetime | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -93,6 +105,14 @@ class Account:
 
         field_links = self.field_links.to_dict()
 
+        api_key_expires_at: None | str | Unset
+        if isinstance(self.api_key_expires_at, Unset):
+            api_key_expires_at = UNSET
+        elif isinstance(self.api_key_expires_at, datetime.datetime):
+            api_key_expires_at = self.api_key_expires_at.isoformat()
+        else:
+            api_key_expires_at = self.api_key_expires_at
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -110,6 +130,8 @@ class Account:
                 "_links": field_links,
             }
         )
+        if api_key_expires_at is not UNSET:
+            field_dict["apiKeyExpiresAt"] = api_key_expires_at
 
         return field_dict
 
@@ -141,6 +163,23 @@ class Account:
 
         field_links = AccountLinks.from_dict(d.pop("_links"))
 
+        def _parse_api_key_expires_at(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                api_key_expires_at_type_0 = isoparse(data)
+
+                return api_key_expires_at_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        api_key_expires_at = _parse_api_key_expires_at(d.pop("apiKeyExpiresAt", UNSET))
+
         account = cls(
             user_id=user_id,
             tier=tier,
@@ -153,6 +192,7 @@ class Account:
             max_dataset_bytes=max_dataset_bytes,
             max_total_storage_bytes=max_total_storage_bytes,
             field_links=field_links,
+            api_key_expires_at=api_key_expires_at,
         )
 
         account.additional_properties = d

@@ -14,28 +14,29 @@ T = TypeVar("T", bound="LiveSource")
 
 @_attrs_define
 class LiveSource:
-    """One market feed a live run consumes. Exactly one entry per run today.
+    """One market-data source a live run reads. A run starts with one, or none, and more can be attached afterwards on the
+    same market feed (see `attachments`).
 
-    Attributes:
-        venue_type (LiveSourceVenueType): Venue category. `cex` is a centralized exchange and `dex` is one pool on a
-            decentralized exchange, which takes its own `exchange`, `segment`, `type` and `instruments` (see "Sources" in
-            the Live execution guide). `cx` and `dx`, the spellings used before, are still read as `cex` and `dex`; the run
-            always reports the new ones. Example: cex.
-        exchange (str): The exchange id, as `GET /exchanges` lists it. For a `dex` source, the chain the pool is on;
-            `robinhood` is the only one today. Example: binance.
-        segment (str): The segment, as `GET /exchanges` lists it for that exchange, among its `liveSegments` (a segment
-            with no live data is refused with `400`). For a `cex` source, the market segment (`spot` today); for a `dex`
-            source, the protocol of the pool, `uniswap-v3` the only one today. Example: spot.
-        type_ (LiveSourceType): Both `ticker` and `kline` connect to the lightest (fastest) cadence available for the
-            exchange — today, 1 tick/second on every supported exchange. Choosing a specific cadence is not offered yet. A
-            `dex` source supports only `kline`: one candle per second of the pool's trades.
-        instruments (list[str]): The instruments the run reads. For a run started with a list, that list as sent; for
-            one started without `instruments`, or with `["*"]`, what the start resolved: the list of pairs the compilation
-            of the strategy records as the instruments it accepts, when it records one, or `["*"]` for every instrument the
-            exchange/segment offers (tier-gated). An entry is written `BASE/QUOTE` and either side can be `*` to mean any,
-            such as any base paired with USDT. Symbols are not case-sensitive and spaces around them are ignored, so
-            `btc/usdt` and `BTC/USDT` are the same instrument. A `dex` source holds exactly one entry, the address of its
-            pool. Example: ['BTC/USDT'].
+        Attributes:
+            venue_type (LiveSourceVenueType): Venue category. `cex` is a centralized exchange and `dex` is one pool on a
+                decentralized exchange, which takes its own `exchange`, `segment`, `type` and `instruments` (see "Sources" in
+                the Live execution guide). `cx` and `dx`, the spellings used before, are still read as `cex` and `dex`; the run
+                always reports the new ones. Example: cex.
+            exchange (str): The exchange id, as `GET /exchanges` lists it. For a `dex` source, the chain the pool is on;
+                `robinhood` is the only one today. Example: binance.
+            segment (str): The segment, as `GET /exchanges` lists it for that exchange, among its `liveSegments` (a segment
+                with no live data is refused with `400`). For a `cex` source, the market segment (`spot` today); for a `dex`
+                source, the protocol of the pool, `uniswap-v3` the only one today. Example: spot.
+            type_ (LiveSourceType): Both `ticker` and `kline` connect to the lightest (fastest) cadence available for the
+                exchange — today, 1 tick/second on every supported exchange. Choosing a specific cadence is not offered yet. A
+                `dex` source supports only `kline`: one candle per second of the pool's trades.
+            instruments (list[str]): The instruments the run reads. For a run started with a list, that list as sent; for
+                one started without `instruments`, or with `["*"]`, what the start resolved: the list of pairs the compilation
+                of the strategy records as the instruments it accepts, when it records one, or `["*"]` for every instrument the
+                exchange/segment offers (tier-gated). An entry is written `BASE/QUOTE` and either side can be `*` to mean any,
+                such as any base paired with USDT. Symbols are not case-sensitive and spaces around them are ignored, so
+                `btc/usdt` and `BTC/USDT` are the same instrument. A `dex` source holds exactly one entry, the address of its
+                pool. Example: ['BTC/USDT'].
     """
 
     venue_type: LiveSourceVenueType

@@ -8,6 +8,8 @@ import datetime as _dt
 
 from qtsurfer.api.client import types
 from qtsurfer.api.client.models import (
+    Account,
+    AuthTokenResponse,
     CompileStrategyResponse200,
     CompileStrategyResponse200RequiresItem,
     CoverageWindow,
@@ -147,6 +149,39 @@ def test_start_live_request_serializes_sandbox_override() -> None:
     parsed = StartLiveRequest.from_dict({"sources": [], "sandbox": True, "sandboxMinutes": 60})
     assert parsed.sandbox is True
     assert parsed.sandbox_minutes == 60
+
+
+def test_api_key_expiry_roundtrips_on_token_and_account() -> None:
+    token = AuthTokenResponse.from_dict(
+        {
+            "access_token": "jwt",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+            "scopes": {},
+            "tier": "free",
+            "key_exp": 1_796_465_100,
+        }
+    )
+    assert token.key_exp == 1_796_465_100
+    assert token.to_dict()["key_exp"] == 1_796_465_100
+
+    account = Account.from_dict(
+        {
+            "userId": "user-1",
+            "tier": "free",
+            "scopes": {},
+            "maxExecute": 1,
+            "maxRangeDays": 7,
+            "maxSweepCartesian": 100,
+            "maxImportRangeHours": 6,
+            "maxDatasets": 3,
+            "maxDatasetBytes": 1024,
+            "maxTotalStorageBytes": 4096,
+            "_links": {"self": {"href": "/v1/account"}, "usage": {"href": "/v1/account/usage"}},
+            "apiKeyExpiresAt": "2026-12-05T10:05:00Z",
+        }
+    )
+    assert account.api_key_expires_at == _dt.datetime(2026, 12, 5, 10, 5, tzinfo=_dt.UTC)
 
 
 def test_compile_strategy_reports_plan_requirements() -> None:

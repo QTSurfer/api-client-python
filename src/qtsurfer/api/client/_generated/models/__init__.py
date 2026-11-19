@@ -5,8 +5,12 @@ from .account import Account
 from .account_links import AccountLinks
 from .account_usage import AccountUsage
 from .account_usage_links import AccountUsageLinks
+from .attach_live_source_request import AttachLiveSourceRequest
 from .auth_token_error import AuthTokenError
 from .auth_token_error_code import AuthTokenErrorCode
+from .auth_token_error_error import AuthTokenErrorError
+from .auth_token_rejected import AuthTokenRejected
+from .auth_token_rejected_error import AuthTokenRejectedError
 from .auth_token_response import AuthTokenResponse
 from .auth_token_response_tier import AuthTokenResponseTier
 from .auth_token_response_token_type import AuthTokenResponseTokenType
@@ -100,6 +104,9 @@ from .job_state_status import JobStateStatus
 from .key_scopes import KeyScopes
 from .list_datasets_response_200 import ListDatasetsResponse200
 from .list_strategies_response_200 import ListStrategiesResponse200
+from .live_attachment import LiveAttachment
+from .live_attachment_accepted import LiveAttachmentAccepted
+from .live_attachment_accepted_state import LiveAttachmentAcceptedState
 from .live_command_result import LiveCommandResult
 from .live_connection_token import LiveConnectionToken
 from .live_list_response import LiveListResponse
@@ -216,8 +223,12 @@ __all__ = (
     "AccountLinks",
     "AccountUsage",
     "AccountUsageLinks",
+    "AttachLiveSourceRequest",
     "AuthTokenError",
     "AuthTokenErrorCode",
+    "AuthTokenErrorError",
+    "AuthTokenRejected",
+    "AuthTokenRejectedError",
     "AuthTokenResponse",
     "AuthTokenResponseTier",
     "AuthTokenResponseTokenType",
@@ -311,6 +322,9 @@ __all__ = (
     "KeyScopes",
     "ListDatasetsResponse200",
     "ListStrategiesResponse200",
+    "LiveAttachment",
+    "LiveAttachmentAccepted",
+    "LiveAttachmentAcceptedState",
     "LiveCommandResult",
     "LiveConnectionToken",
     "LiveListResponse",

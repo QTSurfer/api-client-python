@@ -108,6 +108,11 @@ A scope is a resource and an action: each listed resource has at least one actio
 }
 ```
 
+When the API key expires, the token response includes `key_exp` (seconds since epoch); the same
+expiry is available as `Account.api_key_expires_at` from `get_account`. A key without an expiry
+omits `key_exp`, and `api_key_expires_at` is `null`. Invalid, revoked, and expired keys share the
+typed `AuthTokenRejected` response with `error == "invalid_credentials"`.
+
 Where a deployment requires scopes, a valid key with none returns `403` and a typed
 `AuthTokenError` with `code == AuthTokenErrorCode.APIKEY_WITHOUT_SCOPES` (`apikey_without_scopes`).
 No token is minted: create a key with at least one scope in the web app. Invalid,
@@ -175,6 +180,8 @@ Each generated endpoint module exposes four entrypoints:
 | `api.dataset` | `import_dataset` | `POST /datasets/imports` — create a dataset from source history |
 | `api.dataset` | `get_dataset_import` | `GET /datasets/{datasetId}/imports/{importId}` |
 | `api.live_execution` | `start_live` | `POST /strategy/{strategyId}/live` |
+| `api.live_execution` | `attach_live_source` | `POST /live/{runId}/attachments` — attach a source to a waiting or active run |
+| `api.live_execution` | `detach_live_source` | `DELETE /live/{runId}/attachments/{attachmentId}` — detach a source and keep the run live |
 | `api.live_execution` | `get_live` | `GET /strategy/{strategyId}/live` |
 | `api.live_execution` | `stop_live` | `DELETE /strategy/{strategyId}/live` |
 | `api.live_execution` | `list_live` | `GET /live` — page the caller's own runs |
@@ -190,7 +197,7 @@ Each generated endpoint module exposes four entrypoints:
 | `api.live_execution` | `get_live_run_paper_equity` | `GET /live/{runId}/paper/equity` — page simulated equity history |
 | `api.live_execution` | `mint_live_connection_token` | `POST /live/token` |
 
-Forty-seven of the spec's forty-eight operations, all reachable through `qtsurfer.api.client.api`
+Forty-nine of the spec's fifty operations, all reachable through `qtsurfer.api.client.api`
 as listed. The exception is `compileStrategy` (`POST /strategy`), whose `text/plain` request body
 openapi-python-client does not support, so no module is generated for it — call it through the
 underlying `httpx` client.

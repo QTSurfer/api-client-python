@@ -7,9 +7,13 @@ read simulated account state and equity history; ``send_live_command`` delivers
 a transient command to a running strategy over REST. ``get_live_run`` reads a
 specific run, while ``rotate_live_stream`` and ``revoke_live_stream`` manage a
 stream URL issued when starting a run with ``stream=True``.
+``attach_live_source`` and ``detach_live_source`` change a run's market-data sources without
+stopping it.
 """
 
 from qtsurfer.api.client._generated.api.live_execution import (
+    attach_live_source,
+    detach_live_source,
     get_live,
     get_live_run,
     get_live_run_paper,
@@ -28,6 +32,8 @@ from qtsurfer.api.client._generated.api.live_execution import (
 )
 
 __all__ = [
+    "attach_live_source",
+    "detach_live_source",
     "get_live",
     "get_live_run",
     "get_live_run_paper",

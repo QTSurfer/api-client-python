@@ -119,7 +119,8 @@ def sync_detailed(
     Only one run per strategy at a time — starting again while one is already running is `409`;
     stop the current one first.
 
-    `sources` takes exactly one entry today (multi-source strategies are not supported yet).
+    `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
+    (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
@@ -256,7 +257,8 @@ def sync(
     Only one run per strategy at a time — starting again while one is already running is `409`;
     stop the current one first.
 
-    `sources` takes exactly one entry today (multi-source strategies are not supported yet).
+    `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
+    (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
@@ -388,7 +390,8 @@ async def asyncio_detailed(
     Only one run per strategy at a time — starting again while one is already running is `409`;
     stop the current one first.
 
-    `sources` takes exactly one entry today (multi-source strategies are not supported yet).
+    `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
+    (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.
@@ -523,7 +526,8 @@ async def asyncio(
     Only one run per strategy at a time — starting again while one is already running is `409`;
     stop the current one first.
 
-    `sources` takes exactly one entry today (multi-source strategies are not supported yet).
+    `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
+    (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
     (fastest) cadence available for the exchange — today that is 1 tick/second on every
     supported exchange; choosing among several cadences is not offered yet.

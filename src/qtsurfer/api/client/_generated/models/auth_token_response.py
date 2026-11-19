@@ -34,6 +34,11 @@ class AuthTokenResponse:
             same key. An operation that needs a scope the key does not carry is answered `403` with the
             code `insufficient_scope`, and says which scope it needed.
              Example: {'backtests': ['read', 'write', 'execute'], 'exchanges': ['read']}.
+        key_exp (int | Unset): When the API key this token was issued for stops working, in seconds since epoch, like
+            the
+            `exp` of the token. Absent when the key never expires. This is the key's expiry, not the
+            token's (`expires_in` is the token's). Create a new key in the web app before it.
+             Example: 1796465100.
     """
 
     access_token: str
@@ -41,6 +46,7 @@ class AuthTokenResponse:
     expires_in: int
     tier: AuthTokenResponseTier
     scopes: KeyScopes | Unset = UNSET
+    key_exp: int | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -56,6 +62,8 @@ class AuthTokenResponse:
         if not isinstance(self.scopes, Unset):
             scopes = self.scopes.to_dict()
 
+        key_exp = self.key_exp
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -68,6 +76,8 @@ class AuthTokenResponse:
         )
         if scopes is not UNSET:
             field_dict["scopes"] = scopes
+        if key_exp is not UNSET:
+            field_dict["key_exp"] = key_exp
 
         return field_dict
 
@@ -91,12 +101,15 @@ class AuthTokenResponse:
         else:
             scopes = KeyScopes.from_dict(_scopes)
 
+        key_exp = d.pop("key_exp", UNSET)
+
         auth_token_response = cls(
             access_token=access_token,
             token_type=token_type,
             expires_in=expires_in,
             tier=tier,
             scopes=scopes,
+            key_exp=key_exp,
         )
 
         auth_token_response.additional_properties = d

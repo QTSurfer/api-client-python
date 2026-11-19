@@ -7,28 +7,35 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.auth_token_error_code import AuthTokenErrorCode
+from ..models.auth_token_error_error import AuthTokenErrorError
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="AuthTokenError")
 
 
 @_attrs_define
 class AuthTokenError:
-    """Error envelope returned by `POST /auth/token` when the API key is rejected (`401`) or carries no scopes where scopes
-    are required (`403`).
+    """Error envelope returned by `POST /auth/token` (`403`) when the API key carries no scopes and scopes are required.
 
-        Attributes:
-            code (AuthTokenErrorCode): Machine-readable error reason.
-            message (str): Human-readable description of the failure.
+    Attributes:
+        code (AuthTokenErrorCode): Machine-readable error reason.
+        message (str): Human-readable description of the failure.
+        error (AuthTokenErrorError | Unset): The same value as `code`; the field the other answers of this route carry.
     """
 
     code: AuthTokenErrorCode
     message: str
+    error: AuthTokenErrorError | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         code = self.code.value
 
         message = self.message
+
+        error: str | Unset = UNSET
+        if not isinstance(self.error, Unset):
+            error = self.error.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -38,6 +45,8 @@ class AuthTokenError:
                 "message": message,
             }
         )
+        if error is not UNSET:
+            field_dict["error"] = error
 
         return field_dict
 
@@ -48,9 +57,17 @@ class AuthTokenError:
 
         message = d.pop("message")
 
+        _error = d.pop("error", UNSET)
+        error: AuthTokenErrorError | Unset
+        if isinstance(_error, Unset):
+            error = UNSET
+        else:
+            error = AuthTokenErrorError(_error)
+
         auth_token_error = cls(
             code=code,
             message=message,
+            error=error,
         )
 
         auth_token_error.additional_properties = d

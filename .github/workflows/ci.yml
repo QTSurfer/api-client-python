@@ -43,7 +43,9 @@ jobs:
       # spec cross-check in tests/test_smoke.py skips here and the suite cannot see a spec
       # operation that generates no module at all — the drift that hid compileStrategy.
       - name: Fetch openapi.yaml
-        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml -o openapi.yaml
+        run: |
+          SPEC_REF=$(uv run python -c "import tomllib; print(tomllib.loads(open('pyproject.toml','rb').read().decode())['tool']['qtsurfer']['openapi_spec_ref'])")
+          curl -fsSL "https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/${SPEC_REF}/openapi.yaml" -o openapi.yaml
 
       - name: Pytest
         run: uv run pytest -v
@@ -64,7 +66,9 @@ jobs:
         run: uv sync --frozen
 
       - name: Fetch openapi.yaml
-        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml -o openapi.yaml
+        run: |
+          SPEC_REF=$(uv run python -c "import tomllib; print(tomllib.loads(open('pyproject.toml','rb').read().decode())['tool']['qtsurfer']['openapi_spec_ref'])")
+          curl -fsSL "https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/${SPEC_REF}/openapi.yaml" -o openapi.yaml
 
       - name: Verify pyproject.toml version matches openapi.yaml
         run: |

@@ -44,7 +44,9 @@ jobs:
           fi
 
       - name: Fetch openapi.yaml
-        run: curl -fsSL https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml -o openapi.yaml
+        run: |
+          SPEC_REF=$(uv run python -c "import tomllib; print(tomllib.loads(open('pyproject.toml','rb').read().decode())['tool']['qtsurfer']['openapi_spec_ref'])")
+          curl -fsSL "https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/${SPEC_REF}/openapi.yaml" -o openapi.yaml
 
       - name: Build
         run: uv run python -m build

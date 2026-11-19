@@ -4,6 +4,7 @@ the response into typed models."""
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 import httpx
@@ -20,6 +21,8 @@ from qtsurfer.api.client.api.backtesting import (
 from qtsurfer.api.client.api.dataset import finalize_dataset_upload, list_datasets, open_dataset_upload
 from qtsurfer.api.client.api.exchange import list_exchanges, list_instruments
 from qtsurfer.api.client.api.live_execution import (
+    attach_live_source,
+    detach_live_source,
     get_live,
     get_live_run,
     get_live_run_signals,
@@ -36,6 +39,7 @@ from qtsurfer.api.client.api.strategy import (
     validate_strategy,
 )
 from qtsurfer.api.client.models import (
+    AttachLiveSourceRequest,
     CoverageWindow,
     DatasetUploadSession,
     DataSourceType,
@@ -53,6 +57,8 @@ from qtsurfer.api.client.models import (
     InsufficientScopeError,
     InsufficientScopeErrorCode,
     ListStrategiesResponse200,
+    LiveAttachmentAccepted,
+    LiveAttachmentAcceptedState,
     LiveCommandResult,
     LiveRunDetail,
     LiveRunWithStream,
@@ -443,6 +449,53 @@ def test_start_live_stream_returns_secret_stream_url(client: AuthenticatedClient
     assert response.stream_url == "wss://stream.example/run-1/secret"
     assert response.warm_from == 0
     assert response.sandbox_minutes == 60
+
+
+@respx.mock
+def test_attach_and_detach_live_source(client: AuthenticatedClient) -> None:
+    attach_route = respx.post(f"{BASE_URL}/live/run-1/attachments").mock(
+        return_value=httpx.Response(
+            202,
+            json={"attachmentId": "attachment-1", "state": "ATTACHING", "effectiveAtMs": 1_759_777_260_000},
+        )
+    )
+    detach_route = respx.delete(f"{BASE_URL}/live/run-1/attachments/attachment-1").mock(
+        return_value=httpx.Response(
+            202,
+            json={"attachmentId": "attachment-1", "state": "DETACHING", "effectiveAtMs": 1_759_777_320_000},
+        )
+    )
+    body = AttachLiveSourceRequest(
+        source=LiveSourceRequest(
+            venue_type=LiveSourceRequestVenueType.CEX,
+            exchange="binance",
+            segment="spot",
+            type_=LiveSourceRequestType.TICKER,
+            instruments=["ETH/USDT"],
+        ),
+        warm_from=300,
+        ref="alert-1",
+    )
+
+    attached = attach_live_source.sync_detailed("run-1", client=client, body=body)
+    detached = detach_live_source.sync_detailed("run-1", "attachment-1", client=client)
+
+    assert attach_route.called and detach_route.called
+    assert json.loads(attach_route.calls.last.request.read()) == {
+        "source": {
+            "venueType": "cex",
+            "exchange": "binance",
+            "segment": "spot",
+            "type": "ticker",
+            "instruments": ["ETH/USDT"],
+        },
+        "warmFrom": 300,
+        "ref": "alert-1",
+    }
+    assert isinstance(attached.parsed, LiveAttachmentAccepted)
+    assert attached.parsed.state is LiveAttachmentAcceptedState.ATTACHING
+    assert isinstance(detached.parsed, LiveAttachmentAccepted)
+    assert detached.parsed.state is LiveAttachmentAcceptedState.DETACHING
 
 
 @respx.mock

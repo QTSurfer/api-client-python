@@ -7,7 +7,13 @@ import respx
 
 from qtsurfer.api.client import AuthenticatedClient
 from qtsurfer.api.client.api.auth import authenticate
-from qtsurfer.api.client.models import AuthTokenError, AuthTokenErrorCode, AuthTokenResponse, KeyScopes
+from qtsurfer.api.client.models import (
+    AuthTokenError,
+    AuthTokenErrorCode,
+    AuthTokenRejected,
+    AuthTokenResponse,
+    KeyScopes,
+)
 
 BASE = "https://api.example/v1"
 
@@ -31,6 +37,7 @@ def test_authentication_success_parses_resource_action_scope_map() -> None:
         "expires_in": 3600,
         "scopes": scopes,
         "tier": "free",
+        "key_exp": 1_796_465_100,
     }
     route = respx.post(BASE + "/auth/token").mock(return_value=httpx.Response(200, json=payload))
 
@@ -40,10 +47,23 @@ def test_authentication_success_parses_resource_action_scope_map() -> None:
     assert isinstance(response.parsed, AuthTokenResponse)
     assert isinstance(response.parsed.scopes, KeyScopes)
     assert response.parsed.scopes["backtests"] == ["read", "write", "execute"]
+    assert response.parsed.key_exp == 1_796_465_100
     assert response.parsed.to_dict() == payload
     request = route.calls.last.request
     assert request.headers["X-API-Key"] == "test-api-key"
     assert "Authorization" not in request.headers
+
+
+@respx.mock
+def test_authentication_401_is_typed_as_invalid_credentials() -> None:
+    payload = {"error": "invalid_credentials"}
+    respx.post(BASE + "/auth/token").mock(return_value=httpx.Response(401, json=payload))
+
+    response = authenticate.sync_detailed(client=_apikey_client())
+
+    assert response.status_code == 401
+    assert isinstance(response.parsed, AuthTokenRejected)
+    assert response.parsed.error.value == "invalid_credentials"
 
 
 @respx.mock

@@ -12,6 +12,7 @@ from ..models.live_run_visibility import LiveRunVisibility
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.live_attachment import LiveAttachment
     from ..models.live_paper_config import LivePaperConfig
     from ..models.live_run_gate import LiveRunGate
     from ..models.live_run_params import LiveRunParams
@@ -41,14 +42,16 @@ class LiveRun:
                 than 24 hours, in which it is compared against a second execution and checked for resource use and stability. A
                 run that passes moves to `LIVE` automatically when the trial is over. A run of a strategy that an earlier run of
                 yours already took through the trial starts `LIVE`, unless you started it with `sandbox: true`.
-            state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `RUNNING`, `LAGGING`
+            state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `WAITING` (running with
+                no market-data source attached: it holds no place on the platform until you attach one), `RUNNING`, `LAGGING`
                 (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
                 for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
                 signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or `STOPPED`.
                 `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown value as a
                 running run with something to look at. See the Live execution guide.
             desired (LiveRunDesired): What you last asked for. `state` can lag this briefly after `DELETE`.
-            sources (list[LiveSource]):
+            sources (list[LiveSource]): The sources the run is reading, those of its attachments that are `ATTACHING` or
+                `ATTACHED`. Empty while it waits.
             params (LiveRunParams):
             params_version (int): Increments on every accepted `PUT .../params` call, including one that resends the current
                 values.
@@ -71,6 +74,8 @@ class LiveRun:
                 live-run limit) until then; one that cannot run, and will not by waiting, because its strategy cannot
                 consume its source type or because the pool of a `dex` run is not a pool or has no room to be followed,
                 is stopped by the platform itself (`desired: STOPPED`), so it holds no place.
+            attachments (list[LiveAttachment] | Unset): The market-data sources attached to the run, with their state. See
+                the "Attaching and detaching a source" section of the Live execution guide.
             gate (LiveRunGate | Unset): The sandbox trial's promotion verdict. Absent for the whole trial and present once
                 it ends, so an absent `gate` means the trial has not finished. A run that started in `LIVE` without a trial has
                 it from the start: the verdict of the earlier run it relies on, with `inheritedFrom` naming that run. `passed`
@@ -104,6 +109,7 @@ class LiveRun:
     name: str | Unset = UNSET
     description: str | Unset = UNSET
     reason: str | Unset = UNSET
+    attachments: list[LiveAttachment] | Unset = UNSET
     gate: LiveRunGate | Unset = UNSET
     paper: LivePaperConfig | Unset = UNSET
     stats: LiveRunStats | Unset = UNSET
@@ -141,6 +147,13 @@ class LiveRun:
 
         reason = self.reason
 
+        attachments: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.attachments, Unset):
+            attachments = []
+            for attachments_item_data in self.attachments:
+                attachments_item = attachments_item_data.to_dict()
+                attachments.append(attachments_item)
+
         gate: dict[str, Any] | Unset = UNSET
         if not isinstance(self.gate, Unset):
             gate = self.gate.to_dict()
@@ -176,6 +189,8 @@ class LiveRun:
             field_dict["description"] = description
         if reason is not UNSET:
             field_dict["reason"] = reason
+        if attachments is not UNSET:
+            field_dict["attachments"] = attachments
         if gate is not UNSET:
             field_dict["gate"] = gate
         if paper is not UNSET:
@@ -187,6 +202,7 @@ class LiveRun:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.live_attachment import LiveAttachment
         from ..models.live_paper_config import LivePaperConfig
         from ..models.live_run_gate import LiveRunGate
         from ..models.live_run_params import LiveRunParams
@@ -227,6 +243,15 @@ class LiveRun:
 
         reason = d.pop("reason", UNSET)
 
+        _attachments = d.pop("attachments", UNSET)
+        attachments: list[LiveAttachment] | Unset = UNSET
+        if _attachments is not UNSET:
+            attachments = []
+            for attachments_item_data in _attachments:
+                attachments_item = LiveAttachment.from_dict(attachments_item_data)
+
+                attachments.append(attachments_item)
+
         _gate = d.pop("gate", UNSET)
         gate: LiveRunGate | Unset
         if isinstance(_gate, Unset):
@@ -263,6 +288,7 @@ class LiveRun:
             name=name,
             description=description,
             reason=reason,
+            attachments=attachments,
             gate=gate,
             paper=paper,
             stats=stats,

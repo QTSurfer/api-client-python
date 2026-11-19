@@ -34,9 +34,11 @@ class DatasetUploadState:
                  Example: ready.
             job_id (str | Unset): The ingest job id, while `status` is `ingesting`.
             error (str | Unset): A human-readable reason, present when `status` is `failed` (e.g. bad CSV contract,
-                mixed timestamp units, a `.zip` with no file inside or more than one). Durably
-                recorded alongside the failure itself, so it stays available however long after the
-                fact you poll — not tied to how recently the failure happened.
+                mixed timestamp units, a `.zip` with no file inside or more than one). A timestamp
+                that reads as none of the accepted forms is named with its line and the forms that
+                would have been accepted. Durably recorded alongside the failure itself, so it stays
+                available however long after the fact you poll — not tied to how recently the failure
+                happened.
                  Example: line 3: column 'close' is not a number: not-a-number.
             version (DatasetVersion | Unset): One successfully ingested upload. Cadence and timestamp unit are discovered
                 from the file,

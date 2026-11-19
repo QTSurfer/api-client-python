@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.57] — 2026-11-19
+
+### Added ✨
+
+- Parse API-key expiry as `AuthTokenResponse.key_exp` and `Account.api_key_expires_at`; model
+  the token endpoint's `401` as `AuthTokenRejected` with `error == "invalid_credentials"`.
+- Add typed `attach_live_source` and `detach_live_source` endpoint functions and models for live
+  attachments. A run can wait without a source or read multiple sources on the same market feed.
+
+### Changed 🔄
+
+- Regenerate from OpenAPI `0.128.57`, including the expanded UTC date/date-time forms accepted for
+  CSV timestamps in `0.128.56` and the multi-source live execution contract in `0.128.57`.
+
 ## [0.128.54] — 2026-11-04
 
 ### Added ✨

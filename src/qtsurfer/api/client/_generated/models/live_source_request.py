@@ -15,8 +15,8 @@ T = TypeVar("T", bound="LiveSourceRequest")
 
 @_attrs_define
 class LiveSourceRequest:
-    """One market feed to start a live run on. Exactly one entry per run today. It is `LiveSource` as you ask for it: the
-    only difference is that `instruments` can be left out.
+    """One market-data source to start a live run on, or to attach to one. It is `LiveSource` as you ask for it: the only
+    difference is that `instruments` can be left out.
 
         Attributes:
             venue_type (LiveSourceRequestVenueType): Venue category. `cex` is a centralized exchange and `dex` is one pool

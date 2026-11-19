@@ -22,7 +22,8 @@ T = TypeVar("T", bound="StartLiveRequest")
 class StartLiveRequest:
     """
     Attributes:
-        sources (list[LiveSourceRequest]):
+        sources (list[LiveSourceRequest] | Unset): One source to start on, or none (left out, or `[]`): the run then
+            waits, with `state` `WAITING`, until you attach one with `POST /live/{runId}/attachments`.
         params (StartLiveRequestParams | Unset): Strategy parameters to start with. Opaque key/value pairs — see this
             strategy's own `declaredProperties` (from `POST /strategy`) for the keys it accepts.
         visibility (StartLiveRequestVisibility | Unset): A `public` run appears in `GET /live/public` and its signal
@@ -82,7 +83,7 @@ class StartLiveRequest:
             in; `accounts` is returned when the request gave it.
     """
 
-    sources: list[LiveSourceRequest]
+    sources: list[LiveSourceRequest] | Unset = UNSET
     params: StartLiveRequestParams | Unset = UNSET
     visibility: StartLiveRequestVisibility | Unset = StartLiveRequestVisibility.PRIVATE
     relay: bool | Unset = False
@@ -96,10 +97,12 @@ class StartLiveRequest:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        sources = []
-        for sources_item_data in self.sources:
-            sources_item = sources_item_data.to_dict()
-            sources.append(sources_item)
+        sources: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.sources, Unset):
+            sources = []
+            for sources_item_data in self.sources:
+                sources_item = sources_item_data.to_dict()
+                sources.append(sources_item)
 
         params: dict[str, Any] | Unset = UNSET
         if not isinstance(self.params, Unset):
@@ -129,11 +132,9 @@ class StartLiveRequest:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "sources": sources,
-            }
-        )
+        field_dict.update({})
+        if sources is not UNSET:
+            field_dict["sources"] = sources
         if params is not UNSET:
             field_dict["params"] = params
         if visibility is not UNSET:
@@ -164,12 +165,14 @@ class StartLiveRequest:
         from ..models.start_live_request_params import StartLiveRequestParams
 
         d = dict(src_dict)
-        sources = []
-        _sources = d.pop("sources")
-        for sources_item_data in _sources:
-            sources_item = LiveSourceRequest.from_dict(sources_item_data)
+        _sources = d.pop("sources", UNSET)
+        sources: list[LiveSourceRequest] | Unset = UNSET
+        if _sources is not UNSET:
+            sources = []
+            for sources_item_data in _sources:
+                sources_item = LiveSourceRequest.from_dict(sources_item_data)
 
-            sources.append(sources_item)
+                sources.append(sources_item)
 
         _params = d.pop("params", UNSET)
         params: StartLiveRequestParams | Unset

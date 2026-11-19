@@ -13,7 +13,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT_DIR"
 
-SPEC_URL="${SPEC_URL:-https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/main/openapi.yaml}"
+SPEC_REF=$(uv run python -c "import tomllib; print(tomllib.loads(open('pyproject.toml', 'rb').read().decode())['tool']['qtsurfer']['openapi_spec_ref'])")
+SPEC_URL="${SPEC_URL:-https://raw.githubusercontent.com/QTSurfer/qtsurfer-api/${SPEC_REF}/openapi.yaml}"
 GEN_OUT="${TMPDIR:-/tmp}/qtsurfer-client-gen"
 TARGET_DIR="src/qtsurfer/api/client/_generated"
 GENERATED_PKG="qtsurfer_api_client"
