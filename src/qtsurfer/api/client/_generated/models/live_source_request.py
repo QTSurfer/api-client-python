@@ -23,14 +23,15 @@ class LiveSourceRequest:
                 on a decentralized exchange, which takes its own `exchange`, `segment`, `type` and `instruments` (see "Sources"
                 in the Live execution guide). `cx` and `dx`, the spellings used before, are still read as `cex` and `dex`; the
                 run always reports the new ones. Example: cex.
-            exchange (str): The exchange id, as `GET /exchanges` lists it. For a `dex` source, the chain the pool is on;
-                `robinhood` is the only one today. Example: binance.
+            exchange (str): The exchange id, as `GET /exchanges` lists it. For a `dex` source, the chain the pool or the
+                token is on, for example `robinhood` or `solana`. Example: binance.
             segment (str): The segment, as `GET /exchanges` lists it for that exchange, among its `liveSegments` (a segment
-                with no live data is refused with `400`). For a `cex` source, the market segment (`spot` today); for a `dex`
-                source, the protocol of the pool, `uniswap-v3` the only one today. Example: spot.
+                with no live data is refused with `400`). For a `cex` source, the market segment (for example `spot`); for a
+                `dex` source, the protocol of the pool, for example `uniswap-v3`, or on `solana` the segment `pumpfun`, which
+                follows a token by its mint. Example: spot.
             type_ (LiveSourceRequestType): Both `ticker` and `kline` connect to the lightest (fastest) cadence available for
-                the exchange — today, 1 tick/second on every supported exchange. Choosing a specific cadence is not offered yet.
-                A `dex` source supports only `kline`: one candle per second of the pool's trades.
+                the exchange. Choosing a specific cadence is not offered. A `dex` source supports only `kline`: one candle per
+                second of the pool's trades.
             instruments (list[str] | Unset): Which instruments the run reads. A QTScript strategy can declare which
                 instruments it accepts with an `instruments` line in its source. When the compilation of the strategy records
                 that selection as a list of pairs, leaving `instruments` out, or sending `["*"]`, takes that list; otherwise the
@@ -41,9 +42,10 @@ class LiveSourceRequest:
                 `/`, an empty side, a `.` or a space inside a side, or a `*` mixed with other characters of a side) makes the
                 run fail when it starts. Plan limits: a list with an entry that has a `*` on a side counts like `["*"]` and only
                 plans that include the wildcard accept it; the other entries are counted one by one. The instruments the run
-                actually reads come back in the run's `sources`. A `dex` source needs exactly one entry, the address of its pool
-                (`0x` and 40 hexadecimal digits, not case-sensitive): it cannot be left out and `*` is not accepted. Example:
-                ['BTC/USDT'].
+                actually reads come back in the run's `sources`. A `dex` source needs exactly one entry: the address of its pool
+                (`0x` and 40 hexadecimal digits, not case-sensitive) or, on `solana`, the mint of its token (a base58 key of 32
+                to 44 characters, case-sensitive: write it as the token has it). It cannot be left out and `*` is not accepted.
+                Example: ['BTC/USDT'].
     """
 
     venue_type: LiveSourceRequestVenueType

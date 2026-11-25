@@ -18,8 +18,8 @@ class PoolListMeta:
     """Metadata describing the pools listing of a decentralized exchange
 
     Attributes:
-        updated_at (datetime.datetime): When this listing was last refreshed. It is refreshed every hour, and the
-            `lastPrice` of each pool is as of this time. Example: 2026-10-14T22:32:34Z.
+        updated_at (datetime.datetime): When this listing was last refreshed. The `lastPrice` of each pool is as of this
+            time. Example: 2026-10-14T22:32:34Z.
         exchange (str): The exchange the pools belong to Example: robinhood.
         segment (str): The protocol served in `data`, one of the exchange's `segments` Example: uniswap-v3.
         venue_type (PoolListMetaVenueType): The venue type of the exchange, as `GET /exchanges` lists it. Always `dex`

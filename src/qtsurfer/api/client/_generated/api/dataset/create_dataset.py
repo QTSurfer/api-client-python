@@ -49,6 +49,11 @@ def _parse_response(
 
         return response_403
 
+    if response.status_code == 404:
+        response_404 = ResponseError.from_dict(response.json())
+
+        return response_404
+
     if response.status_code == 409:
         response_409 = ResponseError.from_dict(response.json())
 
@@ -110,7 +115,7 @@ def sync_detailed(
     discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as it is. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
     one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
     and an uploaded lastra file both report `dataFormat: \"lastra\"`).
@@ -177,7 +182,7 @@ def sync(
     discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as it is. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
     one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
     and an uploaded lastra file both report `dataFormat: \"lastra\"`).
@@ -239,7 +244,7 @@ async def asyncio_detailed(
     discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as it is. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
     one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
     and an uploaded lastra file both report `dataFormat: \"lastra\"`).
@@ -304,7 +309,7 @@ async def asyncio(
     discovered from the data, not declared, for all three.
 
     A CSV upload is converted to our native columnar format (`lastra`) for storage. A parquet
-    or lastra upload is stored as-is today. Either way, always check `dataFormat` on
+    or lastra upload is stored as it is. Either way, always check `dataFormat` on
     `GET /datasets/{datasetId}` and `GET /datasets/{datasetId}/uploads/{uploadId}` for which
     one `dataUrl` actually is, rather than assuming from how you uploaded it (a converted CSV
     and an uploaded lastra file both report `dataFormat: \"lastra\"`).

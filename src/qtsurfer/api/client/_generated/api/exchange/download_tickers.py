@@ -109,11 +109,11 @@ def sync_detailed(
     One segment = one hour, aligned to UTC. The `hour` query parameter selects
     the segment and must match `YYYY-MM-DDTHH` (no minutes/seconds, no timezone
     suffix). Example: `hour=2026-10-15T10` is the segment `h10.lastra` of
-    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be one of the last 7 days (see
+    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be a recent one (see
     below): read the example as the shape of the value.
 
-    **Which hours.** The last 7 days: an hour that started no more than 7 days before the
-    request and has ended. This route gives one hour of one instrument, fast; it is not how to
+    **Which hours.** Recent hours only: an hour that has ended and is not too old. This route gives one
+    hour of one instrument, fast; it is not how to
     get older history or a range. An older hour is `400` with `reason: OUTSIDE_WINDOW`, and the
     error carries `next`, the `POST /datasets/imports` request that imports exactly that hour
     as a dataset (add a `name`); a longer span is imported the same way, within your plan's
@@ -122,7 +122,7 @@ def sync_detailed(
     **The hour in progress and the last hours.** The hour in progress, and an hour that has ended
     but is not stored yet, can be answered with what has been received so far, marked provisional:
     `200` with `X-Data-Status: provisional` and `X-Data-Through`, the instant of the last row.
-    Not every deployment of the service gives provisional answers: where it does not, those hours
+    The service does not always give provisional answers: when it does not, those hours
     are `404` with `reason: NOT_YET_AVAILABLE` and a `Retry-After`, and a client that needs them
     handles both. A provisional answer is not to keep: it can still grow, and the stored hour
     replaces it once there is one. It takes seconds to build, longer the further the hour has gone,
@@ -204,11 +204,11 @@ def sync(
     One segment = one hour, aligned to UTC. The `hour` query parameter selects
     the segment and must match `YYYY-MM-DDTHH` (no minutes/seconds, no timezone
     suffix). Example: `hour=2026-10-15T10` is the segment `h10.lastra` of
-    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be one of the last 7 days (see
+    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be a recent one (see
     below): read the example as the shape of the value.
 
-    **Which hours.** The last 7 days: an hour that started no more than 7 days before the
-    request and has ended. This route gives one hour of one instrument, fast; it is not how to
+    **Which hours.** Recent hours only: an hour that has ended and is not too old. This route gives one
+    hour of one instrument, fast; it is not how to
     get older history or a range. An older hour is `400` with `reason: OUTSIDE_WINDOW`, and the
     error carries `next`, the `POST /datasets/imports` request that imports exactly that hour
     as a dataset (add a `name`); a longer span is imported the same way, within your plan's
@@ -217,7 +217,7 @@ def sync(
     **The hour in progress and the last hours.** The hour in progress, and an hour that has ended
     but is not stored yet, can be answered with what has been received so far, marked provisional:
     `200` with `X-Data-Status: provisional` and `X-Data-Through`, the instant of the last row.
-    Not every deployment of the service gives provisional answers: where it does not, those hours
+    The service does not always give provisional answers: when it does not, those hours
     are `404` with `reason: NOT_YET_AVAILABLE` and a `Retry-After`, and a client that needs them
     handles both. A provisional answer is not to keep: it can still grow, and the stored hour
     replaces it once there is one. It takes seconds to build, longer the further the hour has gone,
@@ -294,11 +294,11 @@ async def asyncio_detailed(
     One segment = one hour, aligned to UTC. The `hour` query parameter selects
     the segment and must match `YYYY-MM-DDTHH` (no minutes/seconds, no timezone
     suffix). Example: `hour=2026-10-15T10` is the segment `h10.lastra` of
-    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be one of the last 7 days (see
+    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be a recent one (see
     below): read the example as the shape of the value.
 
-    **Which hours.** The last 7 days: an hour that started no more than 7 days before the
-    request and has ended. This route gives one hour of one instrument, fast; it is not how to
+    **Which hours.** Recent hours only: an hour that has ended and is not too old. This route gives one
+    hour of one instrument, fast; it is not how to
     get older history or a range. An older hour is `400` with `reason: OUTSIDE_WINDOW`, and the
     error carries `next`, the `POST /datasets/imports` request that imports exactly that hour
     as a dataset (add a `name`); a longer span is imported the same way, within your plan's
@@ -307,7 +307,7 @@ async def asyncio_detailed(
     **The hour in progress and the last hours.** The hour in progress, and an hour that has ended
     but is not stored yet, can be answered with what has been received so far, marked provisional:
     `200` with `X-Data-Status: provisional` and `X-Data-Through`, the instant of the last row.
-    Not every deployment of the service gives provisional answers: where it does not, those hours
+    The service does not always give provisional answers: when it does not, those hours
     are `404` with `reason: NOT_YET_AVAILABLE` and a `Retry-After`, and a client that needs them
     handles both. A provisional answer is not to keep: it can still grow, and the stored hour
     replaces it once there is one. It takes seconds to build, longer the further the hour has gone,
@@ -387,11 +387,11 @@ async def asyncio(
     One segment = one hour, aligned to UTC. The `hour` query parameter selects
     the segment and must match `YYYY-MM-DDTHH` (no minutes/seconds, no timezone
     suffix). Example: `hour=2026-10-15T10` is the segment `h10.lastra` of
-    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be one of the last 7 days (see
+    2026-10-15, covering `[10:00:00Z, 11:00:00Z)`. The hour has to be a recent one (see
     below): read the example as the shape of the value.
 
-    **Which hours.** The last 7 days: an hour that started no more than 7 days before the
-    request and has ended. This route gives one hour of one instrument, fast; it is not how to
+    **Which hours.** Recent hours only: an hour that has ended and is not too old. This route gives one
+    hour of one instrument, fast; it is not how to
     get older history or a range. An older hour is `400` with `reason: OUTSIDE_WINDOW`, and the
     error carries `next`, the `POST /datasets/imports` request that imports exactly that hour
     as a dataset (add a `name`); a longer span is imported the same way, within your plan's
@@ -400,7 +400,7 @@ async def asyncio(
     **The hour in progress and the last hours.** The hour in progress, and an hour that has ended
     but is not stored yet, can be answered with what has been received so far, marked provisional:
     `200` with `X-Data-Status: provisional` and `X-Data-Through`, the instant of the last row.
-    Not every deployment of the service gives provisional answers: where it does not, those hours
+    The service does not always give provisional answers: when it does not, those hours
     are `404` with `reason: NOT_YET_AVAILABLE` and a `Retry-After`, and a client that needs them
     handles both. A provisional answer is not to keep: it can still grow, and the stored hour
     replaces it once there is one. It takes seconds to build, longer the further the hour has gone,

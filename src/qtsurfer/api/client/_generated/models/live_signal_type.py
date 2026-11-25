@@ -7,6 +7,7 @@ class LiveSignalType(str, Enum):
     INFO = "info"
     MARKER = "marker"
     PAPER = "paper"
+    SYSTEM = "system"
 
     def __str__(self) -> str:
         return str(self.value)

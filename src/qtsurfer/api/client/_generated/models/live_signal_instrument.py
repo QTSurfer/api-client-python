@@ -17,11 +17,16 @@ class LiveSignalInstrument:
     Attributes:
         exchange (str | Unset):
         segment (str | Unset):
+        id (str | Unset): For a `dex` run, the contract the signal is about: the address of the pool, or the mint of the
+            token, as `GET /exchange/{exchange}/{segment}/instruments` lists a pool's `id`. `symbol` is the pair as the
+            candles name it, and a symbol does not identify a token, since another can be issued under the same one, so act
+            on `id`. Absent for the instrument of a centralized exchange.
         symbol (str | Unset): Slashed form, e.g. `BTC/USDT`.
     """
 
     exchange: str | Unset = UNSET
     segment: str | Unset = UNSET
+    id: str | Unset = UNSET
     symbol: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -29,6 +34,8 @@ class LiveSignalInstrument:
         exchange = self.exchange
 
         segment = self.segment
+
+        id = self.id
 
         symbol = self.symbol
 
@@ -39,6 +46,8 @@ class LiveSignalInstrument:
             field_dict["exchange"] = exchange
         if segment is not UNSET:
             field_dict["segment"] = segment
+        if id is not UNSET:
+            field_dict["id"] = id
         if symbol is not UNSET:
             field_dict["symbol"] = symbol
 
@@ -51,11 +60,14 @@ class LiveSignalInstrument:
 
         segment = d.pop("segment", UNSET)
 
+        id = d.pop("id", UNSET)
+
         symbol = d.pop("symbol", UNSET)
 
         live_signal_instrument = cls(
             exchange=exchange,
             segment=segment,
+            id=id,
             symbol=symbol,
         )
 

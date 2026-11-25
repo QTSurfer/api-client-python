@@ -36,8 +36,8 @@ class ResultMap:
                 changed once already and callers that indexed a fixed position broke on it.
                  Example: strategy:00000000-0000-0000-0000-000000000000:2iyvtenlzh9dabqtxn7nbv.
             instrument (str): The instrument (currency pair) that was backtested Example: BTC/USDT.
-            host_name (str | Unset): Identifier of the worker that executed the strategy. Useful when reporting issues so
-                support can correlate with logs. Example: executor10.
+            host_name (str | Unset): Identifier of what executed the strategy. Quote it when you report an issue. Example:
+                executor10.
             iops (float | Unset): Instrument operations per second throughput during execution Example: 123956.53.
             notices (list[Notice] | Unset): Diagnostics the engine raised over this run, each with `provenance: execute`.
 

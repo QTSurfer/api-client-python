@@ -26,8 +26,8 @@ class DatasetImportCexRequest:
                 A decentralized exchange's id is `400`: import its pools with `type: dex`.
                  Example: binance.
             segment (DatasetImportCexRequestSegment): The market segment, one of the exchange's `segments`. `spot` is the
-                only segment a
-                `cex` import takes today, which matches `instrument` being a plain spot pair.
+                segment a
+                `cex` import takes, which matches `instrument` being a plain spot pair.
                  Example: spot.
             data_type (DatasetImportCexRequestDataType): What to import, and the resulting dataset's `type`: `ticker` — the
                 exchange's ticker

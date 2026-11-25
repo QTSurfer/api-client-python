@@ -475,6 +475,7 @@ def test_attach_and_detach_live_source(client: AuthenticatedClient) -> None:
         ),
         warm_from=300,
         ref="alert-1",
+        resolve_instrument=False,
     )
 
     attached = attach_live_source.sync_detailed("run-1", client=client, body=body)
@@ -491,6 +492,7 @@ def test_attach_and_detach_live_source(client: AuthenticatedClient) -> None:
         },
         "warmFrom": 300,
         "ref": "alert-1",
+        "resolveInstrument": False,
     }
     assert isinstance(attached.parsed, LiveAttachmentAccepted)
     assert attached.parsed.state is LiveAttachmentAcceptedState.ATTACHING

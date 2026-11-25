@@ -256,6 +256,20 @@ imports with an explicit cadence produce candles; omission also produces candles
 that include the source's native rate, where it keeps per-trade data. User file uploads are not
 subject to plan cadence limits.
 
+Dataset collections are available from `qtsurfer.api.client.api.dataset`: create, list, read,
+update, or delete them. Use `collection_id` when creating or importing a dataset, filter
+`list_datasets` with an id or `"none"` for root datasets, and pass
+`DatasetMoveRequest(collection_id=None)` to `move_dataset` to return a dataset to the root.
+Deleting a collection keeps its datasets and returns them to the root.
+
+### Signal channels
+
+Import channel, notice, offer, code, subscription, and delivery endpoints from
+`qtsurfer.api.client.api.signal_channels`. The
+[signal channels guide](https://www.qtsurfer.com/docs/developers/api/signals) explains the
+publisher and subscriber workflows. Keep webhook paths and unredeemed codes private.
+A delivery waiting for its scheduled time omits its source and notice data.
+
 ### Live execution
 
 `start_live` starts a compiled strategy against one live source. Use `get_live` to inspect its

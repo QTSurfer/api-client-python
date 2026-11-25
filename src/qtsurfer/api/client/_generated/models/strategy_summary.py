@@ -8,6 +8,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
+from ..models.strategy_language import StrategyLanguage
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="StrategySummary")
@@ -26,6 +27,12 @@ class StrategySummary:
                 the language — see `POST /strategy` for exactly which rewrites preserve it and which do
                 not.
                  Example: 6bsh31ikwkuivhtgcoa6s4.
+            name (str | Unset): What the strategy calls itself, read from its source: the name in the `strategy "Name"`
+                header of a
+                QTScript strategy, the public class of a Java one. It is the name to show for it wherever it is listed.
+                Absent, not empty, when the source gives none (a Java source without a public class).
+                 Example: Detach one of two.
+            language (StrategyLanguage | Unset): What the source of the strategy is written in. Example: qtscript.
             compiled_at (datetime.datetime | Unset): When the live compilation was produced.
             required_sources (list[str] | Unset): The market data this strategy needs. Absent, not empty, when it could
                 not be established without constructing the strategy.
@@ -35,6 +42,8 @@ class StrategySummary:
     """
 
     strategy_id: str
+    name: str | Unset = UNSET
+    language: StrategyLanguage | Unset = UNSET
     compiled_at: datetime.datetime | Unset = UNSET
     required_sources: list[str] | Unset = UNSET
     deleted_at: datetime.datetime | Unset = UNSET
@@ -42,6 +51,12 @@ class StrategySummary:
 
     def to_dict(self) -> dict[str, Any]:
         strategy_id = self.strategy_id
+
+        name = self.name
+
+        language: str | Unset = UNSET
+        if not isinstance(self.language, Unset):
+            language = self.language.value
 
         compiled_at: str | Unset = UNSET
         if not isinstance(self.compiled_at, Unset):
@@ -62,6 +77,10 @@ class StrategySummary:
                 "strategyId": strategy_id,
             }
         )
+        if name is not UNSET:
+            field_dict["name"] = name
+        if language is not UNSET:
+            field_dict["language"] = language
         if compiled_at is not UNSET:
             field_dict["compiledAt"] = compiled_at
         if required_sources is not UNSET:
@@ -75,6 +94,15 @@ class StrategySummary:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
+
+        name = d.pop("name", UNSET)
+
+        _language = d.pop("language", UNSET)
+        language: StrategyLanguage | Unset
+        if isinstance(_language, Unset):
+            language = UNSET
+        else:
+            language = StrategyLanguage(_language)
 
         _compiled_at = d.pop("compiledAt", UNSET)
         compiled_at: datetime.datetime | Unset
@@ -94,6 +122,8 @@ class StrategySummary:
 
         strategy_summary = cls(
             strategy_id=strategy_id,
+            name=name,
+            language=language,
             compiled_at=compiled_at,
             required_sources=required_sources,
             deleted_at=deleted_at,

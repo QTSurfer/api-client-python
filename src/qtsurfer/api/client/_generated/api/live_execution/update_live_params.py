@@ -100,6 +100,11 @@ def sync_detailed(
     WebSocket paths to this same update (see the \"Live execution\" guide) land on the exact same
     value at the exact same moment.
 
+    A run that reads no source (`state: WAITING`) is not running anywhere, so there is no moment to
+    apply
+    the change at: the new values are kept for the run and it starts with them when its first source is
+    attached. The answer has no `effectiveAtMs`.
+
     Args:
         run_id (str):
         body (UpdateLiveParamsRequest):
@@ -144,6 +149,11 @@ def sync(
     WebSocket paths to this same update (see the \"Live execution\" guide) land on the exact same
     value at the exact same moment.
 
+    A run that reads no source (`state: WAITING`) is not running anywhere, so there is no moment to
+    apply
+    the change at: the new values are kept for the run and it starts with them when its first source is
+    attached. The answer has no `effectiveAtMs`.
+
     Args:
         run_id (str):
         body (UpdateLiveParamsRequest):
@@ -182,6 +192,11 @@ async def asyncio_detailed(
     earliest moment it is guaranteed to apply, a few seconds out, so both the REST and
     WebSocket paths to this same update (see the \"Live execution\" guide) land on the exact same
     value at the exact same moment.
+
+    A run that reads no source (`state: WAITING`) is not running anywhere, so there is no moment to
+    apply
+    the change at: the new values are kept for the run and it starts with them when its first source is
+    attached. The answer has no `effectiveAtMs`.
 
     Args:
         run_id (str):
@@ -224,6 +239,11 @@ async def asyncio(
     earliest moment it is guaranteed to apply, a few seconds out, so both the REST and
     WebSocket paths to this same update (see the \"Live execution\" guide) land on the exact same
     value at the exact same moment.
+
+    A run that reads no source (`state: WAITING`) is not running anywhere, so there is no moment to
+    apply
+    the change at: the new values are kept for the run and it starts with them when its first source is
+    attached. The answer has no `effectiveAtMs`.
 
     Args:
         run_id (str):

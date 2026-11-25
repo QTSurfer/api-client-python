@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -12,6 +12,10 @@ from ..models.dataset_status import DatasetStatus
 from ..models.dataset_timestamp_unit import DatasetTimestampUnit
 from ..models.dataset_type import DatasetType
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.dataset_meta import DatasetMeta
+
 
 T = TypeVar("T", bound="Dataset")
 
@@ -28,7 +32,7 @@ class Dataset:
 
         Attributes:
             dataset_id (str): Opaque id, returned by `POST /datasets`. Example: ds_3f9a1c2e7b0d4a5f.
-            name (str): Unique among your datasets. Example: My BTC ticks.
+            name (str): Unique among your datasets, whatever collection each is in. Example: My BTC ticks.
             type_ (DatasetType): What the rows of the current version are, decided when the version became `ready`. An
                 import that knows what it fetched says so: a `cex` import is its `dataType`, a `dex`
                 import of candles is `klines`. Everything else (an upload, a `dex` import of on-chain
@@ -52,6 +56,24 @@ class Dataset:
                 * `pending` — nothing has ever been attempted (just created, or an upload was never
                   finalized).
                  Example: ready.
+            collection_id (str | Unset): The collection the dataset is in. Absent when it is at the root, never `null`. It
+                changes with `PATCH /datasets/{datasetId}`, and goes away when the collection is deleted.
+                 Example: dc_3f9a1c2e7b0d4a5f.
+            meta (DatasetMeta | Unset): How the dataset came to be: a flat map of text to text, written once when the
+                dataset
+                is created and never changed afterwards. Always present, `{}` when nothing was recorded
+                (an upload, or a dataset created before this field existed). It is information for
+                whoever looks at the dataset, not something the API decides anything from.
+
+                An import records what it was asked for, under keys that begin with `import.`
+                (`import.type`, `import.cadence`, `import.from`, `import.to`, the range requested),
+                `dex.` (`dex.network`, `dex.contract`, `dex.id`, `dex.version`, `dex.factory`) or `cex.`
+                (`cex.exchange`, `cex.segment`, `cex.data_type`). A key with no value is left out. The
+                keys the caller sent with the import (`pool.*`, `user.*`, see `DatasetImportRequest`)
+                come back beside them.
+                 Example: {'import.type': 'dex', 'import.cadence': '1s', 'import.from': '2026-11-16T00:25:02Z', 'import.to':
+                '2026-11-16T10:30:00Z', 'dex.network': 'solana', 'dex.contract': '6nwmQSgHWtRfXw9xqQM3hseyKzWrQq2gzamoSbjKqs32',
+                'pool.name': 'FiveM / SOL'}.
             current_version_id (str | Unset): The id of the most recently finalized, successfully ingested version. Absent
                 until at
                 least one upload has finished ingesting.
@@ -96,6 +118,8 @@ class Dataset:
     instrument: str
     created_at: datetime.datetime
     status: DatasetStatus
+    collection_id: str | Unset = UNSET
+    meta: DatasetMeta | Unset = UNSET
     current_version_id: str | Unset = UNSET
     deleted_at: datetime.datetime | Unset = UNSET
     updated_at: datetime.datetime | Unset = UNSET
@@ -122,6 +146,12 @@ class Dataset:
         created_at = self.created_at.isoformat()
 
         status = self.status.value
+
+        collection_id = self.collection_id
+
+        meta: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.meta, Unset):
+            meta = self.meta.to_dict()
 
         current_version_id = self.current_version_id
 
@@ -169,6 +199,10 @@ class Dataset:
                 "status": status,
             }
         )
+        if collection_id is not UNSET:
+            field_dict["collectionId"] = collection_id
+        if meta is not UNSET:
+            field_dict["meta"] = meta
         if current_version_id is not UNSET:
             field_dict["currentVersionId"] = current_version_id
         if deleted_at is not UNSET:
@@ -198,6 +232,8 @@ class Dataset:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.dataset_meta import DatasetMeta
+
         d = dict(src_dict)
         dataset_id = d.pop("datasetId")
 
@@ -210,6 +246,15 @@ class Dataset:
         created_at = isoparse(d.pop("createdAt"))
 
         status = DatasetStatus(d.pop("status"))
+
+        collection_id = d.pop("collectionId", UNSET)
+
+        _meta = d.pop("meta", UNSET)
+        meta: DatasetMeta | Unset
+        if isinstance(_meta, Unset):
+            meta = UNSET
+        else:
+            meta = DatasetMeta.from_dict(_meta)
 
         current_version_id = d.pop("currentVersionId", UNSET)
 
@@ -267,6 +312,8 @@ class Dataset:
             instrument=instrument,
             created_at=created_at,
             status=status,
+            collection_id=collection_id,
+            meta=meta,
             current_version_id=current_version_id,
             deleted_at=deleted_at,
             updated_at=updated_at,

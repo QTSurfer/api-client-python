@@ -1,6 +1,6 @@
 [project]
 name = "qtsurfer-api-client"
-version = "0.128.57"
+version = "0.128.70"
 description = "Auto-generated Python client for the QTSurfer API."
 readme = "README.md"
 license = "Apache-2.0"
@@ -56,12 +56,14 @@ requires = ["hatchling<1.32"]
 build-backend = "hatchling.build"
 
 [tool.qtsurfer]
-openapi_spec_ref = "2748c5a5406f0c1b1c32e0923c0799c1a5fe9dac"
+openapi_spec_ref = "d5732501bb7db85c37044c7bdefa0bd172c7b1d7"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/qtsurfer"]
 
 [tool.hatch.build.targets.sdist]
+# The release workflow fetches the pinned spec into a Git-ignored path.
+ignore-vcs = true
 include = [
     "src/",
     "LICENSE",

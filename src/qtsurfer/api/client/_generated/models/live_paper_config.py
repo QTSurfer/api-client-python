@@ -44,8 +44,8 @@ class LivePaperConfig:
                 balance, as on a venue with one wallet per asset. `instrument` is one isolated account per instrument, each a
                 simulation of that instrument alone with its own `initialFunding`, which is what makes it comparable with a
                 backtest of the instrument but less realistic, since a venue has one wallet per asset and not one per pair. It
-                needs the instruments of the run named: a wildcard is refused, on every plan. Default:
-                LivePaperConfigAccounts.CURRENCY.
+                needs the instruments of the run named: a wildcard is refused, on every plan, at start and in every source
+                attached afterwards. Default: LivePaperConfigAccounts.CURRENCY.
     """
 
     initial_funding: float | Unset = 100.0

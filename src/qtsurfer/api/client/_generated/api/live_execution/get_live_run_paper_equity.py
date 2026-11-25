@@ -131,8 +131,8 @@ def sync_detailed(
     parameters, with the account's `currency` and its `gaps` alongside. The curve is kept for
     the life of the run, so unlike signals it has no moving window.
 
-    It is one series of running equity: the value after every closed trade and, every minute
-    of market time while positions are open, the value marked to market. Where the run was
+    It is one series of running equity: the value after every closed trade and, periodically
+    while positions are open, the value marked to market. Where the run was
     restarted with positions open, those positions are not carried over, so the curve has no
     value there: that moment is listed in `gaps` and is not a point of the curve.
 
@@ -244,8 +244,8 @@ def sync(
     parameters, with the account's `currency` and its `gaps` alongside. The curve is kept for
     the life of the run, so unlike signals it has no moving window.
 
-    It is one series of running equity: the value after every closed trade and, every minute
-    of market time while positions are open, the value marked to market. Where the run was
+    It is one series of running equity: the value after every closed trade and, periodically
+    while positions are open, the value marked to market. Where the run was
     restarted with positions open, those positions are not carried over, so the curve has no
     value there: that moment is listed in `gaps` and is not a point of the curve.
 
@@ -352,8 +352,8 @@ async def asyncio_detailed(
     parameters, with the account's `currency` and its `gaps` alongside. The curve is kept for
     the life of the run, so unlike signals it has no moving window.
 
-    It is one series of running equity: the value after every closed trade and, every minute
-    of market time while positions are open, the value marked to market. Where the run was
+    It is one series of running equity: the value after every closed trade and, periodically
+    while positions are open, the value marked to market. Where the run was
     restarted with positions open, those positions are not carried over, so the curve has no
     value there: that moment is listed in `gaps` and is not a point of the curve.
 
@@ -463,8 +463,8 @@ async def asyncio(
     parameters, with the account's `currency` and its `gaps` alongside. The curve is kept for
     the life of the run, so unlike signals it has no moving window.
 
-    It is one series of running equity: the value after every closed trade and, every minute
-    of market time while positions are open, the value marked to market. Where the run was
+    It is one series of running equity: the value after every closed trade and, periodically
+    while positions are open, the value marked to market. Where the run was
     restarted with positions open, those positions are not carried over, so the curve has no
     value there: that moment is listed in `gaps` and is not a point of the curve.
 

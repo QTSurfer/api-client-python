@@ -27,7 +27,7 @@ class DatasetUploadState:
             status (DatasetUploadStateStatus): * `uploading` — the file was PUT to the presigned URL, but `finalize` has not
                 been
                   called yet.
-                * `ingesting` — `finalize` was called; the worker is parsing and validating the file.
+                * `ingesting` — `finalize` was called; the file is being parsed and validated.
                 * `ready` — ingested successfully. `version` carries the result.
                 * `failed` — ingest rejected the file (e.g. bad CSV contract, mixed timestamp units, a
                   `.zip` with no file inside or more than one).

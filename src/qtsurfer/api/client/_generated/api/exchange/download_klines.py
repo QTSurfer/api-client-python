@@ -110,8 +110,8 @@ def sync_detailed(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
-    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
-    timestamps
+    The hours served (recent hours only; the hour in progress and the last hours may be provisional),
+    the timestamps
     (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
 
     Args:
@@ -165,8 +165,8 @@ def sync(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
-    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
-    timestamps
+    The hours served (recent hours only; the hour in progress and the last hours may be provisional),
+    the timestamps
     (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
 
     Args:
@@ -215,8 +215,8 @@ async def asyncio_detailed(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
-    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
-    timestamps
+    The hours served (recent hours only; the hour in progress and the last hours may be provisional),
+    the timestamps
     (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
 
     Args:
@@ -268,8 +268,8 @@ async def asyncio(
     format read the other with the same code. Use this endpoint when a
     per-tick payload would be too large for the window of interest.
 
-    The hours served (the last 7 days; the hour in progress and the last hours may be provisional), the
-    timestamps
+    The hours served (recent hours only; the hour in progress and the last hours may be provisional),
+    the timestamps
     (`ts` in microseconds, `X-Ts-Unit: micros`) and the errors are those of the tickers route.
 
     Args:

@@ -26,6 +26,19 @@ class PlanRequiredError:
             reason (str | Unset): A stable token naming the cause, for a client to branch on without reading `message`.
                 Present only on an error that has one, and each operation that can return one lists
                 the values it uses. A client treats a value it does not know like an absent `reason`.
+
+                Besides the values an operation lists, these can come with any operation:
+
+                | `reason` | Status | When |
+                |---|---|---|
+                | `STRATEGY_OUTDATED` | `409` | The strategy was compiled for an earlier version of the platform: register it
+                again. |
+                | `PLAN_REQUIRED` | `402` | Your plan does not include what the request asks for. |
+                | `PLAN_LIMIT` | `429` | You reached a limit of your own plan (no `Retry-After`: waiting does not help). |
+                | `INVALID_VALUE` | `400` | A number, a date or a name of the request could not be read. |
+                | `INVALID_BODY` | `400` | The request body is not JSON. |
+                | `WRONG_FIELD_TYPE` | `400` | A field of the body has a value of the wrong type. |
+                | `INTERNAL_ERROR` | `500` | A failure on our side; quote the reference in `message` when you ask for help. |
                  Example: OUTSIDE_WINDOW.
             retryable (bool | Unset): Whether sending the same request again can succeed. `true` for `408`, `425`, `429` and
                 every `5xx`; `false` for every other `4xx`, which fails the same way until the request

@@ -7,6 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.dataset_created_type import DatasetCreatedType
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.dataset_upload_target import DatasetUploadTarget
@@ -34,6 +35,8 @@ class DatasetCreated:
                 `Dataset.type`): a file of candles is `klines` then.
                  Example: ticker.
             instrument (str): Exchange instrument identifier (e.g. a currency pair) Example: BTC/USDT.
+            collection_id (str | Unset): The collection the dataset was created in. Present only when the request named one.
+                Example: dc_3f9a1c2e7b0d4a5f.
     """
 
     upload_id: str
@@ -42,6 +45,7 @@ class DatasetCreated:
     name: str
     type_: DatasetCreatedType
     instrument: str
+    collection_id: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -57,6 +61,8 @@ class DatasetCreated:
 
         instrument = self.instrument
 
+        collection_id = self.collection_id
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -69,6 +75,8 @@ class DatasetCreated:
                 "instrument": instrument,
             }
         )
+        if collection_id is not UNSET:
+            field_dict["collectionId"] = collection_id
 
         return field_dict
 
@@ -89,6 +97,8 @@ class DatasetCreated:
 
         instrument = d.pop("instrument")
 
+        collection_id = d.pop("collectionId", UNSET)
+
         dataset_created = cls(
             upload_id=upload_id,
             upload=upload,
@@ -96,6 +106,7 @@ class DatasetCreated:
             name=name,
             type_=type_,
             instrument=instrument,
+            collection_id=collection_id,
         )
 
         dataset_created.additional_properties = d

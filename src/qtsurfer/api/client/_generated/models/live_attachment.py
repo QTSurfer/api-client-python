@@ -28,11 +28,13 @@ class LiveAttachment:
             follow it; the run stays as it was). The set may grow: read an unknown value as a source in transition.
         created_at_ms (int):
         warm_from (int | Unset): The seconds of warm-up in effect for this source.
+        resolve_instrument (bool | Unset): The value in effect for this source: how the strategy is told of a `dex`
+            pool. See "The instrument of a pool" in the Live execution guide.
         ref (str | Unset): The `ref` it was attached with, when there was one.
         reason (str | Unset): Why it is `DETACHED` or `REFUSED`, when there is something to say: `OWNER` (you detached
             it), `REFUSED` (the platform refused it), `POOL_GONE` (a `dex` pool stopped being followed), `CAPACITY` (the
-            platform has no room to follow it) or `NO_DATA` (an instrument of a centralized exchange that the platform does
-            not capture sent nothing for five minutes). The set may grow.
+            platform has no room to follow it), `STRATEGY` (the strategy asked for it) or `NO_DATA` (an instrument of a
+            centralized exchange that the platform does not capture sent nothing for five minutes). The set may grow.
         message (str | Unset): A sentence saying more about a `REFUSED` attachment. Do not parse it.
         effective_at_ms (int | Unset): Epoch milliseconds, when the last change to this attachment takes effect.
     """
@@ -42,6 +44,7 @@ class LiveAttachment:
     state: str
     created_at_ms: int
     warm_from: int | Unset = UNSET
+    resolve_instrument: bool | Unset = UNSET
     ref: str | Unset = UNSET
     reason: str | Unset = UNSET
     message: str | Unset = UNSET
@@ -58,6 +61,8 @@ class LiveAttachment:
         created_at_ms = self.created_at_ms
 
         warm_from = self.warm_from
+
+        resolve_instrument = self.resolve_instrument
 
         ref = self.ref
 
@@ -79,6 +84,8 @@ class LiveAttachment:
         )
         if warm_from is not UNSET:
             field_dict["warmFrom"] = warm_from
+        if resolve_instrument is not UNSET:
+            field_dict["resolveInstrument"] = resolve_instrument
         if ref is not UNSET:
             field_dict["ref"] = ref
         if reason is not UNSET:
@@ -105,6 +112,8 @@ class LiveAttachment:
 
         warm_from = d.pop("warmFrom", UNSET)
 
+        resolve_instrument = d.pop("resolveInstrument", UNSET)
+
         ref = d.pop("ref", UNSET)
 
         reason = d.pop("reason", UNSET)
@@ -119,6 +128,7 @@ class LiveAttachment:
             state=state,
             created_at_ms=created_at_ms,
             warm_from=warm_from,
+            resolve_instrument=resolve_instrument,
             ref=ref,
             reason=reason,
             message=message,

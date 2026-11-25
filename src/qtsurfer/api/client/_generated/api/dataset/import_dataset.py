@@ -55,6 +55,11 @@ def _parse_response(
 
         return response_403
 
+    if response.status_code == 404:
+        response_404 = ResponseError.from_dict(response.json())
+
+        return response_404
+
     if response.status_code == 409:
         response_409 = ResponseError.from_dict(response.json())
 
@@ -105,8 +110,31 @@ def sync_detailed(
     A `cex` import covers one instrument over a range: the API reads that range of the
     exchange's history, builds the bars of the requested `cadence` from the finest data it has
     for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
-    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
-    your tier like any import (`maxImportRangeHours` of `GET /account`).
+    picks tickers or klines and is also the resulting dataset's `type`. The range of a `cex`
+    import is capped by your tier's `maxCexImportRangeHours` of `GET /account`, in hours and
+    counted apart from a pool's (`maxImportRangeHours`): the history is already kept by the
+    platform, so it reaches weeks on the larger plans. On the plans that have no such cap
+    (`maxCexImportRangeHours` is the largest whole number) the range is held by three other
+    limits, all refused with `400` before anything is queued:
+
+    * **The size of the file.** The API estimates the bars the range holds at its `cadence`
+      (a request with no `cadence` is judged at `1s`, the finest there is) and the size of the
+      file they make, and refuses a range over your tier's `maxDatasetBytes`. The message says
+      how many days that cadence reaches on your plan, so a coarser cadence is what takes a
+      longer range: on a 500 MiB file, `1s` candles reach about a hundred days and `1m`
+      candles cover every year of an exchange's history. `reason: IMPORT_TOO_LARGE`.
+    * **How far back it starts.** `from` cannot be earlier than your tier's
+      `maxCexHistoryDays` days before now. `reason: IMPORT_OUTSIDE_HISTORY`.
+    * **At least two bars.** A range shorter than two bars of its `cadence` is refused instead
+      of being queued to fail. `reason: IMPORT_TOO_FEW_BARS`.
+
+    **Instruments per month.** Your tier's `maxCexImportInstrumentsPerMonth` is how many
+    different instruments of one market (an exchange and its segment) you can import in a
+    calendar month (UTC). Importing an instrument again in the same month costs nothing. An
+    import that fails for good gives its place back. Over it the import is a `429` with
+    `reason: IMPORT_MONTHLY_QUOTA` and no `Retry-After`: the message says when it renews.
+    `GET /account/usage` shows what you have used. A tier with no such limit has
+    `maxCexImportInstrumentsPerMonth` at the largest whole number.
 
     **An import is held to your plan's cadences,** the same ones as the preparation of an
     exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan
@@ -192,8 +220,31 @@ def sync(
     A `cex` import covers one instrument over a range: the API reads that range of the
     exchange's history, builds the bars of the requested `cadence` from the finest data it has
     for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
-    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
-    your tier like any import (`maxImportRangeHours` of `GET /account`).
+    picks tickers or klines and is also the resulting dataset's `type`. The range of a `cex`
+    import is capped by your tier's `maxCexImportRangeHours` of `GET /account`, in hours and
+    counted apart from a pool's (`maxImportRangeHours`): the history is already kept by the
+    platform, so it reaches weeks on the larger plans. On the plans that have no such cap
+    (`maxCexImportRangeHours` is the largest whole number) the range is held by three other
+    limits, all refused with `400` before anything is queued:
+
+    * **The size of the file.** The API estimates the bars the range holds at its `cadence`
+      (a request with no `cadence` is judged at `1s`, the finest there is) and the size of the
+      file they make, and refuses a range over your tier's `maxDatasetBytes`. The message says
+      how many days that cadence reaches on your plan, so a coarser cadence is what takes a
+      longer range: on a 500 MiB file, `1s` candles reach about a hundred days and `1m`
+      candles cover every year of an exchange's history. `reason: IMPORT_TOO_LARGE`.
+    * **How far back it starts.** `from` cannot be earlier than your tier's
+      `maxCexHistoryDays` days before now. `reason: IMPORT_OUTSIDE_HISTORY`.
+    * **At least two bars.** A range shorter than two bars of its `cadence` is refused instead
+      of being queued to fail. `reason: IMPORT_TOO_FEW_BARS`.
+
+    **Instruments per month.** Your tier's `maxCexImportInstrumentsPerMonth` is how many
+    different instruments of one market (an exchange and its segment) you can import in a
+    calendar month (UTC). Importing an instrument again in the same month costs nothing. An
+    import that fails for good gives its place back. Over it the import is a `429` with
+    `reason: IMPORT_MONTHLY_QUOTA` and no `Retry-After`: the message says when it renews.
+    `GET /account/usage` shows what you have used. A tier with no such limit has
+    `maxCexImportInstrumentsPerMonth` at the largest whole number.
 
     **An import is held to your plan's cadences,** the same ones as the preparation of an
     exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan
@@ -274,8 +325,31 @@ async def asyncio_detailed(
     A `cex` import covers one instrument over a range: the API reads that range of the
     exchange's history, builds the bars of the requested `cadence` from the finest data it has
     for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
-    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
-    your tier like any import (`maxImportRangeHours` of `GET /account`).
+    picks tickers or klines and is also the resulting dataset's `type`. The range of a `cex`
+    import is capped by your tier's `maxCexImportRangeHours` of `GET /account`, in hours and
+    counted apart from a pool's (`maxImportRangeHours`): the history is already kept by the
+    platform, so it reaches weeks on the larger plans. On the plans that have no such cap
+    (`maxCexImportRangeHours` is the largest whole number) the range is held by three other
+    limits, all refused with `400` before anything is queued:
+
+    * **The size of the file.** The API estimates the bars the range holds at its `cadence`
+      (a request with no `cadence` is judged at `1s`, the finest there is) and the size of the
+      file they make, and refuses a range over your tier's `maxDatasetBytes`. The message says
+      how many days that cadence reaches on your plan, so a coarser cadence is what takes a
+      longer range: on a 500 MiB file, `1s` candles reach about a hundred days and `1m`
+      candles cover every year of an exchange's history. `reason: IMPORT_TOO_LARGE`.
+    * **How far back it starts.** `from` cannot be earlier than your tier's
+      `maxCexHistoryDays` days before now. `reason: IMPORT_OUTSIDE_HISTORY`.
+    * **At least two bars.** A range shorter than two bars of its `cadence` is refused instead
+      of being queued to fail. `reason: IMPORT_TOO_FEW_BARS`.
+
+    **Instruments per month.** Your tier's `maxCexImportInstrumentsPerMonth` is how many
+    different instruments of one market (an exchange and its segment) you can import in a
+    calendar month (UTC). Importing an instrument again in the same month costs nothing. An
+    import that fails for good gives its place back. Over it the import is a `429` with
+    `reason: IMPORT_MONTHLY_QUOTA` and no `Retry-After`: the message says when it renews.
+    `GET /account/usage` shows what you have used. A tier with no such limit has
+    `maxCexImportInstrumentsPerMonth` at the largest whole number.
 
     **An import is held to your plan's cadences,** the same ones as the preparation of an
     exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan
@@ -359,8 +433,31 @@ async def asyncio(
     A `cex` import covers one instrument over a range: the API reads that range of the
     exchange's history, builds the bars of the requested `cadence` from the finest data it has
     for it, and stores the result as a dataset version, exactly as for an upload. `cex.dataType`
-    picks tickers or klines and is also the resulting dataset's `type`. The range is capped by
-    your tier like any import (`maxImportRangeHours` of `GET /account`).
+    picks tickers or klines and is also the resulting dataset's `type`. The range of a `cex`
+    import is capped by your tier's `maxCexImportRangeHours` of `GET /account`, in hours and
+    counted apart from a pool's (`maxImportRangeHours`): the history is already kept by the
+    platform, so it reaches weeks on the larger plans. On the plans that have no such cap
+    (`maxCexImportRangeHours` is the largest whole number) the range is held by three other
+    limits, all refused with `400` before anything is queued:
+
+    * **The size of the file.** The API estimates the bars the range holds at its `cadence`
+      (a request with no `cadence` is judged at `1s`, the finest there is) and the size of the
+      file they make, and refuses a range over your tier's `maxDatasetBytes`. The message says
+      how many days that cadence reaches on your plan, so a coarser cadence is what takes a
+      longer range: on a 500 MiB file, `1s` candles reach about a hundred days and `1m`
+      candles cover every year of an exchange's history. `reason: IMPORT_TOO_LARGE`.
+    * **How far back it starts.** `from` cannot be earlier than your tier's
+      `maxCexHistoryDays` days before now. `reason: IMPORT_OUTSIDE_HISTORY`.
+    * **At least two bars.** A range shorter than two bars of its `cadence` is refused instead
+      of being queued to fail. `reason: IMPORT_TOO_FEW_BARS`.
+
+    **Instruments per month.** Your tier's `maxCexImportInstrumentsPerMonth` is how many
+    different instruments of one market (an exchange and its segment) you can import in a
+    calendar month (UTC). Importing an instrument again in the same month costs nothing. An
+    import that fails for good gives its place back. Over it the import is a `429` with
+    `reason: IMPORT_MONTHLY_QUOTA` and no `Retry-After`: the message says when it renews.
+    `GET /account/usage` shows what you have used. A tier with no such limit has
+    `maxCexImportInstrumentsPerMonth` at the largest whole number.
 
     **An import is held to your plan's cadences,** the same ones as the preparation of an
     exchange's data (the \"Cadences by plan\" section of the Backtests guide). A `cadence` your plan

@@ -174,6 +174,8 @@ def test_api_key_expiry_roundtrips_on_token_and_account() -> None:
             "maxRangeDays": 7,
             "maxSweepCartesian": 100,
             "maxImportRangeHours": 6,
+            "maxCexImportRangeHours": 168,
+            "maxConcurrentImports": 2,
             "maxDatasets": 3,
             "maxDatasetBytes": 1024,
             "maxTotalStorageBytes": 4096,
@@ -181,6 +183,8 @@ def test_api_key_expiry_roundtrips_on_token_and_account() -> None:
             "apiKeyExpiresAt": "2026-12-05T10:05:00Z",
         }
     )
+    assert account.max_cex_import_range_hours == 168
+    assert account.max_concurrent_imports == 2
     assert account.api_key_expires_at == _dt.datetime(2026, 12, 5, 10, 5, tzinfo=_dt.UTC)
 
 

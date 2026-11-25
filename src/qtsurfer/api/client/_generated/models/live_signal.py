@@ -29,15 +29,17 @@ class LiveSignal:
         run_id (str):
         stage (LiveSignalStage): The stage the run was in when this signal was produced.
         type_ (LiveSignalType): `paper` items appear only for a run whose `paper.output` is `mix`; they are not relayed
-            over the WebSocket channel.
+            over the WebSocket channel. `system` is what a strategy tells the platform that runs it, today a request to
+            detach a source (see "A strategy that leaves a source" in the Live execution guide): `GET /live/{runId}/signals`
+            returns it only when `type` asks for it, and the WebSocket channel never carries it.
         event_ts_ms (int): Market time the signal was produced.
         emitted_at_ms (int): Time it was published — always at or after `eventTsMs`.
         instrument (LiveSignalInstrument | None): The instrument the signal is about. `null` only for a `paper` item
             about a whole account (`equity`, `mark`, `kpi`), whose `data.currency` names the account.
         digest (str): Content hash, for checking that two independent deliveries of the same signal agree.
         params_version (int | Unset): The parameter set in force when this signal was produced.
-        kind (None | str | Unset): `BUY`/`SELL` for a `hint`, the command name for a `command`; for `paper`, what the
-            item is: `fill`, `trade`, `equity`, `mark`, `kpi` or `gap`. Absent otherwise.
+        kind (None | str | Unset): `BUY`/`SELL` for a `hint`, the command name for a `command`, `DETACH` for a `system`;
+            for `paper`, what the item is: `fill`, `trade`, `equity`, `mark`, `kpi` or `gap`. Absent otherwise.
         order (LiveSignalOrderType0 | None | Unset): Present only for a `hint`.
         data (LiveSignalData | Unset): The signal's own free-form payload, what the strategy put there with
             `signal.set(...)`. Whoever may read the run may read it, so on a `public` run it is public. A signal whose

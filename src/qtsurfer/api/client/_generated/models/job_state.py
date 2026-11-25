@@ -19,10 +19,8 @@ class JobState:
     """Information about a single job
 
     Attributes:
-        context_id (str): Identifier for the job's execution context. Its current shape is a colon-delimited string
-            encoding the data source type, an internal user id, the exchange, the job id, and the instrument — but that
-            structure is not a committed contract and may change without notice. Treat it as an opaque token: store and pass
-            it back, don't parse it. Example:
+        context_id (str): Identifier for the job's execution context. It is an opaque token whose shape may change
+            without notice: store and pass it back, don't parse it. Example:
             jctx:ticker:00000000-0000-0000-0000-000000000000:binance:5ikyamio8b3v9wcnfxztzg:btc/usdt:0vicnz3thzhrqvfczks1pu.
         status (JobStateStatus): Current status of the job. Treat `Completed | Aborted | Failed` as
             terminal; `New | Started` mean keep polling. A single-instrument prepare

@@ -97,7 +97,7 @@ def sync_detailed(
 
     For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
     each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
-    `robinhood`).
+    `robinhood`, `orca` for `solana`).
 
     Args:
         exchange_id (str):  Example: binance.
@@ -135,7 +135,7 @@ def sync(
 
     For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
     each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
-    `robinhood`).
+    `robinhood`, `orca` for `solana`).
 
     Args:
         exchange_id (str):  Example: binance.
@@ -168,7 +168,7 @@ async def asyncio_detailed(
 
     For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
     each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
-    `robinhood`).
+    `robinhood`, `orca` for `solana`).
 
     Args:
         exchange_id (str):  Example: binance.
@@ -204,7 +204,7 @@ async def asyncio(
 
     For a decentralized exchange (`venueType` `dex` in `GET /exchanges`) the instruments are its pools,
     each a `PoolDetail`, and the default segment is the first one the exchange lists (`uniswap-v3` for
-    `robinhood`).
+    `robinhood`, `orca` for `solana`).
 
     Args:
         exchange_id (str):  Example: binance.

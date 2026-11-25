@@ -122,8 +122,7 @@ def sync_detailed(
     `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
     (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
-    (fastest) cadence available for the exchange — today that is 1 tick/second on every
-    supported exchange; choosing among several cadences is not offered yet.
+    (fastest) cadence available for the exchange; choosing among several cadences is not offered.
 
     `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
     `dex` source reads one
@@ -174,10 +173,8 @@ def sync_detailed(
     replays
     nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
     and the
-    first bar of a window can be partial. Omitted, the platform replays from the start of the current
-    15-minute
-    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
-    window is
+    first bar of a window can be partial. Omitted, the platform chooses how far back to replay, so that
+    the first bar of the usual windows is
     complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".
@@ -260,8 +257,7 @@ def sync(
     `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
     (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
-    (fastest) cadence available for the exchange — today that is 1 tick/second on every
-    supported exchange; choosing among several cadences is not offered yet.
+    (fastest) cadence available for the exchange; choosing among several cadences is not offered.
 
     `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
     `dex` source reads one
@@ -312,10 +308,8 @@ def sync(
     replays
     nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
     and the
-    first bar of a window can be partial. Omitted, the platform replays from the start of the current
-    15-minute
-    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
-    window is
+    first bar of a window can be partial. Omitted, the platform chooses how far back to replay, so that
+    the first bar of the usual windows is
     complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".
@@ -393,8 +387,7 @@ async def asyncio_detailed(
     `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
     (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
-    (fastest) cadence available for the exchange — today that is 1 tick/second on every
-    supported exchange; choosing among several cadences is not offered yet.
+    (fastest) cadence available for the exchange; choosing among several cadences is not offered.
 
     `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
     `dex` source reads one
@@ -445,10 +438,8 @@ async def asyncio_detailed(
     replays
     nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
     and the
-    first bar of a window can be partial. Omitted, the platform replays from the start of the current
-    15-minute
-    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
-    window is
+    first bar of a window can be partial. Omitted, the platform chooses how far back to replay, so that
+    the first bar of the usual windows is
     complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".
@@ -529,8 +520,7 @@ async def asyncio(
     `sources` takes one entry, or none: a start with no `sources` makes a run that waits for a source
     (see `POST /live/{runId}/attachments`).
     `type` is `ticker` or `kline`; anything else is rejected. Both connect to the lightest
-    (fastest) cadence available for the exchange — today that is 1 tick/second on every
-    supported exchange; choosing among several cadences is not offered yet.
+    (fastest) cadence available for the exchange; choosing among several cadences is not offered.
 
     `venueType` is `cex` (a centralized exchange) or `dex` (one pool on a decentralized exchange). A
     `dex` source reads one
@@ -581,10 +571,8 @@ async def asyncio(
     replays
     nothing: the run delivers its first signal as soon as it is running, but its indicators start empty
     and the
-    first bar of a window can be partial. Omitted, the platform replays from the start of the current
-    15-minute
-    block, which is between 0 and 900 seconds before the run's start, so the first bar of a 15-minute
-    window is
+    first bar of a window can be partial. Omitted, the platform chooses how far back to replay, so that
+    the first bar of the usual windows is
     complete. The value in effect, yours or the platform's, comes back as `warmFrom`. It can be set only
     here,
     when the run is started. See the \"Live execution\" guide, \"Warming up\".

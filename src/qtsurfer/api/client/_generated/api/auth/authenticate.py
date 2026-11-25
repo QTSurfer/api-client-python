@@ -82,7 +82,7 @@ def sync_detailed(
     key's expiry, not the token's: a token issued just before the key lapses keeps working
     until its own `expires_in` is over.
 
-    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    The answer's `scopes` say what the key may do. A key
     that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
     with at least one scope.
 
@@ -125,7 +125,7 @@ def sync(
     key's expiry, not the token's: a token issued just before the key lapses keeps working
     until its own `expires_in` is over.
 
-    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    The answer's `scopes` say what the key may do. A key
     that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
     with at least one scope.
 
@@ -164,7 +164,7 @@ async def asyncio_detailed(
     key's expiry, not the token's: a token issued just before the key lapses keeps working
     until its own `expires_in` is over.
 
-    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    The answer's `scopes` say what the key may do. A key
     that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
     with at least one scope.
 
@@ -205,7 +205,7 @@ async def asyncio(
     key's expiry, not the token's: a token issued just before the key lapses keeps working
     until its own `expires_in` is over.
 
-    The answer's `scopes` say what the key may do. Where a deployment requires scopes, a key
+    The answer's `scopes` say what the key may do. A key
     that carries none is refused with `403` and the code `apikey_without_scopes`: create a key
     with at least one scope.
 

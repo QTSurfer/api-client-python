@@ -28,7 +28,7 @@ class ExecuteBacktestBody:
             the language — see `POST /strategy` for exactly which rewrites preserve it and which do
             not.
              Example: 6bsh31ikwkuivhtgcoa6s4.
-        store_signals (bool | Unset): When true, the worker uploads emitted signals to object storage and the
+        store_signals (bool | Unset): When true, the emitted signals are stored and the
             response includes `signalsUrl` / `signalsId` fields. Defaults to false.
              Default: False.
         equity_curve (EquityCurveOptions | Unset): Requested equity-curve transform, applied server-side in a fixed

@@ -19,8 +19,8 @@ class PrepareJobStateHoursWithoutDataItem:
     """
     Attributes:
         hour (datetime.datetime | Unset): The hour (UTC, hour-aligned) that has no data. Example: 2026-04-14T02:00:00Z.
-        expected (int | Unset): Expected row count for the hour (currently always 0; reserved for
-            future use). The rationale never depends on it.
+        expected (int | Unset): Expected row count for the hour (always 0; reserved).
+            The rationale never depends on it.
         rationale (PrepareJobStateHoursWithoutDataItemRationale | Unset): Why the hour has no data.
             `pending_conversion`: data for this hour is
             still being produced — a re-poll may fill it. `low_activity`: the

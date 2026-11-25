@@ -98,10 +98,21 @@ def sync_detailed(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
-    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
-    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
-    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
-    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`; `orca`,
+    `raydium`, `raydium-clmm`, `meteora`, `pumpswap` and `pumpfun` for `solana`) and the instruments are
+    its pools,
+    each a `PoolDetail`: the ones with most volume in the last 24 hours among those with enough
+    liquidity
+    (`meta.limit` is the most the listing holds and `meta.minTvlUsd` the least liquidity a listed pool
+    has),
+    refreshed periodically (`meta.updatedAt`). The list is a
+    place to start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    The
+    pools of `solana` are for importing as datasets and for backtesting; a live run reads a `solana`
+    segment
+    only when `GET /exchanges` lists it in `liveSegments`. The segment `pumpfun` follows a token by its
+    mint, so
+    it has no listing: this request answers `404` for it.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -140,10 +151,21 @@ def sync(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
-    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
-    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
-    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
-    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`; `orca`,
+    `raydium`, `raydium-clmm`, `meteora`, `pumpswap` and `pumpfun` for `solana`) and the instruments are
+    its pools,
+    each a `PoolDetail`: the ones with most volume in the last 24 hours among those with enough
+    liquidity
+    (`meta.limit` is the most the listing holds and `meta.minTvlUsd` the least liquidity a listed pool
+    has),
+    refreshed periodically (`meta.updatedAt`). The list is a
+    place to start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    The
+    pools of `solana` are for importing as datasets and for backtesting; a live run reads a `solana`
+    segment
+    only when `GET /exchanges` lists it in `liveSegments`. The segment `pumpfun` follows a token by its
+    mint, so
+    it has no listing: this request answers `404` for it.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -177,10 +199,21 @@ async def asyncio_detailed(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
-    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
-    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
-    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
-    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`; `orca`,
+    `raydium`, `raydium-clmm`, `meteora`, `pumpswap` and `pumpfun` for `solana`) and the instruments are
+    its pools,
+    each a `PoolDetail`: the ones with most volume in the last 24 hours among those with enough
+    liquidity
+    (`meta.limit` is the most the listing holds and `meta.minTvlUsd` the least liquidity a listed pool
+    has),
+    refreshed periodically (`meta.updatedAt`). The list is a
+    place to start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    The
+    pools of `solana` are for importing as datasets and for backtesting; a live run reads a `solana`
+    segment
+    only when `GET /exchanges` lists it in `liveSegments`. The segment `pumpfun` follows a token by its
+    mint, so
+    it has no listing: this request answers `404` for it.
 
     Args:
         exchange_id (str):  Example: binance.
@@ -217,10 +250,21 @@ async def asyncio(
     `spot` / `futures` segment-discovery links; the default-segment shortcut is
     `GET /exchange/{exchangeId}/instruments` (spot).
 
-    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`) and the
-    instruments are its pools, each a `PoolDetail`: the 50 with most volume in the last 24 hours among
-    those with at least 10,000 US dollars of liquidity, refreshed every hour. The list is a place to
-    start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    For a decentralized exchange the segments are its protocols (`uniswap-v3` for `robinhood`; `orca`,
+    `raydium`, `raydium-clmm`, `meteora`, `pumpswap` and `pumpfun` for `solana`) and the instruments are
+    its pools,
+    each a `PoolDetail`: the ones with most volume in the last 24 hours among those with enough
+    liquidity
+    (`meta.limit` is the most the listing holds and `meta.minTvlUsd` the least liquidity a listed pool
+    has),
+    refreshed periodically (`meta.updatedAt`). The list is a
+    place to start, not the whole market: a live run can read any pool of the protocol, listed or not.
+    The
+    pools of `solana` are for importing as datasets and for backtesting; a live run reads a `solana`
+    segment
+    only when `GET /exchanges` lists it in `liveSegments`. The segment `pumpfun` follows a token by its
+    mint, so
+    it has no listing: this request answers `404` for it.
 
     Args:
         exchange_id (str):  Example: binance.

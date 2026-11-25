@@ -75,7 +75,7 @@ def sync_detailed(
 
     `equity` is the account's latest recorded value: at the last closed trade (`equityKind:
     equity`), or the last periodic mark-to-market while positions are open (`equityKind:
-    mark`, taken every minute of market time). Until either exists the account holds its
+    mark`, taken periodically). Until either exists the account holds its
     starting capital.
 
     A run started with `accounts: instrument` has one account per instrument instead: each
@@ -85,7 +85,7 @@ def sync_detailed(
     A position also says what it is worth. When the last mark valued it as it stands now, its
     entry in `openPositions` carries `markPrice` (the price it was valued at), `markedAtMs`
     (when) and `unrealisedPnl` (`base` times `markPrice`, minus `cost`). A position opened or
-    changed since the last mark, which is at most about a minute old, has none of the three yet.
+    changed since the last mark has none of the three yet.
     The account says it for all its positions together: `unrealisedPnl` (their sum, `0` when it
     holds nothing) and `totalPnl` (with its `realisedPnl`); both are absent while any of its
     positions has no current mark.
@@ -136,7 +136,7 @@ def sync(
 
     `equity` is the account's latest recorded value: at the last closed trade (`equityKind:
     equity`), or the last periodic mark-to-market while positions are open (`equityKind:
-    mark`, taken every minute of market time). Until either exists the account holds its
+    mark`, taken periodically). Until either exists the account holds its
     starting capital.
 
     A run started with `accounts: instrument` has one account per instrument instead: each
@@ -146,7 +146,7 @@ def sync(
     A position also says what it is worth. When the last mark valued it as it stands now, its
     entry in `openPositions` carries `markPrice` (the price it was valued at), `markedAtMs`
     (when) and `unrealisedPnl` (`base` times `markPrice`, minus `cost`). A position opened or
-    changed since the last mark, which is at most about a minute old, has none of the three yet.
+    changed since the last mark has none of the three yet.
     The account says it for all its positions together: `unrealisedPnl` (their sum, `0` when it
     holds nothing) and `totalPnl` (with its `realisedPnl`); both are absent while any of its
     positions has no current mark.
@@ -192,7 +192,7 @@ async def asyncio_detailed(
 
     `equity` is the account's latest recorded value: at the last closed trade (`equityKind:
     equity`), or the last periodic mark-to-market while positions are open (`equityKind:
-    mark`, taken every minute of market time). Until either exists the account holds its
+    mark`, taken periodically). Until either exists the account holds its
     starting capital.
 
     A run started with `accounts: instrument` has one account per instrument instead: each
@@ -202,7 +202,7 @@ async def asyncio_detailed(
     A position also says what it is worth. When the last mark valued it as it stands now, its
     entry in `openPositions` carries `markPrice` (the price it was valued at), `markedAtMs`
     (when) and `unrealisedPnl` (`base` times `markPrice`, minus `cost`). A position opened or
-    changed since the last mark, which is at most about a minute old, has none of the three yet.
+    changed since the last mark has none of the three yet.
     The account says it for all its positions together: `unrealisedPnl` (their sum, `0` when it
     holds nothing) and `totalPnl` (with its `realisedPnl`); both are absent while any of its
     positions has no current mark.
@@ -251,7 +251,7 @@ async def asyncio(
 
     `equity` is the account's latest recorded value: at the last closed trade (`equityKind:
     equity`), or the last periodic mark-to-market while positions are open (`equityKind:
-    mark`, taken every minute of market time). Until either exists the account holds its
+    mark`, taken periodically). Until either exists the account holds its
     starting capital.
 
     A run started with `accounts: instrument` has one account per instrument instead: each
@@ -261,7 +261,7 @@ async def asyncio(
     A position also says what it is worth. When the last mark valued it as it stands now, its
     entry in `openPositions` carries `markPrice` (the price it was valued at), `markedAtMs`
     (when) and `unrealisedPnl` (`base` times `markPrice`, minus `cost`). A position opened or
-    changed since the last mark, which is at most about a minute old, has none of the three yet.
+    changed since the last mark has none of the three yet.
     The account says it for all its positions together: `unrealisedPnl` (their sum, `0` when it
     holds nothing) and `totalPnl` (with its `realisedPnl`); both are absent while any of its
     positions has no current mark.

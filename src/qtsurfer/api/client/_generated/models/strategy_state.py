@@ -8,6 +8,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from dateutil.parser import isoparse
 
+from ..models.strategy_language import StrategyLanguage
 from ..models.strategy_state_required_sources_item import StrategyStateRequiredSourcesItem
 from ..models.strategy_state_validation import StrategyStateValidation
 from ..types import UNSET, Unset
@@ -47,6 +48,12 @@ class StrategyState:
                 * `passed` — the class loaded and survived its first event.
                 * `failed` — it did not; `detail` says how.
                  Example: passed.
+            name (str | Unset): What the strategy calls itself, read from its source: the name in the `strategy "Name"`
+                header of a
+                QTScript strategy, the public class of a Java one. It is the name to show for it wherever it is listed.
+                Absent, not empty, when the source gives none (a Java source without a public class).
+                 Example: Detach one of two.
+            language (StrategyLanguage | Unset): What the source of the strategy is written in. Example: qtscript.
             compiled_at (datetime.datetime | Unset): When the live compilation was produced.
             required_sources (list[StrategyStateRequiredSourcesItem] | Unset): The market data a strategy needs, read off
                 the compiled class rather than off anything
@@ -86,6 +93,8 @@ class StrategyState:
 
     strategy_id: str
     validation: StrategyStateValidation
+    name: str | Unset = UNSET
+    language: StrategyLanguage | Unset = UNSET
     compiled_at: datetime.datetime | Unset = UNSET
     required_sources: list[StrategyStateRequiredSourcesItem] | Unset = UNSET
     validated_at: datetime.datetime | Unset = UNSET
@@ -101,6 +110,12 @@ class StrategyState:
         strategy_id = self.strategy_id
 
         validation = self.validation.value
+
+        name = self.name
+
+        language: str | Unset = UNSET
+        if not isinstance(self.language, Unset):
+            language = self.language.value
 
         compiled_at: str | Unset = UNSET
         if not isinstance(self.compiled_at, Unset):
@@ -144,6 +159,10 @@ class StrategyState:
                 "validation": validation,
             }
         )
+        if name is not UNSET:
+            field_dict["name"] = name
+        if language is not UNSET:
+            field_dict["language"] = language
         if compiled_at is not UNSET:
             field_dict["compiledAt"] = compiled_at
         if required_sources is not UNSET:
@@ -174,6 +193,15 @@ class StrategyState:
         strategy_id = d.pop("strategyId")
 
         validation = StrategyStateValidation(d.pop("validation"))
+
+        name = d.pop("name", UNSET)
+
+        _language = d.pop("language", UNSET)
+        language: StrategyLanguage | Unset
+        if isinstance(_language, Unset):
+            language = UNSET
+        else:
+            language = StrategyLanguage(_language)
 
         _compiled_at = d.pop("compiledAt", UNSET)
         compiled_at: datetime.datetime | Unset
@@ -225,6 +253,8 @@ class StrategyState:
         strategy_state = cls(
             strategy_id=strategy_id,
             validation=validation,
+            name=name,
+            language=language,
             compiled_at=compiled_at,
             required_sources=required_sources,
             validated_at=validated_at,

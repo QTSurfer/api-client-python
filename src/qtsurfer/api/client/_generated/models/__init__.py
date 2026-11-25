@@ -19,6 +19,13 @@ from .cancel_backtest_response_200 import CancelBacktestResponse200
 from .cancel_backtest_response_200_status import CancelBacktestResponse200Status
 from .cancel_sweep_response_200 import CancelSweepResponse200
 from .cancel_sweep_response_200_status import CancelSweepResponse200Status
+from .cex_import_instrument_usage import CexImportInstrumentUsage
+from .collection import Collection
+from .collection_create_request import CollectionCreateRequest
+from .collection_dataset_count_by_type import CollectionDatasetCountByType
+from .collection_deleted import CollectionDeleted
+from .collection_list import CollectionList
+from .collection_update_request import CollectionUpdateRequest
 from .compile_strategy_response_200 import CompileStrategyResponse200
 from .compile_strategy_response_200_requires_item import CompileStrategyResponse200RequiresItem
 from .coverage_window import CoverageWindow
@@ -38,9 +45,12 @@ from .dataset_import_dex_request_network import DatasetImportDexRequestNetwork
 from .dataset_import_dex_request_version import DatasetImportDexRequestVersion
 from .dataset_import_request import DatasetImportRequest
 from .dataset_import_request_cadence import DatasetImportRequestCadence
+from .dataset_import_request_meta import DatasetImportRequestMeta
 from .dataset_import_request_type import DatasetImportRequestType
 from .dataset_import_state import DatasetImportState
 from .dataset_import_state_status import DatasetImportStateStatus
+from .dataset_meta import DatasetMeta
+from .dataset_move_request import DatasetMoveRequest
 from .dataset_status import DatasetStatus
 from .dataset_timestamp_unit import DatasetTimestampUnit
 from .dataset_type import DatasetType
@@ -158,6 +168,7 @@ from .live_source_type import LiveSourceType
 from .live_source_venue_type import LiveSourceVenueType
 from .live_stream_revoked import LiveStreamRevoked
 from .live_stream_url import LiveStreamUrl
+from .minted_signal_code import MintedSignalCode
 from .notice import Notice
 from .notice_provenance import NoticeProvenance
 from .plan_required_error import PlanRequiredError
@@ -175,15 +186,49 @@ from .public_live_list_links import PublicLiveListLinks
 from .public_live_list_response import PublicLiveListResponse
 from .public_live_next_link import PublicLiveNextLink
 from .public_live_run import PublicLiveRun
+from .public_signal_channel_page import PublicSignalChannelPage
 from .response_error import ResponseError
 from .result_map import ResultMap
 from .result_map_params import ResultMapParams
 from .result_map_signals_upload import ResultMapSignalsUpload
 from .send_live_command_request import SendLiveCommandRequest
 from .send_live_command_request_properties import SendLiveCommandRequestProperties
+from .signal_channel import SignalChannel
+from .signal_channel_list import SignalChannelList
+from .signal_channel_request import SignalChannelRequest
+from .signal_channel_request_visibility import SignalChannelRequestVisibility
+from .signal_channel_visibility import SignalChannelVisibility
+from .signal_code import SignalCode
+from .signal_code_list import SignalCodeList
+from .signal_code_redemption import SignalCodeRedemption
+from .signal_codes_request import SignalCodesRequest
+from .signal_delivery import SignalDelivery
+from .signal_delivery_counts import SignalDeliveryCounts
+from .signal_delivery_data import SignalDeliveryData
+from .signal_delivery_page import SignalDeliveryPage
+from .signal_minted_codes import SignalMintedCodes
+from .signal_notice import SignalNotice
+from .signal_notice_accepted import SignalNoticeAccepted
+from .signal_notice_data import SignalNoticeData
+from .signal_notice_page import SignalNoticePage
+from .signal_notice_request import SignalNoticeRequest
+from .signal_notice_request_data import SignalNoticeRequestData
+from .signal_notice_source import SignalNoticeSource
+from .signal_notice_source_venue_type import SignalNoticeSourceVenueType
+from .signal_offer import SignalOffer
+from .signal_offer_codes import SignalOfferCodes
+from .signal_offer_list import SignalOfferList
+from .signal_offer_request import SignalOfferRequest
+from .signal_subscription import SignalSubscription
+from .signal_subscription_list import SignalSubscriptionList
+from .signal_subscription_run import SignalSubscriptionRun
+from .signal_subscription_run_request import SignalSubscriptionRunRequest
+from .signal_subscription_run_request_type import SignalSubscriptionRunRequestType
+from .signal_subscription_run_type import SignalSubscriptionRunType
 from .start_live_request import StartLiveRequest
 from .start_live_request_params import StartLiveRequestParams
 from .start_live_request_visibility import StartLiveRequestVisibility
+from .strategy_language import StrategyLanguage
 from .strategy_links import StrategyLinks
 from .strategy_state import StrategyState
 from .strategy_state_required_sources_item import StrategyStateRequiredSourcesItem
@@ -211,6 +256,8 @@ from .update_live_params_request import UpdateLiveParamsRequest
 from .update_live_params_request_params import UpdateLiveParamsRequestParams
 from .update_live_request import UpdateLiveRequest
 from .update_live_request_visibility import UpdateLiveRequestVisibility
+from .update_signal_channel_request import UpdateSignalChannelRequest
+from .update_signal_channel_request_visibility import UpdateSignalChannelRequestVisibility
 from .walk_forward_accepted import WalkForwardAccepted
 from .walk_forward_fold import WalkForwardFold
 from .walk_forward_fold_params import WalkForwardFoldParams
@@ -237,6 +284,13 @@ __all__ = (
     "CancelBacktestResponse200Status",
     "CancelSweepResponse200",
     "CancelSweepResponse200Status",
+    "CexImportInstrumentUsage",
+    "Collection",
+    "CollectionCreateRequest",
+    "CollectionDatasetCountByType",
+    "CollectionDeleted",
+    "CollectionList",
+    "CollectionUpdateRequest",
     "CompileStrategyResponse200",
     "CompileStrategyResponse200RequiresItem",
     "CoverageWindow",
@@ -255,9 +309,12 @@ __all__ = (
     "DatasetImportDexRequestVersion",
     "DatasetImportRequest",
     "DatasetImportRequestCadence",
+    "DatasetImportRequestMeta",
     "DatasetImportRequestType",
     "DatasetImportState",
     "DatasetImportStateStatus",
+    "DatasetMeta",
+    "DatasetMoveRequest",
     "DatasetStatus",
     "DatasetTimestampUnit",
     "DatasetType",
@@ -376,6 +433,7 @@ __all__ = (
     "LiveSourceVenueType",
     "LiveStreamRevoked",
     "LiveStreamUrl",
+    "MintedSignalCode",
     "Notice",
     "NoticeProvenance",
     "PlanRequiredError",
@@ -393,15 +451,49 @@ __all__ = (
     "PublicLiveListResponse",
     "PublicLiveNextLink",
     "PublicLiveRun",
+    "PublicSignalChannelPage",
     "ResponseError",
     "ResultMap",
     "ResultMapParams",
     "ResultMapSignalsUpload",
     "SendLiveCommandRequest",
     "SendLiveCommandRequestProperties",
+    "SignalChannel",
+    "SignalChannelList",
+    "SignalChannelRequest",
+    "SignalChannelRequestVisibility",
+    "SignalChannelVisibility",
+    "SignalCode",
+    "SignalCodeList",
+    "SignalCodeRedemption",
+    "SignalCodesRequest",
+    "SignalDelivery",
+    "SignalDeliveryCounts",
+    "SignalDeliveryData",
+    "SignalDeliveryPage",
+    "SignalMintedCodes",
+    "SignalNotice",
+    "SignalNoticeAccepted",
+    "SignalNoticeData",
+    "SignalNoticePage",
+    "SignalNoticeRequest",
+    "SignalNoticeRequestData",
+    "SignalNoticeSource",
+    "SignalNoticeSourceVenueType",
+    "SignalOffer",
+    "SignalOfferCodes",
+    "SignalOfferList",
+    "SignalOfferRequest",
+    "SignalSubscription",
+    "SignalSubscriptionList",
+    "SignalSubscriptionRun",
+    "SignalSubscriptionRunRequest",
+    "SignalSubscriptionRunRequestType",
+    "SignalSubscriptionRunType",
     "StartLiveRequest",
     "StartLiveRequestParams",
     "StartLiveRequestVisibility",
+    "StrategyLanguage",
     "StrategyLinks",
     "StrategyState",
     "StrategyStateRequiredSourcesItem",
@@ -429,6 +521,8 @@ __all__ = (
     "UpdateLiveParamsRequestParams",
     "UpdateLiveRequest",
     "UpdateLiveRequestVisibility",
+    "UpdateSignalChannelRequest",
+    "UpdateSignalChannelRequestVisibility",
     "WalkForwardAccepted",
     "WalkForwardFold",
     "WalkForwardFoldParams",

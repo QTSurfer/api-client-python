@@ -7,6 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.compile_strategy_response_200_requires_item import CompileStrategyResponse200RequiresItem
+from ..models.strategy_language import StrategyLanguage
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -25,6 +26,12 @@ class CompileStrategyResponse200:
             the language — see `POST /strategy` for exactly which rewrites preserve it and which do
             not.
              Example: 6bsh31ikwkuivhtgcoa6s4.
+        name (str | Unset): What the strategy calls itself, read from its source: the name in the `strategy "Name"`
+            header of a
+            QTScript strategy, the public class of a Java one. It is the name to show for it wherever it is listed.
+            Absent, not empty, when the source gives none (a Java source without a public class).
+             Example: Detach one of two.
+        language (StrategyLanguage | Unset): What the source of the strategy is written in. Example: qtscript.
         declared_properties (list[DeclaredProperty] | Unset): What could be established about this strategy's sweep-key
             vocabulary without
             constructing it. See `DeclaredProperty` — best-effort, not exhaustive.
@@ -37,12 +44,20 @@ class CompileStrategyResponse200:
     """
 
     strategy_id: str
+    name: str | Unset = UNSET
+    language: StrategyLanguage | Unset = UNSET
     declared_properties: list[DeclaredProperty] | Unset = UNSET
     requires: list[CompileStrategyResponse200RequiresItem] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         strategy_id = self.strategy_id
+
+        name = self.name
+
+        language: str | Unset = UNSET
+        if not isinstance(self.language, Unset):
+            language = self.language.value
 
         declared_properties: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.declared_properties, Unset):
@@ -65,6 +80,10 @@ class CompileStrategyResponse200:
                 "strategyId": strategy_id,
             }
         )
+        if name is not UNSET:
+            field_dict["name"] = name
+        if language is not UNSET:
+            field_dict["language"] = language
         if declared_properties is not UNSET:
             field_dict["declaredProperties"] = declared_properties
         if requires is not UNSET:
@@ -78,6 +97,15 @@ class CompileStrategyResponse200:
 
         d = dict(src_dict)
         strategy_id = d.pop("strategyId")
+
+        name = d.pop("name", UNSET)
+
+        _language = d.pop("language", UNSET)
+        language: StrategyLanguage | Unset
+        if isinstance(_language, Unset):
+            language = UNSET
+        else:
+            language = StrategyLanguage(_language)
 
         _declared_properties = d.pop("declaredProperties", UNSET)
         declared_properties: list[DeclaredProperty] | Unset = UNSET
@@ -99,6 +127,8 @@ class CompileStrategyResponse200:
 
         compile_strategy_response_200 = cls(
             strategy_id=strategy_id,
+            name=name,
+            language=language,
             declared_properties=declared_properties,
             requires=requires,
         )

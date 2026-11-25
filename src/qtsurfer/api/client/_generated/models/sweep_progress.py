@@ -27,20 +27,19 @@ class SweepProgress:
                 run that was in flight has finished and the leaderboard is complete: `CANCELLED` is reported before that.
             failed_shards (int): Shards (or folds) that failed and will not be retried. Distinct from `aborted`: this counts
                 whole units that never reported, not runs that ran badly.
-            retrying (int): Units whose last attempt failed on something transient — an I/O error, a worker that died mid-
-                read — and which are queued to be attempted again. Not counted as failures, because they have not failed yet; a
-                sweep with a non-zero value here is still expected to complete.
-            not_started (int): Units that have not reported anything yet. Covers both work still queued behind other work
-                and work claimed by a worker that stopped before it began, which is why a sweep with a persistent value here and
-                a rising `stalledSeconds` is worth looking at.
+            retrying (int): Units whose last attempt failed on something transient — an I/O error, for example — and which
+                are queued to be attempted again. Not counted as failures, because they have not failed yet; a sweep with a non-
+                zero value here is still expected to complete.
+            not_started (int): Units that have not reported anything yet. Covers both work still waiting behind other work
+                and work that stopped before it began, which is why a sweep with a persistent value here and a rising
+                `stalledSeconds` is worth looking at.
             stalled_seconds (int | Unset): Seconds since anything last advanced. Omitted on a finished sweep, where it would
                 only measure how long ago it finished, and on sweeps submitted before this field existed.
             eta_seconds (int | Unset): Rough seconds remaining, extrapolated from the rate observed so far and assuming
-                nothing else competes for workers. Runs conservative in practice — it has measured 2–5× long when a sweep spent
-                part of its life waiting to be retried, since that wait dilutes the observed rate. **Omitted, never zero, when
-                it cannot be computed**: a sweep with nothing finished yet has no rate to extrapolate from, and a zero would
-                read as "about to finish". Excludes queue wait entirely; `retrying` and `stalledSeconds` are where that shows
-                up.
+                nothing else competes for capacity. It can run long when a sweep spent part of its life waiting to be retried,
+                since that wait dilutes the observed rate. **Omitted, never zero, when it cannot be computed**: a sweep with
+                nothing finished yet has no rate to extrapolate from, and a zero would read as "about to finish". Excludes queue
+                wait entirely; `retrying` and `stalledSeconds` are where that shows up.
     """
 
     done: int

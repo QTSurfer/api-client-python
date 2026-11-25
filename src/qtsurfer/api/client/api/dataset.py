@@ -27,19 +27,31 @@ backtest already running against one of its versions is not disrupted.
 """
 
 from qtsurfer.api.client._generated.api.dataset import (
+    create_collection,
     create_dataset,
+    delete_collection,
     delete_dataset,
     finalize_dataset_upload,
+    get_collection,
     get_dataset,
     get_dataset_import,
     get_dataset_upload,
     import_dataset,
+    list_collections,
     list_datasets,
+    move_dataset,
     open_dataset_upload,
+    update_collection,
 )
 
 __all__ = [
     "create_dataset",
+    "create_collection",
+    "delete_collection",
+    "get_collection",
+    "list_collections",
+    "move_dataset",
+    "update_collection",
     "delete_dataset",
     "finalize_dataset_upload",
     "get_dataset",

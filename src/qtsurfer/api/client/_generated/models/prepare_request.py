@@ -42,7 +42,7 @@ class PrepareRequest:
                 the dataset instead of its current one. Defaults to the dataset's current version.
                  Example: dsv_8e2b4f19c6a03d7e.
             cadence (str | Unset): Output bar cadence for the prepared range. Coarser cadences are produced on demand by
-                resampling the source and stored alongside the native blob in cache. A target finer
+                resampling the source and kept for later requests. A target finer
                 than the source, or not an exact multiple of it, returns `400`. What's accepted, and
                 what omitting it means, depends on the source:
 

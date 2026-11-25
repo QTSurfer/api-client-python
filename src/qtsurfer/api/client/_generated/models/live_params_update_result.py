@@ -6,6 +6,8 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..types import UNSET, Unset
+
 T = TypeVar("T", bound="LiveParamsUpdateResult")
 
 
@@ -15,12 +17,14 @@ class LiveParamsUpdateResult:
     Attributes:
         run_id (str):
         params_version (int):
-        effective_at_ms (int): Epoch milliseconds — the earliest moment the new values are guaranteed to be in effect.
+        effective_at_ms (int | Unset): Epoch milliseconds — the earliest moment the new values are guaranteed to be in
+            effect. Absent when the run reads no source (`state: WAITING`): it applies nothing at a moment, and starts with
+            the new values when its first source is attached.
     """
 
     run_id: str
     params_version: int
-    effective_at_ms: int
+    effective_at_ms: int | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -36,9 +40,10 @@ class LiveParamsUpdateResult:
             {
                 "runId": run_id,
                 "paramsVersion": params_version,
-                "effectiveAtMs": effective_at_ms,
             }
         )
+        if effective_at_ms is not UNSET:
+            field_dict["effectiveAtMs"] = effective_at_ms
 
         return field_dict
 
@@ -49,7 +54,7 @@ class LiveParamsUpdateResult:
 
         params_version = d.pop("paramsVersion")
 
-        effective_at_ms = d.pop("effectiveAtMs")
+        effective_at_ms = d.pop("effectiveAtMs", UNSET)
 
         live_params_update_result = cls(
             run_id=run_id,

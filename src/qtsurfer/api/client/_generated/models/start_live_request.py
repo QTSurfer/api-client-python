@@ -52,9 +52,8 @@ class StartLiveRequest:
             strategy's indicators and
             windows have history when its first live tick arrives. `0` replays nothing: the run delivers its first
             signal as soon as it is running, but its indicators start empty and the first bar of a window can be
-            partial. Omitted, the platform replays from the start of the current 15-minute block: between 0 and 900
-            seconds before the run's start, depending on when it starts (0 if it starts exactly on a quarter hour),
-            so the first bar of a 15-minute window is complete. The value in effect, the one you sent or the one the
+            partial. Omitted, the platform chooses how far back to replay,
+            so that the first bar of the usual windows is complete. The value in effect, the one you sent or the one the
             platform chose, is reported back as `warmFrom` on the run. Signals about the replayed time
             are not pushed on the run's channel or stream: they describe events from before the run started.
             It can be set **only when the run is started**: it is not a parameter of `PUT /live/{runId}/params`, and

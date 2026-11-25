@@ -46,8 +46,13 @@ class Account:
                 A grid with more combinations is refused with `400`; the `random` and `lhs` samplers run
                 only their `samples` and are not held to it.
                  Example: 100.
-            max_import_range_hours (int): Maximum length, in hours, of the time range of one dataset import from an
-                exchange. Example: 6.
+            max_import_range_hours (int): Maximum length, in hours, of the time range of one dataset import of a
+                decentralized exchange's pool (`type: dex`). Example: 6.
+            max_cex_import_range_hours (int): Maximum length, in hours, of the time range of one dataset import of a
+                centralized exchange's history (`type: cex`). It is counted apart from `maxImportRangeHours`. Example: 24.
+            max_concurrent_imports (int): Maximum number of dataset imports your account may have in flight at once, queued
+                or running, whether of an exchange's history or of a pool. A new import over it is refused with `429` until one
+                has finished. Example: 1.
             max_datasets (int): Maximum number of active datasets your tier allows. Example: 3.
             max_dataset_bytes (int): Maximum size, in bytes, of a single dataset version as stored, that is the `bytes` of
                 its ready version. For a CSV upload that is the converted file, not the file you upload, so estimate from the
@@ -66,6 +71,13 @@ class Account:
                 `key_exp` of `POST /auth/token`. Rotate the key before it: after it, `POST /auth/token`
                 answers `401`. A token already issued keeps working until its own expiry.
                  Example: 2026-12-05T10:05:00Z.
+            max_cex_history_days (int | Unset): How far back from now, in days, an import of a centralized exchange's
+                history (`type: cex`) may start. The largest whole number means as far back as the platform keeps. Absent on a
+                platform that has not adopted it. Example: 730.
+            max_cex_import_instruments_per_month (int | Unset): How many different instruments of one market (an exchange
+                and its segment) your account may import from an exchange's history in a calendar month (UTC). Importing the
+                same instrument again in the month costs nothing. The largest whole number means no limit. Absent on a platform
+                that has not adopted it. Example: 20.
     """
 
     user_id: str
@@ -75,11 +87,15 @@ class Account:
     max_range_days: int
     max_sweep_cartesian: int
     max_import_range_hours: int
+    max_cex_import_range_hours: int
+    max_concurrent_imports: int
     max_datasets: int
     max_dataset_bytes: int
     max_total_storage_bytes: int
     field_links: AccountLinks
     api_key_expires_at: datetime.datetime | None | Unset = UNSET
+    max_cex_history_days: int | Unset = UNSET
+    max_cex_import_instruments_per_month: int | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -97,6 +113,10 @@ class Account:
 
         max_import_range_hours = self.max_import_range_hours
 
+        max_cex_import_range_hours = self.max_cex_import_range_hours
+
+        max_concurrent_imports = self.max_concurrent_imports
+
         max_datasets = self.max_datasets
 
         max_dataset_bytes = self.max_dataset_bytes
@@ -113,6 +133,10 @@ class Account:
         else:
             api_key_expires_at = self.api_key_expires_at
 
+        max_cex_history_days = self.max_cex_history_days
+
+        max_cex_import_instruments_per_month = self.max_cex_import_instruments_per_month
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -124,6 +148,8 @@ class Account:
                 "maxRangeDays": max_range_days,
                 "maxSweepCartesian": max_sweep_cartesian,
                 "maxImportRangeHours": max_import_range_hours,
+                "maxCexImportRangeHours": max_cex_import_range_hours,
+                "maxConcurrentImports": max_concurrent_imports,
                 "maxDatasets": max_datasets,
                 "maxDatasetBytes": max_dataset_bytes,
                 "maxTotalStorageBytes": max_total_storage_bytes,
@@ -132,6 +158,10 @@ class Account:
         )
         if api_key_expires_at is not UNSET:
             field_dict["apiKeyExpiresAt"] = api_key_expires_at
+        if max_cex_history_days is not UNSET:
+            field_dict["maxCexHistoryDays"] = max_cex_history_days
+        if max_cex_import_instruments_per_month is not UNSET:
+            field_dict["maxCexImportInstrumentsPerMonth"] = max_cex_import_instruments_per_month
 
         return field_dict
 
@@ -154,6 +184,10 @@ class Account:
         max_sweep_cartesian = d.pop("maxSweepCartesian")
 
         max_import_range_hours = d.pop("maxImportRangeHours")
+
+        max_cex_import_range_hours = d.pop("maxCexImportRangeHours")
+
+        max_concurrent_imports = d.pop("maxConcurrentImports")
 
         max_datasets = d.pop("maxDatasets")
 
@@ -180,6 +214,10 @@ class Account:
 
         api_key_expires_at = _parse_api_key_expires_at(d.pop("apiKeyExpiresAt", UNSET))
 
+        max_cex_history_days = d.pop("maxCexHistoryDays", UNSET)
+
+        max_cex_import_instruments_per_month = d.pop("maxCexImportInstrumentsPerMonth", UNSET)
+
         account = cls(
             user_id=user_id,
             tier=tier,
@@ -188,11 +226,15 @@ class Account:
             max_range_days=max_range_days,
             max_sweep_cartesian=max_sweep_cartesian,
             max_import_range_hours=max_import_range_hours,
+            max_cex_import_range_hours=max_cex_import_range_hours,
+            max_concurrent_imports=max_concurrent_imports,
             max_datasets=max_datasets,
             max_dataset_bytes=max_dataset_bytes,
             max_total_storage_bytes=max_total_storage_bytes,
             field_links=field_links,
             api_key_expires_at=api_key_expires_at,
+            max_cex_history_days=max_cex_history_days,
+            max_cex_import_instruments_per_month=max_cex_import_instruments_per_month,
         )
 
         account.additional_properties = d

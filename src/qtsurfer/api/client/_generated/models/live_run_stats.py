@@ -13,7 +13,7 @@ T = TypeVar("T", bound="LiveRunStats")
 
 @_attrs_define
 class LiveRunStats:
-    """What a run has been doing, as of its last snapshot. The platform refreshes it about once a minute
+    """What a run has been doing, as of its last snapshot. The platform refreshes it periodically
     while the run is being executed, so `opsPerSecond` is an average over that interval, not an
     instantaneous rate.
 
@@ -24,7 +24,7 @@ class LiveRunStats:
             instruments_seen (int): How many distinct instruments the run has received an update for.
             as_of_ms (int): Epoch milliseconds when these counters were last written.
             stale (bool): `true` when the run is meant to be running (`desired` is `RUNNING`) and its counters have not
-                been refreshed for several refresh intervals: the platform has stopped updating them, which is
+                been refreshed for much longer than they usually are: the platform has stopped updating them, which is
                 worth checking against `state`. `false` otherwise. A run whose `processed` is flat is not stale;
                 `progressedAtMs` is how to tell it apart.
             progressed_at_ms (int | Unset): Epoch milliseconds of the last snapshot in which `processed` had grown. Absent

@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.128.70] — 2026-11-25
+
+### Added ✨
+
+- Add dataset collection endpoints, dataset moves, and collection filters for dataset queries.
+- Expose signal channels, notices, offers, codes, subscriptions, and deliveries under
+  `qtsurfer.api.client.api.signal_channels`.
+- Expose strategy names and languages, exchange import limits and usage, and dataset provenance.
+
+### Changed 🔄
+
+- Generate from OpenAPI `0.128.70`, including Solana pool catalogues and live token mints,
+  attachment instrument resolution, and REST system signals.
+- A parameter update on a waiting run can omit `effective_at_ms`. Solana pool entries can omit
+  `fee_percent`. Pending signal deliveries omit the source and notice data until due.
+- Include the pinned OpenAPI document in the source distribution.
+
 ## [0.128.57] — 2026-11-19
 
 ### Added ✨

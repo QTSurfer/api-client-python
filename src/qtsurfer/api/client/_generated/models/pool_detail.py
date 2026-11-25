@@ -15,27 +15,29 @@ T = TypeVar("T", bound="PoolDetail")
 
 @_attrs_define
 class PoolDetail:
-    """A pool of a decentralized exchange that a live run can read. The listing is a place to start, not the
-    whole market: a live run can read any pool of the protocol, listed or not.
+    """A pool of a decentralized exchange. The listing is a place to start, not the whole market: a live run
+    can read any pool of the protocol, listed or not, on an exchange whose segment is in `liveSegments`.
 
         Attributes:
-            id (str): The pool's address, in lower case. It is the value to put in `instruments` of a live run's source.
-                Example: 0x52e65b17fb6e5ba00ed806f37afcd2daa50271ca.
+            id (str): The pool's address. On an EVM chain (`robinhood`) it is `0x` and 40 hexadecimal digits, in lower case.
+                On `solana` it is a base58 address of 32 to 44 characters, which is case-sensitive: use it exactly as
+                listed. It is the value to put in `instruments` of a live run's source.
+                 Example: 0x52e65b17fb6e5ba00ed806f37afcd2daa50271ca.
             symbol (str): The pair written `BASE/QUOTE`, the way the signals of a run on this pool name it (`instrument`)
                 Example: WETH/USDG.
             base (str): Symbol of the base token Example: WETH.
             quote (str): Symbol of the quote token Example: USDG.
-            base_address (str): Address of the base token, in lower case Example:
-                0x0bd7d308f8e1639fab988df18a8011f41eacad73.
-            quote_address (str): Address of the quote token, in lower case Example:
-                0x5fc5360d0400a0fd4f2af552add042d716f1d168.
-            fee_percent (float): The pool's fee tier, in percent (`0.05` is a 0.05 % fee). A protocol can have several pools
-                of the same pair, one per fee tier. Example: 0.01.
+            base_address (str): Address of the base token, in the form of `id` (lower case on an EVM chain; as written,
+                base58 and case-sensitive, on `solana`) Example: 0x0bd7d308f8e1639fab988df18a8011f41eacad73.
+            quote_address (str): Address of the quote token, in the form of `id` (lower case on an EVM chain; as written,
+                base58 and case-sensitive, on `solana`) Example: 0x5fc5360d0400a0fd4f2af552add042d716f1d168.
             tvl_usd (float): The liquidity held by the pool, in US dollars Example: 19857902.02.
             volume_24_h_usd (float): What traded in the pool over the last 24 hours, in US dollars Example: 273876056.45.
+            fee_percent (float | Unset): The pool's fee tier, in percent (`0.05` is a 0.05 % fee). A protocol can have
+                several pools of the same pair, one per fee tier. Absent when the source does not tell it, which is the case of
+                most pools of `solana`. Example: 0.01.
             last_price (float | Unset): The price of one base token in the quote token, as the signals of a run on this pool
-                name the pair. It is as of `meta.updatedAt`, so up to one hour old. Absent when there is no price for the pool.
-                Example: 2411.285967.
+                name the pair. It is as of `meta.updatedAt`. Absent when there is no price for the pool. Example: 2411.285967.
             volume24h (float | Unset): What traded in the pool over the last 24 hours, in the quote token, the same meaning
                 as `volume24h` of an instrument of a centralized exchange. Absent when the quote token has no dollar price to
                 convert from. Example: 274033077.4.
@@ -49,9 +51,9 @@ class PoolDetail:
     quote: str
     base_address: str
     quote_address: str
-    fee_percent: float
     tvl_usd: float
     volume_24_h_usd: float
+    fee_percent: float | Unset = UNSET
     last_price: float | Unset = UNSET
     volume24h: float | Unset = UNSET
     created_at: datetime.datetime | Unset = UNSET
@@ -70,11 +72,11 @@ class PoolDetail:
 
         quote_address = self.quote_address
 
-        fee_percent = self.fee_percent
-
         tvl_usd = self.tvl_usd
 
         volume_24_h_usd = self.volume_24_h_usd
+
+        fee_percent = self.fee_percent
 
         last_price = self.last_price
 
@@ -94,11 +96,12 @@ class PoolDetail:
                 "quote": quote,
                 "baseAddress": base_address,
                 "quoteAddress": quote_address,
-                "feePercent": fee_percent,
                 "tvlUsd": tvl_usd,
                 "volume24hUsd": volume_24_h_usd,
             }
         )
+        if fee_percent is not UNSET:
+            field_dict["feePercent"] = fee_percent
         if last_price is not UNSET:
             field_dict["lastPrice"] = last_price
         if volume24h is not UNSET:
@@ -123,11 +126,11 @@ class PoolDetail:
 
         quote_address = d.pop("quoteAddress")
 
-        fee_percent = d.pop("feePercent")
-
         tvl_usd = d.pop("tvlUsd")
 
         volume_24_h_usd = d.pop("volume24hUsd")
+
+        fee_percent = d.pop("feePercent", UNSET)
 
         last_price = d.pop("lastPrice", UNSET)
 
@@ -147,9 +150,9 @@ class PoolDetail:
             quote=quote,
             base_address=base_address,
             quote_address=quote_address,
-            fee_percent=fee_percent,
             tvl_usd=tvl_usd,
             volume_24_h_usd=volume_24_h_usd,
+            fee_percent=fee_percent,
             last_price=last_price,
             volume24h=volume24h,
             created_at=created_at,

@@ -45,13 +45,13 @@ class LiveRunWithStream:
                 than 24 hours, in which it is compared against a second execution and checked for resource use and stability. A
                 run that passes moves to `LIVE` automatically when the trial is over. A run of a strategy that an earlier run of
                 yours already took through the trial starts `LIVE`, unless you started it with `sandbox: true`.
-            state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `WAITING` (running with
-                no market-data source attached: it holds no place on the platform until you attach one), `RUNNING`, `LAGGING`
-                (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
-                for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
-                signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or `STOPPED`.
-                `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown value as a
-                running run with something to look at. See the Live execution guide.
+            state (str): The run's health right now: `STARTING` (the platform has not reported on it yet), `WAITING`
+                (running with no market-data source attached: it holds no place on the platform until you attach one),
+                `RUNNING`, `LAGGING` (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside
+                one strategy call for longer than allowed; clears when it returns), `DEGRADED` (its independent executions
+                produced different signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or
+                `STOPPED`. `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown
+                value as a running run with something to look at. See the Live execution guide.
             desired (LiveRunDesired): What you last asked for. `state` can lag this briefly after `DELETE`.
             sources (list[LiveSource]): The sources the run is reading, those of its attachments that are `ATTACHING` or
                 `ATTACHED`. Empty while it waits.
@@ -93,13 +93,12 @@ class LiveRunWithStream:
                 normalised: `feeRate` is resolved into `buyFeeRate`/`sellFeeRate` and defaults are filled
                 in; `accounts` is returned when the request gave it.
             stats (LiveRunStats | Unset): What a run has been doing, as of its last snapshot. The platform refreshes it
-                about once a minute
+                periodically
                 while the run is being executed, so `opsPerSecond` is an average over that interval, not an
                 instantaneous rate.
             warm_from (int | Unset): The `warmFrom` in effect for this run, in seconds: the one requested when the run was
-                started or, when none was, the one the platform chose (the distance from the run's start back to the start of
-                the current 15-minute block, 0 to 900). It is never `null`. It is present on every run started since the field
-                exists and absent from a run started before it existed. It never changes while the run exists.
+                started or, when none was, the one the platform chose. It is never `null`. It is present on every run started
+                since the field exists and absent from a run started before it existed. It never changes while the run exists.
             sandbox_minutes (int | Unset): The sandbox trial this run was given, in minutes: the one requested when the run
                 was started or, when none was, the shortest one its plan gives. It is a minimum: a run that has not yet been fed
                 enough of the market feed to be judged stays in the sandbox past it, up to 24 hours. It is never `null`. It is

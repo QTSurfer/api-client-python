@@ -105,9 +105,8 @@ def sync_detailed(
     A command is an event, not a stored setting: it is delivered once to every execution behind the run,
     at
     the same market position, and nothing about it is written to the run's state. **It is transient** —
-    a
-    replica that restarts replays only its recent market history, so a command from before that only
-    reaches
+    it is
+    not replayed when an execution restarts, so a command from before that only reaches
     one that was already running when it arrived. Anything the strategy needs to remember across a
     restart
     belongs in a parameter (`PUT /live/{runId}/params`), which does have a stored value; a command does
@@ -158,9 +157,8 @@ def sync(
     A command is an event, not a stored setting: it is delivered once to every execution behind the run,
     at
     the same market position, and nothing about it is written to the run's state. **It is transient** —
-    a
-    replica that restarts replays only its recent market history, so a command from before that only
-    reaches
+    it is
+    not replayed when an execution restarts, so a command from before that only reaches
     one that was already running when it arrived. Anything the strategy needs to remember across a
     restart
     belongs in a parameter (`PUT /live/{runId}/params`), which does have a stored value; a command does
@@ -206,9 +204,8 @@ async def asyncio_detailed(
     A command is an event, not a stored setting: it is delivered once to every execution behind the run,
     at
     the same market position, and nothing about it is written to the run's state. **It is transient** —
-    a
-    replica that restarts replays only its recent market history, so a command from before that only
-    reaches
+    it is
+    not replayed when an execution restarts, so a command from before that only reaches
     one that was already running when it arrived. Anything the strategy needs to remember across a
     restart
     belongs in a parameter (`PUT /live/{runId}/params`), which does have a stored value; a command does
@@ -257,9 +254,8 @@ async def asyncio(
     A command is an event, not a stored setting: it is delivered once to every execution behind the run,
     at
     the same market position, and nothing about it is written to the run's state. **It is transient** —
-    a
-    replica that restarts replays only its recent market history, so a command from before that only
-    reaches
+    it is
+    not replayed when an execution restarts, so a command from before that only reaches
     one that was already running when it arrived. Anything the strategy needs to remember across a
     restart
     belongs in a parameter (`PUT /live/{runId}/params`), which does have a stored value; a command does

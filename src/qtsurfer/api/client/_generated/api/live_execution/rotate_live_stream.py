@@ -80,8 +80,7 @@ def sync_detailed(
     r"""Rotate a run's stream URL
 
      Gives a run a **new** stream URL and retires the old one: connections open on the old URL are closed
-    within about 15 seconds and the old URL answers `404` from then on. Use it when the URL may have
-    leaked.
+    shortly afterwards and the old URL answers `404` from then on. Use it when the URL may have leaked.
     Owner only, and only for a run that is running and was started with `stream: true` (the URL cannot
     be added
     to a run later, and a revoked one cannot be brought back). The plan is checked again: a plan that
@@ -120,8 +119,7 @@ def sync(
     r"""Rotate a run's stream URL
 
      Gives a run a **new** stream URL and retires the old one: connections open on the old URL are closed
-    within about 15 seconds and the old URL answers `404` from then on. Use it when the URL may have
-    leaked.
+    shortly afterwards and the old URL answers `404` from then on. Use it when the URL may have leaked.
     Owner only, and only for a run that is running and was started with `stream: true` (the URL cannot
     be added
     to a run later, and a revoked one cannot be brought back). The plan is checked again: a plan that
@@ -155,8 +153,7 @@ async def asyncio_detailed(
     r"""Rotate a run's stream URL
 
      Gives a run a **new** stream URL and retires the old one: connections open on the old URL are closed
-    within about 15 seconds and the old URL answers `404` from then on. Use it when the URL may have
-    leaked.
+    shortly afterwards and the old URL answers `404` from then on. Use it when the URL may have leaked.
     Owner only, and only for a run that is running and was started with `stream: true` (the URL cannot
     be added
     to a run later, and a revoked one cannot be brought back). The plan is checked again: a plan that
@@ -193,8 +190,7 @@ async def asyncio(
     r"""Rotate a run's stream URL
 
      Gives a run a **new** stream URL and retires the old one: connections open on the old URL are closed
-    within about 15 seconds and the old URL answers `404` from then on. Use it when the URL may have
-    leaked.
+    shortly afterwards and the old URL answers `404` from then on. Use it when the URL may have leaked.
     Owner only, and only for a run that is running and was started with `stream: true` (the URL cannot
     be added
     to a run later, and a revoked one cannot be brought back). The plan is checked again: a plan that

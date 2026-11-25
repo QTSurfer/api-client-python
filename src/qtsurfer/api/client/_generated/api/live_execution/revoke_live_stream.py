@@ -73,8 +73,7 @@ def sync_detailed(
 ) -> Response[InsufficientScopeError | LiveStreamRevoked | ResponseError]:
     """Revoke a run's stream URL
 
-     Revokes a run's stream URL **for good**: connections open on it are closed within about 15 seconds
-    and it
+     Revokes a run's stream URL **for good**: connections open on it are closed shortly afterwards and it
     answers `404` from then on. The run itself is not touched, and a stream cannot be added to it again;
     start
     the run again with `stream: true` for a new URL. Owner only, and always allowed, whatever your plan
@@ -110,8 +109,7 @@ def sync(
 ) -> InsufficientScopeError | LiveStreamRevoked | ResponseError | None:
     """Revoke a run's stream URL
 
-     Revokes a run's stream URL **for good**: connections open on it are closed within about 15 seconds
-    and it
+     Revokes a run's stream URL **for good**: connections open on it are closed shortly afterwards and it
     answers `404` from then on. The run itself is not touched, and a stream cannot be added to it again;
     start
     the run again with `stream: true` for a new URL. Owner only, and always allowed, whatever your plan
@@ -142,8 +140,7 @@ async def asyncio_detailed(
 ) -> Response[InsufficientScopeError | LiveStreamRevoked | ResponseError]:
     """Revoke a run's stream URL
 
-     Revokes a run's stream URL **for good**: connections open on it are closed within about 15 seconds
-    and it
+     Revokes a run's stream URL **for good**: connections open on it are closed shortly afterwards and it
     answers `404` from then on. The run itself is not touched, and a stream cannot be added to it again;
     start
     the run again with `stream: true` for a new URL. Owner only, and always allowed, whatever your plan
@@ -177,8 +174,7 @@ async def asyncio(
 ) -> InsufficientScopeError | LiveStreamRevoked | ResponseError | None:
     """Revoke a run's stream URL
 
-     Revokes a run's stream URL **for good**: connections open on it are closed within about 15 seconds
-    and it
+     Revokes a run's stream URL **for good**: connections open on it are closed shortly afterwards and it
     answers `404` from then on. The run itself is not touched, and a stream cannot be added to it again;
     start
     the run again with `stream: true` for a new URL. Owner only, and always allowed, whatever your plan

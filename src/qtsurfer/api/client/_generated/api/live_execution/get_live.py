@@ -75,7 +75,7 @@ def sync_detailed(
     with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
 
     While the run is being executed it also carries `stats`, the run's latest counters (updates
-    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    processed, rate, instruments seen), refreshed periodically. Starting or stopping a run
     does not return them; read them here.
 
     Args:
@@ -119,7 +119,7 @@ def sync(
     with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
 
     While the run is being executed it also carries `stats`, the run's latest counters (updates
-    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    processed, rate, instruments seen), refreshed periodically. Starting or stopping a run
     does not return them; read them here.
 
     Args:
@@ -158,7 +158,7 @@ async def asyncio_detailed(
     with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
 
     While the run is being executed it also carries `stats`, the run's latest counters (updates
-    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    processed, rate, instruments seen), refreshed periodically. Starting or stopping a run
     does not return them; read them here.
 
     Args:
@@ -200,7 +200,7 @@ async def asyncio(
     with a `stream`, `streamUrl` is here too while the run is running and your plan allows it.
 
     While the run is being executed it also carries `stats`, the run's latest counters (updates
-    processed, rate, instruments seen), refreshed about once a minute. Starting or stopping a run
+    processed, rate, instruments seen), refreshed periodically. Starting or stopping a run
     does not return them; read them here.
 
     Args:

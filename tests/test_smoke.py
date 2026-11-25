@@ -22,7 +22,7 @@ PUBLIC_API = "qtsurfer.api.client.api"
 #: Operations declared by the OpenAPI spec this package is generated from.
 #: Every one of them must be accounted for below, either as a generated module
 #: or as a documented exception.
-SPEC_OPERATION_COUNT = 50
+SPEC_OPERATION_COUNT = 78
 
 #: Each spec ``operationId`` the generator turns into an endpoint module, mapped
 #: to the ``(tag package, module name)`` it lands under.
@@ -76,6 +76,34 @@ SPEC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "openDatasetUpload": ("dataset", "open_dataset_upload"),
     "importDataset": ("dataset", "import_dataset"),
     "getDatasetImport": ("dataset", "get_dataset_import"),
+    "createCollection": ("dataset", "create_collection"),
+    "deleteCollection": ("dataset", "delete_collection"),
+    "getCollection": ("dataset", "get_collection"),
+    "listCollections": ("dataset", "list_collections"),
+    "moveDataset": ("dataset", "move_dataset"),
+    "updateCollection": ("dataset", "update_collection"),
+    "cancelSignalSubscription": ("signal_channels", "cancel_signal_subscription"),
+    "createSignalChannel": ("signal_channels", "create_signal_channel"),
+    "createSignalOffer": ("signal_channels", "create_signal_offer"),
+    "deleteSignalChannel": ("signal_channels", "delete_signal_channel"),
+    "feedSignalSubscriptionRun": ("signal_channels", "feed_signal_subscription_run"),
+    "getSignalChannel": ("signal_channels", "get_signal_channel"),
+    "getSignalSubscription": ("signal_channels", "get_signal_subscription"),
+    "listPublicSignalChannels": ("signal_channels", "list_public_signal_channels"),
+    "listSignalChannels": ("signal_channels", "list_signal_channels"),
+    "listSignalCodes": ("signal_channels", "list_signal_codes"),
+    "listSignalDeliveries": ("signal_channels", "list_signal_deliveries"),
+    "listSignalNotices": ("signal_channels", "list_signal_notices"),
+    "listSignalOffers": ("signal_channels", "list_signal_offers"),
+    "listSignalSubscriptions": ("signal_channels", "list_signal_subscriptions"),
+    "mintSignalCodes": ("signal_channels", "mint_signal_codes"),
+    "publishSignalNotice": ("signal_channels", "publish_signal_notice"),
+    "publishSignalNoticeByHook": ("signal_channels", "publish_signal_notice_by_hook"),
+    "redeemSignalCode": ("signal_channels", "redeem_signal_code"),
+    "renewSignalSubscription": ("signal_channels", "renew_signal_subscription"),
+    "revokeSignalCode": ("signal_channels", "revoke_signal_code"),
+    "stopFeedingSignalSubscriptionRun": ("signal_channels", "stop_feeding_signal_subscription_run"),
+    "updateSignalChannel": ("signal_channels", "update_signal_channel"),
     "startLive": ("live_execution", "start_live"),
     "getLiveRun": ("live_execution", "get_live_run"),
     "getLiveRunPaper": ("live_execution", "get_live_run_paper"),

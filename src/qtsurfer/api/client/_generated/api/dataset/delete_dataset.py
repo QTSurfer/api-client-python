@@ -69,8 +69,8 @@ def sync_detailed(
     """Delete a dataset
 
      Soft-delete — the dataset stops appearing in `GET /datasets`/`GET /datasets/{datasetId}` and
-    can no longer be prepared from, but its object data is reclaimed later rather than purged
-    inline, so a backtest already running against one of its versions is not disrupted.
+    can no longer be prepared from, but its data is not removed at once, so a backtest already
+    running against one of its versions is not disrupted.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.
@@ -102,8 +102,8 @@ def sync(
     """Delete a dataset
 
      Soft-delete — the dataset stops appearing in `GET /datasets`/`GET /datasets/{datasetId}` and
-    can no longer be prepared from, but its object data is reclaimed later rather than purged
-    inline, so a backtest already running against one of its versions is not disrupted.
+    can no longer be prepared from, but its data is not removed at once, so a backtest already
+    running against one of its versions is not disrupted.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.
@@ -130,8 +130,8 @@ async def asyncio_detailed(
     """Delete a dataset
 
      Soft-delete — the dataset stops appearing in `GET /datasets`/`GET /datasets/{datasetId}` and
-    can no longer be prepared from, but its object data is reclaimed later rather than purged
-    inline, so a backtest already running against one of its versions is not disrupted.
+    can no longer be prepared from, but its data is not removed at once, so a backtest already
+    running against one of its versions is not disrupted.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.
@@ -161,8 +161,8 @@ async def asyncio(
     """Delete a dataset
 
      Soft-delete — the dataset stops appearing in `GET /datasets`/`GET /datasets/{datasetId}` and
-    can no longer be prepared from, but its object data is reclaimed later rather than purged
-    inline, so a backtest already running against one of its versions is not disrupted.
+    can no longer be prepared from, but its data is not removed at once, so a backtest already
+    running against one of its versions is not disrupted.
 
     Args:
         dataset_id (str):  Example: ds_3f9a1c2e7b0d4a5f.

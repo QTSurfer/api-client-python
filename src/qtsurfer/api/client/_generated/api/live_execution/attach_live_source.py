@@ -113,8 +113,10 @@ def sync_detailed(
     the Live
     execution guide). `warmFrom` is how many seconds of the feed before the attachment the strategy sees
     first,
-    `0` to `3600`, for this source only; left out, the same default as at start. `ref` is a string of
-    yours, up to
+    `0` to `3600`, for this source only; left out, the same default as at start. `resolveInstrument`
+    says when the
+    strategy is told of a `dex` pool (see \"The instrument of a pool\" in the Live execution guide).
+    `ref` is a string of yours, up to
     64 characters: sending the same `ref` to the same run answers the attachment it already made instead
     of
     making another one, so a retried request or a repeated alert is safe. So does sending a source the
@@ -173,8 +175,10 @@ def sync(
     the Live
     execution guide). `warmFrom` is how many seconds of the feed before the attachment the strategy sees
     first,
-    `0` to `3600`, for this source only; left out, the same default as at start. `ref` is a string of
-    yours, up to
+    `0` to `3600`, for this source only; left out, the same default as at start. `resolveInstrument`
+    says when the
+    strategy is told of a `dex` pool (see \"The instrument of a pool\" in the Live execution guide).
+    `ref` is a string of yours, up to
     64 characters: sending the same `ref` to the same run answers the attachment it already made instead
     of
     making another one, so a retried request or a repeated alert is safe. So does sending a source the
@@ -228,8 +232,10 @@ async def asyncio_detailed(
     the Live
     execution guide). `warmFrom` is how many seconds of the feed before the attachment the strategy sees
     first,
-    `0` to `3600`, for this source only; left out, the same default as at start. `ref` is a string of
-    yours, up to
+    `0` to `3600`, for this source only; left out, the same default as at start. `resolveInstrument`
+    says when the
+    strategy is told of a `dex` pool (see \"The instrument of a pool\" in the Live execution guide).
+    `ref` is a string of yours, up to
     64 characters: sending the same `ref` to the same run answers the attachment it already made instead
     of
     making another one, so a retried request or a repeated alert is safe. So does sending a source the
@@ -286,8 +292,10 @@ async def asyncio(
     the Live
     execution guide). `warmFrom` is how many seconds of the feed before the attachment the strategy sees
     first,
-    `0` to `3600`, for this source only; left out, the same default as at start. `ref` is a string of
-    yours, up to
+    `0` to `3600`, for this source only; left out, the same default as at start. `resolveInstrument`
+    says when the
+    strategy is told of a `dex` pool (see \"The instrument of a pool\" in the Live execution guide).
+    `ref` is a string of yours, up to
     64 characters: sending the same `ref` to the same run answers the attachment it already made instead
     of
     making another one, so a retried request or a repeated alert is safe. So does sending a source the

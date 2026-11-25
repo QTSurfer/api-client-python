@@ -6,8 +6,11 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..types import UNSET, Unset
+
 if TYPE_CHECKING:
     from ..models.account_usage_links import AccountUsageLinks
+    from ..models.cex_import_instrument_usage import CexImportInstrumentUsage
 
 
 T = TypeVar("T", bound="AccountUsage")
@@ -32,6 +35,11 @@ class AccountUsage:
                 against `GET /account`'s `maxTotalStorageBytes`.
                  Example: 16293888.
             field_links (AccountUsageLinks): HAL `_links` for `GET /account/usage`
+            cex_import_month (str | Unset): The calendar month (UTC, `YYYY-MM`) `cexImportInstruments` counts. Absent on a
+                platform that has not adopted the monthly limit. Example: 2026-11.
+            cex_import_instruments (list[CexImportInstrumentUsage] | Unset): The instruments of an exchange's history you
+                have imported this month, counted per market against `GET /account`'s `maxCexImportInstrumentsPerMonth`. A
+                market with none is not listed.
     """
 
     datasets_used: int
@@ -42,6 +50,8 @@ class AccountUsage:
     strategy_bytes_used: int
     storage_bytes_used: int
     field_links: AccountUsageLinks
+    cex_import_month: str | Unset = UNSET
+    cex_import_instruments: list[CexImportInstrumentUsage] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -61,6 +71,15 @@ class AccountUsage:
 
         field_links = self.field_links.to_dict()
 
+        cex_import_month = self.cex_import_month
+
+        cex_import_instruments: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.cex_import_instruments, Unset):
+            cex_import_instruments = []
+            for cex_import_instruments_item_data in self.cex_import_instruments:
+                cex_import_instruments_item = cex_import_instruments_item_data.to_dict()
+                cex_import_instruments.append(cex_import_instruments_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -75,12 +94,17 @@ class AccountUsage:
                 "_links": field_links,
             }
         )
+        if cex_import_month is not UNSET:
+            field_dict["cexImportMonth"] = cex_import_month
+        if cex_import_instruments is not UNSET:
+            field_dict["cexImportInstruments"] = cex_import_instruments
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.account_usage_links import AccountUsageLinks
+        from ..models.cex_import_instrument_usage import CexImportInstrumentUsage
 
         d = dict(src_dict)
         datasets_used = d.pop("datasetsUsed")
@@ -99,6 +123,17 @@ class AccountUsage:
 
         field_links = AccountUsageLinks.from_dict(d.pop("_links"))
 
+        cex_import_month = d.pop("cexImportMonth", UNSET)
+
+        _cex_import_instruments = d.pop("cexImportInstruments", UNSET)
+        cex_import_instruments: list[CexImportInstrumentUsage] | Unset = UNSET
+        if _cex_import_instruments is not UNSET:
+            cex_import_instruments = []
+            for cex_import_instruments_item_data in _cex_import_instruments:
+                cex_import_instruments_item = CexImportInstrumentUsage.from_dict(cex_import_instruments_item_data)
+
+                cex_import_instruments.append(cex_import_instruments_item)
+
         account_usage = cls(
             datasets_used=datasets_used,
             dataset_bytes_used=dataset_bytes_used,
@@ -108,6 +143,8 @@ class AccountUsage:
             strategy_bytes_used=strategy_bytes_used,
             storage_bytes_used=storage_bytes_used,
             field_links=field_links,
+            cex_import_month=cex_import_month,
+            cex_import_instruments=cex_import_instruments,
         )
 
         account_usage.additional_properties = d

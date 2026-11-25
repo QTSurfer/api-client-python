@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -15,6 +15,7 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.dataset_import_cex_request import DatasetImportCexRequest
     from ..models.dataset_import_dex_request import DatasetImportDexRequest
+    from ..models.dataset_import_request_meta import DatasetImportRequestMeta
 
 
 T = TypeVar("T", bound="DatasetImportRequest")
@@ -38,6 +39,12 @@ class DatasetImportRequest:
                 `GET /exchanges`: `dex` — a pool/pair's own on-chain market (block `dex`) — or `cex` —
                 a centralized exchange's market history (block `cex`).
                  Example: cex.
+            collection_id (None | str | Unset): Optional. The collection to create the dataset in; `null`, or leaving it
+                out, creates
+                it at the root. An id that is not one of your collections is `404`, answered before the
+                import is queued and before anything is counted against your plan. The `202` carries
+                `collectionId` only when you sent one.
+                 Example: dc_3f9a1c2e7b0d4a5f.
             cadence (DatasetImportRequestCadence | Unset): Optional; what it means, and what it accepts, depends on `type`.
                 Any other value is
                 `400`. A cadence your plan does not include is `402` (the "Cadences by plan" section of the Backtests guide
@@ -76,6 +83,19 @@ class DatasetImportRequest:
                 `GET /exchanges` and the instruments routes do: `exchange` is the `id` of a centralized
                 exchange, `segment` one of its `segments`.
                  Example: {'exchange': 'binance', 'segment': 'spot', 'dataType': 'klines'}.
+            meta (DatasetImportRequestMeta | Unset): Optional. Keys of your own to keep on the dataset, returned as `meta`
+                of the `Dataset`
+                beside the ones the import records itself. Two namespaces are yours: `pool.*`, a note
+                about the pool the import is for (by convention `pool.id`, `pool.name`, `pool.dex`,
+                `pool.reserve_usd`, `pool.created_at`), and `user.*`, any label you like. A key of the
+                platform's (`import.*`, `dex.*`, `cex.*`) or of any other namespace is `400`.
+
+                A key is lower-case letters, digits and `_`, in parts separated by `.`, at most 64
+                characters. A value is a non-empty text of at most 256 characters with no control
+                characters. At most 16 keys, and the whole of what is kept (your keys and the ones the
+                import adds) at most 32 keys and 4096 bytes of JSON. Anything over a limit is `400`; the
+                import is not created. `meta` is not taken by `POST /datasets`.
+                 Example: {'pool.name': 'FiveM / SOL', 'pool.dex': 'PumpSwap', 'user.label': 'week one'}.
     """
 
     name: str
@@ -83,9 +103,11 @@ class DatasetImportRequest:
     from_: datetime.datetime
     to: datetime.datetime
     type_: DatasetImportRequestType
+    collection_id: None | str | Unset = UNSET
     cadence: DatasetImportRequestCadence | Unset = UNSET
     dex: DatasetImportDexRequest | Unset = UNSET
     cex: DatasetImportCexRequest | Unset = UNSET
+    meta: DatasetImportRequestMeta | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -99,6 +121,12 @@ class DatasetImportRequest:
 
         type_ = self.type_.value
 
+        collection_id: None | str | Unset
+        if isinstance(self.collection_id, Unset):
+            collection_id = UNSET
+        else:
+            collection_id = self.collection_id
+
         cadence: str | Unset = UNSET
         if not isinstance(self.cadence, Unset):
             cadence = self.cadence.value
@@ -111,6 +139,10 @@ class DatasetImportRequest:
         if not isinstance(self.cex, Unset):
             cex = self.cex.to_dict()
 
+        meta: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.meta, Unset):
+            meta = self.meta.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -122,12 +154,16 @@ class DatasetImportRequest:
                 "type": type_,
             }
         )
+        if collection_id is not UNSET:
+            field_dict["collectionId"] = collection_id
         if cadence is not UNSET:
             field_dict["cadence"] = cadence
         if dex is not UNSET:
             field_dict["dex"] = dex
         if cex is not UNSET:
             field_dict["cex"] = cex
+        if meta is not UNSET:
+            field_dict["meta"] = meta
 
         return field_dict
 
@@ -135,6 +171,7 @@ class DatasetImportRequest:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.dataset_import_cex_request import DatasetImportCexRequest
         from ..models.dataset_import_dex_request import DatasetImportDexRequest
+        from ..models.dataset_import_request_meta import DatasetImportRequestMeta
 
         d = dict(src_dict)
         name = d.pop("name")
@@ -146,6 +183,15 @@ class DatasetImportRequest:
         to = isoparse(d.pop("to"))
 
         type_ = DatasetImportRequestType(d.pop("type"))
+
+        def _parse_collection_id(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        collection_id = _parse_collection_id(d.pop("collectionId", UNSET))
 
         _cadence = d.pop("cadence", UNSET)
         cadence: DatasetImportRequestCadence | Unset
@@ -168,15 +214,24 @@ class DatasetImportRequest:
         else:
             cex = DatasetImportCexRequest.from_dict(_cex)
 
+        _meta = d.pop("meta", UNSET)
+        meta: DatasetImportRequestMeta | Unset
+        if isinstance(_meta, Unset):
+            meta = UNSET
+        else:
+            meta = DatasetImportRequestMeta.from_dict(_meta)
+
         dataset_import_request = cls(
             name=name,
             instrument=instrument,
             from_=from_,
             to=to,
             type_=type_,
+            collection_id=collection_id,
             cadence=cadence,
             dex=dex,
             cex=cex,
+            meta=meta,
         )
 
         dataset_import_request.additional_properties = d

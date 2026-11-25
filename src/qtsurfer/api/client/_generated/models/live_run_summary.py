@@ -37,13 +37,13 @@ class LiveRunSummary:
                 more than 24 hours, in which it is compared against a second execution and checked for resource use and
                 stability. A run that passes moves to `LIVE` automatically when the trial is over. A run of a strategy that an
                 earlier run of yours already took through the trial starts `LIVE`, unless you started it with `sandbox: true`.
-            state (str): The run's health right now: `STARTING` (no runner has reported on it yet), `WAITING` (running with
-                no market-data source attached: it holds no place on the platform until you attach one), `RUNNING`, `LAGGING`
-                (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside one strategy call
-                for longer than allowed; clears when it returns), `DEGRADED` (its independent executions produced different
-                signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or `STOPPED`.
-                `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown value as a
-                running run with something to look at. See the Live execution guide.
+            state (str): The run's health right now: `STARTING` (the platform has not reported on it yet), `WAITING`
+                (running with no market-data source attached: it holds no place on the platform until you attach one),
+                `RUNNING`, `LAGGING` (behind the market data, usually while catching up; clears by itself), `HUNG` (stuck inside
+                one strategy call for longer than allowed; clears when it returns), `DEGRADED` (its independent executions
+                produced different signals), `FAILED` (refused, could not start or failed while running; `reason` says why) or
+                `STOPPED`. `LAGGING`, `HUNG` and `DEGRADED` come and go on a running run. The set may grow: read an unknown
+                value as a running run with something to look at. See the Live execution guide.
             desired (LiveRunSummaryDesired): What you last asked for. `state` can lag this briefly after `DELETE`.
             sources (list[LiveSource]):
             created_at_ms (int): Epoch milliseconds this run was started.

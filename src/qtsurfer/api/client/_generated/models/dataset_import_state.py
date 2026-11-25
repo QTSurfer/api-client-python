@@ -26,7 +26,7 @@ class DatasetImportState:
             import_id (str):  Example: imp_01j9z1x2y3z4a5b6c7d8e9f0g1.
             status (DatasetImportStateStatus): * `fetching` — reading from the source; nothing staged yet.
                 * `ingesting` — fetch complete, staged, and re-entered the same ingest chain an
-                  upload uses; the worker is parsing and validating it.
+                  upload uses; the file is being parsed and validated.
                 * `ready` — ingested successfully. `version` carries the result.
                 * `failed` — the fetch or the ingest that followed it was rejected. `error` names why.
                  Example: ready.

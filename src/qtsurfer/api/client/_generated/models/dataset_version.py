@@ -41,17 +41,17 @@ class DatasetVersion:
             gaps (int | Unset): Number of gaps at the discovered cadence. Always `0` for `rt`.
             largest_gap_steps (int | Unset): The largest gap, in units of the discovered cadence step. Always `0` for `rt`.
             data_url (str | Unset): Presigned GET URL to the stored file — see `dataFormat` for which format it's in.
-                Present once the version is `ready`. Long-lived (day-scale, not permanent): a
-                DuckDB-WASM/`lastra-ts`-style reader issues HTTP range requests against it lazily over
-                an extended viewing session, not in one shot like a browser upload.
+                Present once the version is `ready`. It is time-limited, so read the dataset again for a fresh
+                one. It is meant to last through a viewing session in which a DuckDB-WASM/`lastra-ts`-style
+                reader issues HTTP range requests against it lazily, not just one shot like a browser upload.
                  Example: https://storage.qtsurfer.com/00000000-
-                .../ds_3f9a1c2e7b0d4a5f/dsv_8e2b4f19c6a03d7e/ticker_BTC_USDT_1700000000000_1700086400000_1m.lastra?X-Amz-....
+                .../ds_3f9a1c2e7b0d4a5f/dsv_8e2b4f19c6a03d7e/ticker_BTC_USDT_1700000000000_1700086400000_1m.lastra?....
             data_format (DatasetVersionDataFormat | Unset): Which format `dataUrl` is actually in — check this rather than
                 assuming it matches
                 how you uploaded it. `lastra` — our native columnar format — for a CSV (or gzip/zip
                 of one) upload, always converted on ingest, or for a lastra upload, stored as-is
                 (the value alone doesn't tell you which). `parquet` for a parquet upload, also
-                stored as-is today.
+                stored as it is.
                  Example: lastra.
     """
 

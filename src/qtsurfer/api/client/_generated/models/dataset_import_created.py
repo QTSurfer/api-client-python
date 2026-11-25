@@ -26,6 +26,8 @@ class DatasetImportCreated:
             import:00000000-.../ds_3f9a1c2e7b0d4a5f:imp_01j9z1x2y3z4a5b6c7d8e9f0g1.
         status (DatasetImportCreatedStatus): Always `fetching` in this response — the fetch has only just started.
             Example: fetching.
+        collection_id (str | Unset): The collection the dataset was created in. Present only when the request named one.
+            Example: dc_3f9a1c2e7b0d4a5f.
         cadence (str | Unset): The cadence the dataset is built at: the one you asked for, or the plan's default when
             you
             asked for none (`rt` for the per-trade data of a `dex` import). Absent only for a `cex`
@@ -38,6 +40,7 @@ class DatasetImportCreated:
     import_id: str
     job_id: str
     status: DatasetImportCreatedStatus
+    collection_id: str | Unset = UNSET
     cadence: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -49,6 +52,8 @@ class DatasetImportCreated:
         job_id = self.job_id
 
         status = self.status.value
+
+        collection_id = self.collection_id
 
         cadence = self.cadence
 
@@ -62,6 +67,8 @@ class DatasetImportCreated:
                 "status": status,
             }
         )
+        if collection_id is not UNSET:
+            field_dict["collectionId"] = collection_id
         if cadence is not UNSET:
             field_dict["cadence"] = cadence
 
@@ -78,6 +85,8 @@ class DatasetImportCreated:
 
         status = DatasetImportCreatedStatus(d.pop("status"))
 
+        collection_id = d.pop("collectionId", UNSET)
+
         cadence = d.pop("cadence", UNSET)
 
         dataset_import_created = cls(
@@ -85,6 +94,7 @@ class DatasetImportCreated:
             import_id=import_id,
             job_id=job_id,
             status=status,
+            collection_id=collection_id,
             cadence=cadence,
         )
 
